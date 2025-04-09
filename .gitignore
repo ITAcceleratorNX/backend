@@ -1,0 +1,56 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directories
+coverage/
+.nyc_output/
+
+# dotenv environment files
+.env
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Testing
+jest-html-reporters-*.html
+coverage-final.json
+
+# TypeScript (если используешь)
+dist/
+build/
+*.tsbuildinfo
+
+# PM2 process file
+ecosystem.config.js
+
+# Optional: Prisma
+prisma/migrations/
+
+# Optional: Ignore uploads or static data (если есть)
+uploads/
+public/uploads/
+static/
+
+# Docker
+docker-compose.override.yml
