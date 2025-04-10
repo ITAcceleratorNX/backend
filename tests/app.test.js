@@ -10,19 +10,11 @@ afterAll(async () => {
     await sequelize.close();
 });
 
-describe('GET /', () => {
-    it('should return 200 OK', async () => {
-        const res = await request(app).get('/');
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('ExtraSpace API работает!');
-    });
-
-});
 describe('Express App', () => {
     it('GET /protected без токена должен вернуть 401', async () => {
         const res = await request(app).get('/protected');
-        expect(res.statusCode).toBe(401); // Теперь будет 401 вместо 403
-        expect(res.body).toHaveProperty('error');
+        expect(res.statusCode).toBe(401);
+        expect(res.body.message).toBe('Нет токена авторизации.');
     });
 })
 describe('Error Handling', () => {
@@ -30,5 +22,20 @@ describe('Error Handling', () => {
         const res = await request(app).get('/asdf');
         expect(res.statusCode).toEqual(404);
         expect(res.body.error).toBe('Не найдено');
+    });
+});
+
+describe('GET /', () => {
+
+    it('should show the home page with login link if not authenticated', async () => {
+        app.use((req, res, next) => {
+            req.user = null;
+            next();
+        });
+
+        const res = await request(app).get('/');
+
+        expect(res.statusCode).toBe(200);
+        expect(res.text).toContain('<a href="/routes/auth/google">Войти через Google</a>');
     });
 });

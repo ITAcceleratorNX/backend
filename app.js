@@ -3,9 +3,10 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import sequelize from './config/database.js';
-import './config/passport.js'; // Настройка Passport
-import googleAuthRoutes from './auth/google.js';
+import './config/passport.js';
+import googleAuthRoutes from './routes/auth/google.js';
 import authenticateJWT from "./middleware/jwt.js";
+
 const app = express();
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -25,12 +26,12 @@ app.get('/', (req, res) => {
         res.send(`
             <h1>Главная</h1>
             <p>Привет, ${req.user.displayName}!</p>
-            <a href="/auth/logout">Выйти</a>
+            <a href="/routes/auth/logout">Выйти</a>
         `);
     } else {
         res.send(`
             <h1>Главная</h1>
-            <a href="/auth/google">Войти через Google</a>
+            <a href="/routes/auth/google">Войти через Google</a>
         `);
     }
 });
