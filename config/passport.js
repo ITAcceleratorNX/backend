@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from 'passport';
-import User from './models/User.js'; // Импортируем модель пользователя
+import User from '../models/User.js';
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -9,7 +9,6 @@ passport.use(new GoogleStrategy({
     callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Проверка, есть ли пользователь с таким email
         let user = await User.findOne({ where: { email: profile.emails[0].value } });
 
         if (!user) {
@@ -19,8 +18,6 @@ passport.use(new GoogleStrategy({
                 email: profile.emails[0].value
             });
         }
-
-        // Генерация JWT токена
         const token = jwt.sign({ userId: user.user_id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         return done(null, { user, token }); // Возвращаем пользователя и токен

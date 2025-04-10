@@ -21,24 +21,24 @@ app.use(cors({
 app.use('/auth', googleAuthRoutes);
 
 app.get('/', (req, res) => {
-    res.send(`
-    <h1>Главная</h1>
-    ${req.user ? `
-      <p>Привет, ${req.user.displayName}!</p>
-      <a href="/auth/logout">Выйти</a>
-    ` : `
-      <a href="/auth/google">Войти через Google</a>
-    `}
-  `);
+    if (req.user) {
+        res.send(`
+            <h1>Главная</h1>
+            <p>Привет, ${req.user.displayName}!</p>
+            <a href="/auth/logout">Выйти</a>
+        `);
+    } else {
+        res.send(`
+            <h1>Главная</h1>
+            <a href="/auth/google">Войти через Google</a>
+        `);
+    }
 });
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// Пример защищённого маршрута
 app.get('/protected', authenticateJWT, (req, res) => {
     res.json({ message: 'Этот маршрут защищён!', user: req.user });
-});
-app.get('/', (req, res) => {
-    res.status(200).json({ message: 'ExtraSpace API работает!' });
 });
 
 app.use((req, res) => {
@@ -51,12 +51,6 @@ const startServer = async () => {
         console.log('Подключение к PostgreSQL установлено.');
         await sequelize.sync({ alter: true });
         console.log('Модели синхронизированы с БД.');
-
-        if (process.env.NODE_ENV !== 'test') {
-            app.listen(PORT, () => {
-                console.log(`Сервер запущен на порту ${PORT}`);
-            });
-        }
     } catch (error) {
         console.error('Ошибка при подключении к БД:', error);
         if (process.env.NODE_ENV !== 'test') {
@@ -64,8 +58,6 @@ const startServer = async () => {
         }
     }
 };
-
-
 startServer();
 
 export default app;
