@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const MovingOrder = sequelize.define('MovingOrder', {
+export const MovingOrder = sequelize.define('MovingOrder', {
     moving_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,

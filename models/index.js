@@ -1,3 +1,6 @@
+import { Sequelize } from "sequelize";
+
+// Импорт моделей
 import { User } from './User.js';
 import { UserRole } from './UserRole.js';
 import { Warehouse } from './Warehouse.js';
@@ -10,11 +13,10 @@ import { OrderItem } from './OrderItem.js';
 import { Transaction } from './Transaction.js';
 import { MovingOrder } from './MovingOrder.js';
 import { Callback } from './Callback.js';
-import { Faq } from './Faq.js';
-import { FaqCategory } from './FaqCategory.js';
+import { FAQ } from './Faq.js';
+import { FAQCategory } from './FaqCategory.js';
 
-// Экспортируем все модели для использования в других частях приложения
-export {
+const models = {
     User,
     UserRole,
     Warehouse,
@@ -27,6 +29,30 @@ export {
     Transaction,
     MovingOrder,
     Callback,
-    Faq,
-    FaqCategory
+    FAQ,
+    FAQCategory
 };
+
+let sequelizeInstance = null;
+
+export async function initSequelize(sequelize) {
+    for (const modelName in models) {
+        if (models[modelName].init && typeof models[modelName].init === 'function') {
+            models[modelName].init(sequelize);
+        }
+    }
+    await sequelize.sync();
+
+    console.log('🟢 Sequelize models are synced');
+}
+
+export function getSequelize() {
+    if (!sequelizeInstance) {
+        throw new Error('Sequelize has not been initialized. Call initSequelize() first.');
+    }
+    return sequelizeInstance;
+}
+
+export function getModels() {
+    return models;
+}

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const PriceType = sequelize.define('PriceType', {
+export const PriceType = sequelize.define('PriceType', {
     price_type_code: {
         type: DataTypes.STRING(20),
         primaryKey: true

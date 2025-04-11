@@ -9,21 +9,6 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: ✅ Checkout code
         uses: actions/checkout@v3
@@ -38,27 +23,6 @@ jobs:
 
       - name: 🧼 Run ESLint
         run: npm run lint
-
-      - name: 🧪 Run Tests with Coverage
-        run: npm run test
-
-  docker-build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: ✅ Checkout code
-        uses: actions/checkout@v3
-
-      - name: 🐳 Set up Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-      - name: 🐳 Build and Run Docker container
-        run: |
-          docker build -t my-app .
-          docker run -d -p 5432:5432 --name postgres-container postgres:15
-          # Add other commands to set up your Docker container if necessary
 
       - name: 🧪 Run Tests with Coverage
         run: npm run test

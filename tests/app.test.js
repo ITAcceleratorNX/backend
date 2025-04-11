@@ -1,13 +1,37 @@
 import request from 'supertest';
-import app from '../app';
-import sequelize from "../config/database.js";
+import { GenericContainer } from 'testcontainers';
+import { createSequelize } from '../config/factory/sequelizeFactory.js';
+import appFactory from '../app.js';
+import { initSequelize } from '../models/index.js';
+
+let container;
+let sequelize;
+let app;
 
 beforeAll(async () => {
-    await sequelize.authenticate();
+    container = await new GenericContainer('postgres')
+        .withEnvironment('POSTGRES_DB', 'testdb')
+        .withEnvironment('POSTGRES_USER', 'testuser')
+        .withEnvironment('POSTGRES_PASSWORD', 'testpass')
+        .withExposedPorts(5432)
+        .start();
+
+    const dbConfig = {
+        dbName: 'testdb',
+        user: 'testuser',
+        password: 'testpass',
+        host: container.getHost(),
+        port: container.getMappedPort(5432)
+    };
+
+    sequelize = createSequelize(dbConfig);
+    await initSequelize(sequelize);
+    app = appFactory(sequelize);
 });
 
 afterAll(async () => {
     await sequelize.close();
+    await container.stop();
 });
 
 describe('GET /', () => {

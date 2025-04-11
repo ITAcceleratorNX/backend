@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import passport from 'passport';
 import User from '../models/User.js';
 
@@ -39,3 +39,5 @@ passport.deserializeUser(async (id, done) => {
         done(err);
     }
 });
+
+export default passport;
