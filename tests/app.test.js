@@ -1,39 +1,11 @@
 import request from 'supertest';
-import {GenericContainer} from 'testcontainers';
-import {createSequelize} from '../config/factory/sequelizeFactory.js';
-import appFactory from '../config/factory/appFactory.js';
+import appFactory from "../config/factory/appFactory.js";
 
-let sequelize;
 let app;
 
 beforeAll(async () => {
-    jest.setTimeout(10000);
-    const container = await new GenericContainer('postgres')
-        .withEnvironment({
-            POSTGRES_DB: 'testdb',
-            POSTGRES_USER: 'testuser',
-            POSTGRES_PASSWORD: 'testpass',
-        })
-        .withExposedPorts(5432)
-        .start();
-    const dbConfig = {
-        dbName: 'testdb',
-        user: 'testuser',
-        password: 'testpass',
-        host: container.getHost(),
-        port: container.getMappedPort(5432)
-    };
-
-    sequelize = createSequelize(dbConfig);
-    await sequelize.authenticate();
-    await sequelize.sync({alter: true});
     app = appFactory();
-});
-
-afterAll(async () => {
-    await sequelize.close();
-    await sequelize.close();
-});
+})
 
 describe('GET /', () => {
     it('should return 200 OK', async () => {
