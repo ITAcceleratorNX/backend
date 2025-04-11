@@ -53,8 +53,8 @@ const startServer = async () => {
         console.log('Модели синхронизированы с БД.');
 
         if (process.env.NODE_ENV !== 'test') {
-            app.listen(PORT, () => {
-                console.log(`Сервер запущен на порту ${PORT}`);
+            app.listen(process.env.PORT, () => {
+                console.log(`Сервер запущен на порту ${process.env.PORT}`);
             });
         }
     } catch (error) {
