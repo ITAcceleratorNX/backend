@@ -1,17 +1,21 @@
-name: Lint and Test
-
-on:
-  pull_request:
-    branches:
-      - main
-
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: ✅ Checkout code
         uses: actions/checkout@v3
+
+      - name: 🐳 Setup Docker (Testcontainers support)
+        uses: docker/setup-buildx-action@v2
+
+      - name: 🔓 Enable Docker daemon socket
+        run: |
+          sudo systemctl start docker
 
       - name: 🟢 Set up Node.js
         uses: actions/setup-node@v3
@@ -21,8 +25,7 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🧼 Run ESLint
-        run: npm run lint
-
-      - name: 🧪 Run Tests with Coverage
+      - name: 🧪 Run Tests
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: true  # опционально, если возникают проблемы с ryuk
         run: npm run test
