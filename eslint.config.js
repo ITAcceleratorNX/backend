@@ -20,6 +20,7 @@ export default defineConfig([
         describe: "readonly",
         it: "readonly",
         expect: "readonly",
+        jest : "readonly",
         document: "readonly",
         window: "readonly",
       },
