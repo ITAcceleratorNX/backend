@@ -1,21 +1,20 @@
 import request from 'supertest';
-import { GenericContainer } from 'testcontainers';
-import { createSequelize } from '../config/factory/sequelizeFactory.js';
-import appFactory from '../app.js';
-import { initSequelize } from '../models/index.js';
+import {GenericContainer} from 'testcontainers';
+import {createSequelize} from '../config/factory/sequelizeFactory.js';
+import appFactory from '../config/factory/appFactory.js';
 
-let container;
 let sequelize;
 let app;
 
 beforeAll(async () => {
-    container = await new GenericContainer('postgres')
-        .withEnvironment('POSTGRES_DB', 'testdb')
-        .withEnvironment('POSTGRES_USER', 'testuser')
-        .withEnvironment('POSTGRES_PASSWORD', 'testpass')
+    const container = await new GenericContainer('postgres')
+        .withEnvironment({
+            POSTGRES_DB: 'testdb',
+            POSTGRES_USER: 'testuser',
+            POSTGRES_PASSWORD: 'testpass',
+        })
         .withExposedPorts(5432)
         .start();
-
     const dbConfig = {
         dbName: 'testdb',
         user: 'testuser',
@@ -25,13 +24,14 @@ beforeAll(async () => {
     };
 
     sequelize = createSequelize(dbConfig);
-    await initSequelize(sequelize);
-    app = appFactory(sequelize);
+    await sequelize.authenticate();
+    await sequelize.sync({alter: true});
+    app = appFactory();
 });
 
 afterAll(async () => {
     await sequelize.close();
-    await container.stop();
+
 });
 
 describe('GET /', () => {

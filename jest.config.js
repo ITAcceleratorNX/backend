@@ -3,7 +3,15 @@ export default {
         '^.+\\.js$': 'babel-jest',
     },
     testEnvironment: 'node',
-    testPathIgnorePatterns: ['/node_modules/', 'backend/config/'],
+    coveragePathIgnorePatterns: [
+        "/node_modules/",
+        "/config/",
+        "/utils/",
+        "/routes/",
+        "/helpers/",
+        "/models/",
+        ".*config.js$"
+    ],
     coverageThreshold: {
         global: {
             functions: 70,

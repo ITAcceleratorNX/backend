@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import passport from '../../config/passport.js';
 import cors from 'cors';
-import googleAuthRoutes from '../../auth/google.js';
+import googleAuthRoutes from '../../routes/auth/google.js';
 import authenticateJWT from "../../middleware/jwt.js";
 
 export default function appFactory() {

@@ -1,17 +1,8 @@
 import dotenv from 'dotenv';
-dotenv.config();
-
-import { createSequelize } from './config/factory/sequelizeFactory.js';
-import { initSequelize } from './models/index.js';
+import {sequelize} from '/config/database.js';
 import appFactory from './config/factory/appFactory.js';
 
-const sequelize = createSequelize({
-    dbName: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 5432,
-});
+dotenv.config();
 
 const app = appFactory();
 
@@ -20,7 +11,6 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('Подключение к PostgreSQL установлено.');
 
-        await initSequelize(sequelize);
         await sequelize.sync({ alter: true });
         console.log('Модели синхронизированы с БД.');
 
