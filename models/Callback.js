@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Callback = sequelize.define('Callback', {
+export const Callback = sequelize.define('Callback', {
     callback_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,

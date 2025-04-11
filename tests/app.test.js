@@ -1,14 +1,11 @@
 import request from 'supertest';
-import app from '../app';
-import sequelize from "../config/database.js";
+import appFactory from "../config/factory/appFactory.js";
+
+let app;
 
 beforeAll(async () => {
-    await sequelize.authenticate();
-});
-
-afterAll(async () => {
-    await sequelize.close();
-});
+    app = appFactory();
+})
 
 describe('GET /', () => {
     it('should return 200 OK', async () => {

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const OrderItem = sequelize.define('OrderItem', {
+export const OrderItem = sequelize.define('OrderItem', {
     item_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,

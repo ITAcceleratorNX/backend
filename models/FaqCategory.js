@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const FAQCategory = sequelize.define('FAQCategory', {
+export const FAQCategory = sequelize.define('FAQCategory', {
     category_code: {
         type: DataTypes.STRING(20),
         primaryKey: true

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const WarehouseStatus = sequelize.define('WarehouseStatus', {
+export const WarehouseStatus = sequelize.define('WarehouseStatus', {
     status_code: {
         type: DataTypes.STRING(20),
         primaryKey: true
