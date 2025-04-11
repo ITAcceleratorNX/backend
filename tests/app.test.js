@@ -31,7 +31,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     await sequelize.close();
-
+    await sequelize.close();
 });
 
 describe('GET /', () => {
