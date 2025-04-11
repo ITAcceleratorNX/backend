@@ -3,7 +3,7 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import sequelize from './config/database.js';
-import './config/passport.js'; // Настройка Passport
+import './config/passport.js';
 import googleAuthRoutes from './auth/google.js';
 import authenticateJWT from "./middleware/jwt.js";
 const app = express();
