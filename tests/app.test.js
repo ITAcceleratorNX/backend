@@ -7,6 +7,7 @@ let sequelize;
 let app;
 
 beforeAll(async () => {
+    jest.setTimeout(10000);
     const container = await new GenericContainer('postgres')
         .withEnvironment({
             POSTGRES_DB: 'testdb',
