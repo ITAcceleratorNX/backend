@@ -22,7 +22,6 @@ coverage/
 
 # dotenv environment files
 .env
-.env.*.local
 
 # OS
 .DS_Store

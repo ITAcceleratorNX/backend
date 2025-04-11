@@ -6,7 +6,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js },
     extends: ["js/recommended"],
-    ignores: ["node_modules", "dist", "coverage"], // Здесь указаны папки, которые нужно игнорировать
+    ignores: ["node_modules", "dist", "coverage"],
   },
   {
     files: ["**/*.{js,mjs,cjs}"],
@@ -20,6 +20,7 @@ export default defineConfig([
         describe: "readonly",
         it: "readonly",
         expect: "readonly",
+        jest : "readonly",
         document: "readonly",
         window: "readonly",
       },
