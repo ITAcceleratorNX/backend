@@ -21,7 +21,8 @@ export const User = sequelize.define('User', {
         allowNull: true
     },
     password_hash: {
-        type: DataTypes.STRING(255)
+        type: DataTypes.STRING(255),
+        allowNull: true
     },
     registration_date: {
         type: DataTypes.DATE,
