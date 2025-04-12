@@ -16,6 +16,8 @@ export default defineConfig([
         console: "readonly",
         next: "readonly",
         beforeAll: "readonly",
+        beforeEach: "readonly",
+        test: "readonly",
         afterAll: "readonly",
         describe: "readonly",
         it: "readonly",

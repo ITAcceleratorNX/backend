@@ -9,7 +9,7 @@ export const User = sequelize.define('User', {
     },
     name: {
         type: DataTypes.STRING(100),
-        allowNull: false
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING(100),
@@ -18,13 +18,14 @@ export const User = sequelize.define('User', {
     },
     phone: {
         type: DataTypes.STRING(20),
-        allowNull: false
+        allowNull: true
     },
     password_hash: {
         type: DataTypes.STRING(255)
     },
     registration_date: {
-        type: DataTypes.DATE
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW()
     },
     last_login: {
         type: DataTypes.DATE

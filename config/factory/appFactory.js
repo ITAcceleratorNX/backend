@@ -3,6 +3,7 @@ import session from 'express-session';
 import passport from '../../config/passport.js';
 import cors from 'cors';
 import googleAuthRoutes from '../../routes/auth/google.js';
+import basicAuthRoutes from '../../routes/auth/BasicAuthRouter.js';
 import authenticateJWT from "../../middleware/jwt.js";
 
 export default function appFactory() {
@@ -21,9 +22,10 @@ export default function appFactory() {
         credentials: true
     }));
 
-    app.use('/auth', googleAuthRoutes);
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use('/auth', googleAuthRoutes);
+    app.use("/auth", basicAuthRoutes);
 
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
