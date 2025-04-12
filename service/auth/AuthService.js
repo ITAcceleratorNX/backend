@@ -7,7 +7,9 @@ import {generateToken} from "../../utils/jwt/JwtService.js";
 
 export async function checkEmail(req, res) {
     const { email } = req.body;
-    User.findOne({ email: email })
+    User.findOne({
+        where: { email: email }
+    })
     .then(user => {
         if (!user) {
             let uniqueCode = generateSecureCode(email);
