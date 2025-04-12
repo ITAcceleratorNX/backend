@@ -22,10 +22,10 @@ export default function appFactory() {
         credentials: true
     }));
 
-    app.use('/auth', googleAuthRoutes);
-    app.use("/auth", basicAuthRoutes);
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.use('/auth', googleAuthRoutes);
+    app.use("/auth", basicAuthRoutes);
 
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });

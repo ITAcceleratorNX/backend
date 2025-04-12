@@ -12,7 +12,8 @@ export function generateSecureCode(email) {
 }
 
 export function verifyCode(code, email) {
-    if (emailVerifyCodesByUserId[code] !== email) {
+    if (emailVerifyCodesByUserId[email] !== code) {
+        console.log(code, emailVerifyCodesByUserId[email], email);
         return false;
     }
     emailVerifyCodesByUserId[email].delete;

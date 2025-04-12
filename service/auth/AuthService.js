@@ -16,7 +16,7 @@ export async function checkEmail(req, res) {
             return res.status(200)
                 .json({user_exists: false, email: email});
         } else {
-            return res.status(400).json({user_exists: true});
+            return res.status(200).json({user_exists: true});
         }
     }).catch(err => {
         console.error(err);
@@ -49,6 +49,11 @@ export async function login(req, res) {
 export async function register(req, res) {
     let message = {};
     const { email, unique_code, password } = req.body;
+    const isUserExists = await User.findOne({ email: email });
+    if (isUserExists) {
+        return res.status(400)
+            .json({success: false, message: "User already exists"});
+    }
 
     if (password.length < 6) {
         message.password_error = "Password must be at least 6 characters";
@@ -56,16 +61,17 @@ export async function register(req, res) {
     if (!validator.isEmail(email)) {
         message.email_error = "Invalid email address";
     }
-    if (verifyCode(unique_code, email)) {
+    if (!verifyCode(unique_code, email)) {
         message.unique_code_error = "Invalid unique code";
     }
-    if (message) {
+    if (Object.keys(message).length !== 0) {
+        console.log(message);
         return res.status(400)
             .json({success: false, message});
     }
     const user = await User.create({
         email,
-        password_hash: getHashedPassword(password),
+        password_hash: await getHashedPassword(password),
         role_code: 1,
         last_login: Date.now()
     });
