@@ -29,9 +29,11 @@ passport.use(new GoogleStrategy({
 }));
 
 
-passport.serializeUser((user, done) => {
-    done(null, user.id);
+passport.serializeUser((userWithToken, done) => {
+    console.log('serializeUser input:', userWithToken);
+    done(null, userWithToken.user.user_id);
 });
+
 
 passport.deserializeUser(async (id, done) => {
     try {
