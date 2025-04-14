@@ -1,0 +1,160 @@
+openapi: 3.0.0
+info:
+  title: Auth API
+  version: 1.0.1
+  description: Документация по авторизации
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /auth/google:
+    get:
+      summary: Авторизация через Google
+      description: Редиректит на Google OAuth
+      responses:
+        '302':
+          description: Редирект на Google
+
+  /auth/google/callback:
+    get:
+      summary: Callback после Google OAuth
+      responses:
+        '302':
+          description: Редирект на главную страницу при успехе или неудаче
+
+  /auth/email:
+    post:
+      summary: Проверка email — зарегистрирован или нет
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+      responses:
+        '200':
+          description: Информация о наличии пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_exists:
+                    type: boolean
+                  email:
+                    type: string
+        '400':
+          description: Email не передан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Email is required
+        '500':
+          description: Внутренняя ошибка
+
+  /auth/login:
+    post:
+      summary: Логин пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: mypassword123
+      responses:
+        '200':
+          description: Успешный логин
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+        '400':
+          description: Ошибка валидации или неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: object
+                    example:
+                      email_error: Email is required
+                      password_error: Password is required
+
+  /auth/register:
+    post:
+      summary: Регистрация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, unique_code]
+              properties:
+                email:
+                  type: string
+                  example: user@example.com
+                unique_code:
+                  type: string
+                  example: "123456"
+                password:
+                  type: string
+                  example: mypassword123
+      responses:
+        '201':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  token:
+                    type: string
+        '400':
+          description: Ошибка валидации или недостающие поля
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: object
+                    example:
+                      email_error: Email is required
+                      unique_code_error: Unique code is required
+                      password_error: Password is required

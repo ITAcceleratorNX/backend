@@ -14,7 +14,9 @@ passport.use(new GoogleStrategy({
         if (!user) {
             user = await User.create({
                 name: profile.displayName,
-                email: profile.emails[0].value
+                email: profile.emails[0].value,
+                role_code: 1,
+                last_login: Date.now()
             });
         }
 
@@ -27,9 +29,11 @@ passport.use(new GoogleStrategy({
 }));
 
 
-passport.serializeUser((user, done) => {
-    done(null, user.id);
+passport.serializeUser((userWithToken, done) => {
+    console.log('serializeUser input:', userWithToken);
+    done(null, userWithToken.user.user_id);
 });
+
 
 passport.deserializeUser(async (id, done) => {
     try {
