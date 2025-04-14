@@ -7,7 +7,9 @@ import {generateToken} from "../../utils/jwt/JwtService.js";
 
 export async function checkEmail(req, res) {
     const { email } = req.body;
-    User.findOne({ email: email })
+    User.findOne({
+        where: { email: email }
+    })
     .then(user => {
         if (!user) {
             let uniqueCode = generateSecureCode(email);
@@ -31,7 +33,9 @@ export async function login(req, res) {
         return res.status(400)
             .json({success: false, message: "Invalid email"});
     }
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({
+        where: { email: email }
+    });
     if (!user) {
         return res.status(400)
         .json({success: false, message: "User not found"});
@@ -49,7 +53,9 @@ export async function login(req, res) {
 export async function register(req, res) {
     let message = {};
     const { email, unique_code, password } = req.body;
-    const isUserExists = await User.findOne({ email: email });
+    const isUserExists = await User.findOne({
+        where: { email: email }
+    });
     if (isUserExists) {
         return res.status(400)
             .json({success: false, message: "User already exists"});
