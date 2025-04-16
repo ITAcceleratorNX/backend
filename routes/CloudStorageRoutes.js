@@ -1,5 +1,5 @@
 import express from "express";
-import storageController from "../service/CloudStorageService.js";
+import * as storageController from "../service/CloudStorageService.js";
 const router = express.Router();
 router.get('/cloud', storageController.getAllCloud);
 router.get('/cloud/:id', storageController.getCloudById);

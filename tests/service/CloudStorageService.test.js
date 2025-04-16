@@ -28,7 +28,7 @@ describe('CloudStorage', () => {
             const res = mockRes();
             await CloudStorageController.getAllCloud({}, res);
 
-            expect(res.json).toHaveBeenCalledWith(mockData); // `json` функциясы дұрыс жұмыс істеп тұр ма тексеру
+            expect(res.json).toHaveBeenCalledWith(mockData);
         });
     });
 
@@ -43,31 +43,31 @@ describe('CloudStorage', () => {
             await CloudStorageController.createCloud(req, res);
 
             expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith(result); // `json` дұрыс қайтарылып жатқаны тексеру
+            expect(res.json).toHaveBeenCalledWith(result);
         });
     });
 
     describe('updateCloud', () => {
         test('should update and return affected rows count', async () => {
-            CloudStorage.update.mockResolvedValue([1]); // Бір жазба жаңарғанын көрсету
+            CloudStorage.update.mockResolvedValue([1]);
 
             const req = { params: { id: 1 }, body: { name: 'Updated Cloud' } };
             const res = mockRes();
             await CloudStorageController.updateCloud(req, res);
 
-            expect(res.json).toHaveBeenCalledWith({ updated: 1 }); // Қайтарылған мәнді тексеру
+            expect(res.json).toHaveBeenCalledWith({ updated: 1 });
         });
     });
 
     describe('deleteCloud', () => {
         test('should delete and return deleted count', async () => {
-            CloudStorage.destroy.mockResolvedValue(1); // Бір жазба жойылғанын көрсету
+            CloudStorage.destroy.mockResolvedValue(1);
 
             const req = { params: { id: 1 } };
             const res = mockRes();
             await CloudStorageController.deleteCloud(req, res);
 
-            expect(res.json).toHaveBeenCalledWith({ deleted: 1 }); // Жойылған жазбаны тексеру
+            expect(res.json).toHaveBeenCalledWith({ deleted: 1 });
         });
     });
 });
