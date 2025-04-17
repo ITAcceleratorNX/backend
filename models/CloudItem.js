@@ -7,7 +7,7 @@ const CloudItem = sequelize.define('CloudItem', {
         primaryKey: true,
         autoIncrement: true
     },
-    storage_id: {
+    storage_order_id: {
         type: DataTypes.INTEGER,
         allowNull: false
     },

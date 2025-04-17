@@ -8,7 +8,9 @@ import authenticateJWT from "../../middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
-
+import CloudStorageOrderRoutes from "../../routes/СloudStorageOrderRoutes.js";
+import CloudStorageRoutes from "../../routes/CloudStorageRoutes.js";
+import CloudItemRoutes from "../../routes/CloudItemRoutes.js";
 export default function appFactory() {
     const app = express();
     //swagger
@@ -33,7 +35,9 @@ export default function appFactory() {
     app.use(express.urlencoded({ extended: true }));
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);
-
+    app.use("/api/cloud-order",CloudStorageOrderRoutes);
+    app.use("/api/cloud",CloudStorageRoutes);
+    app.use('/api/cloud-items', CloudItemRoutes);
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
