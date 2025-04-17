@@ -1,5 +1,5 @@
 import CloudStorage from "../../models/CloudStorage.js";
-import CloudStorageController from "../../controllers/CloudStorageController.js"; // Дұрыс импорт
+import CloudStorageController from "../../controllers/storage/CloudStorageController.js"; // Дұрыс импорт
 
 jest.mock('../../models/CloudStorage.js', () => ({
     __esModule: true,

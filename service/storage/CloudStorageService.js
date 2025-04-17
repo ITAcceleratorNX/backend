@@ -1,4 +1,4 @@
-import CloudStorage from "../models/CloudStorage.js";
+import CloudStorage from "../../models/CloudStorage.js";
 const getAllCloud = () => CloudStorage.findAll();
 const getCloudById = (id) => CloudStorage.findByPk(id);
 const createCloud = (data) => CloudStorage.create(data);
