@@ -1,4 +1,4 @@
-import * as CloudStorageService from "../service/CloudStorageService.js";
+import * as CloudStorageService from "../../service/storage/CloudStorageService.js";
 
 const getAllCloud = async (req, res) => {
     try {

@@ -8,6 +8,7 @@ import authenticateJWT from "../../middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
+import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -41,6 +42,7 @@ export default function appFactory() {
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
+    app.use("/individual", individualStorageRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
