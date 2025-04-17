@@ -130,7 +130,6 @@ describe('CloudStorageOrder Service', () => {
             CloudStorageOrder.findByPk.mockResolvedValue(null);
 
             const req = { params: { id: 999 } };
-            const res = mockRes();
             await expect(CloudStorageOrderService.deleteOrder(req.params.id))
                 .rejects
                 .toThrow('Order not found');

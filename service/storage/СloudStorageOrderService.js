@@ -6,6 +6,7 @@ export const createOrder = async (orderData) => {
         const order = await CloudStorageOrder.create(orderData);
         return order;
     } catch (error) {
+        console.error('Ошибка при получении всех элементов:', error);
         throw new Error("Error creating order");
     }
 };
@@ -15,6 +16,7 @@ export const getAllOrders = async () => {
         const orders = await CloudStorageOrder.findAll();
         return orders;
     } catch (error) {
+        console.error('Ошибка при получении всех элементов:', error);
         throw new Error("Error fetching orders");
     }
 };
@@ -27,6 +29,7 @@ export const getOrderById = async (id) => {
         }
         return order;
     } catch (error) {
+        console.error('Ошибка при получении всех элементов:', error);
         throw new Error("Error fetching order");
     }
 };
@@ -43,6 +46,7 @@ export const updateOrder = async (id, data, res) => {
 
         res.json({ updated: updatedCount });
     } catch (error) {
+        console.error('Ошибка при получении всех элементов:', error);
         throw new Error("Error updating order");
     }
 };
