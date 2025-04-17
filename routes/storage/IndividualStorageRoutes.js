@@ -5,10 +5,10 @@ import {IndividualStorageDto, UpdateIndividualStorageDto} from "../../dto/storag
 
 const router = express.Router();
 
-router.get("", individualStorageController.getAllIndividualStorages);
-router.get(":id", individualStorageController.getIndividualStorageById);
-router.post("", validateBody(IndividualStorageDto), individualStorageController.createIndividualStorage);
-router.delete(":id", individualStorageController.deleteIndividualStorage);
-router.put(":id", validateBody(UpdateIndividualStorageDto), individualStorageController.updateIndividualStorage);
+router.get("/", individualStorageController.getAllIndividualStorages);
+router.get("/:id", individualStorageController.getIndividualStorageById);
+router.post("/", validateBody(IndividualStorageDto), individualStorageController.createIndividualStorage);
+router.delete("/:id", individualStorageController.deleteIndividualStorage);
+router.put("/:id", validateBody(UpdateIndividualStorageDto), individualStorageController.updateIndividualStorage);
 
 export default router;
