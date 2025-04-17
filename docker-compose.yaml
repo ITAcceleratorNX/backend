@@ -5,9 +5,9 @@ services:
     image: postgres:15
     container_name: extraspace_db
     environment:
-      POSTGRES_DB: ${DB_NAME:-extraspace}
-      POSTGRES_USER: ${DB_USER:-extraspace}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-extraspace123}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       TZ: Asia/Almaty
     volumes:
       - postgres_data:/var/lib/postgresql/data

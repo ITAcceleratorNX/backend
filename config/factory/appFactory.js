@@ -8,6 +8,9 @@ import authenticateJWT from "../../middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
+import CloudStorageOrderRoutes from "../../routes/storage/СloudStorageOrderRoutes.js";
+import CloudStorageRoutes from "../../routes/storage/CloudStorageRoutes.js";
+import CloudItemRoutes from "../../routes/storage/CloudItemRoutes.js";
 import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
 
 export default function appFactory() {
@@ -34,7 +37,9 @@ export default function appFactory() {
     app.use(express.urlencoded({ extended: true }));
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);
-
+    app.use("/api/cloud-order",CloudStorageOrderRoutes);
+    app.use("/api/cloud",CloudStorageRoutes);
+    app.use('/api/cloud-items', CloudItemRoutes);
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });

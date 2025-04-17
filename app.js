@@ -3,7 +3,6 @@ import {sequelize} from './config/database.js';
 import appFactory from './config/factory/appFactory.js';
 
 dotenv.config();
-
 const app = appFactory();
 
 const startServer = async () => {
@@ -11,7 +10,7 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('Подключение к PostgreSQL установлено.');
 
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
         console.log('Модели синхронизированы с БД.');
 
     } catch (error) {
@@ -24,4 +23,8 @@ if (process.env.NODE_ENV !== 'test') {
     startServer();
 }
 
+
 export default app;
+
+
+
