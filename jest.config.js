@@ -10,6 +10,7 @@ export default {
         "/routes/",
         "/helpers/",
         "/models/",
+        "/dto/",
         ".*config.js$"
     ],
     coverageThreshold: {

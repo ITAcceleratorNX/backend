@@ -1,7 +1,7 @@
-import CloudStorage from "../../models/CloudStorage.js";
-import CloudStorageController from "../../controllers/storage/CloudStorageController.js"; // Дұрыс импорт
+import CloudStorage from "../../../models/CloudStorage.js";
+import CloudStorageController from "../../../controllers/storage/CloudStorageController.js"; // Дұрыс импорт
 
-jest.mock('../../models/CloudStorage.js', () => ({
+jest.mock('../../../models/CloudStorage.js', () => ({
     __esModule: true,
     default: {
         findAll: jest.fn(),
