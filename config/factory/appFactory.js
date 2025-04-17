@@ -11,6 +11,8 @@ import swaggerUi from "swagger-ui-express";
 import CloudStorageOrderRoutes from "../../routes/СloudStorageOrderRoutes.js";
 import CloudStorageRoutes from "../../routes/CloudStorageRoutes.js";
 import CloudItemRoutes from "../../routes/CloudItemRoutes.js";
+import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
+
 export default function appFactory() {
     const app = express();
     //swagger
@@ -45,6 +47,7 @@ export default function appFactory() {
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
+    app.use("/individual", individualStorageRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
