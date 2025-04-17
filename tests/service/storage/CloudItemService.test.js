@@ -4,11 +4,11 @@ import {
     createItem,
     updateItem,
     deleteItem
-} from '../../service/cloudItemService.js';
+} from '../../../service/storage/CloudItemService.js';
 
-import CloudItem from '../../models/CloudItem.js';
+import CloudItem from '../../../models/CloudItem.js';
 
-jest.mock('../../models/CloudItem.js'); 
+jest.mock('../../../models/CloudItem.js');
 
 describe('cloudItemService', () => {
     afterEach(() => {

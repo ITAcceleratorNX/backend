@@ -1,4 +1,4 @@
-import CloudStorage from "../models/CloudStorage.js";
+import CloudStorage from "../../models/CloudStorage.js";
 
 const getAllCloud = async () => {
     try {

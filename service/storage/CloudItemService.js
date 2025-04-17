@@ -1,4 +1,4 @@
-import CloudItem from '../models/CloudItem.js';
+import CloudItem from '../../models/CloudItem.js';
 
 const getAllItems = async () => {
     try {

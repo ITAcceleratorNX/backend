@@ -1,4 +1,4 @@
-import * as CloudStorageOrderService from "../service/СloudStorageOrderService.js";
+import * as CloudStorageOrderService from "../../service/storage/СloudStorageOrderService.js";
 
 export const createOrder = async (req, res) => {
     try {

@@ -4,7 +4,7 @@ import {
     createItem,
     updateItem,
     deleteItem
-} from '../service/CloudItemService.js';
+} from '../../service/storage/CloudItemService.js';
 
 export const getItems = async (req, res) => {
     try {

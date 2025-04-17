@@ -5,7 +5,7 @@ import {
     createNewItem,
     updateExistingItem,
     deleteExistingItem
-} from '../controllers/CloudItemController.js';
+} from '../../controllers/storage/CloudItemController.js';
 
 const router = express.Router();
 

@@ -5,7 +5,7 @@ import {
     getOrderById,
     updateOrder,
     deleteOrder
-} from '../controllers/СloudStorageOrderController.js';
+} from '../../controllers/storage/СloudStorageOrderController.js';
 
 const router = express.Router();
 

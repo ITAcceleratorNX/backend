@@ -1,7 +1,7 @@
-import CloudStorageOrder from "../../models/CloudStorageOrder.js";
-import * as CloudStorageOrderService from "../../service/СloudStorageOrderService.js";
+import CloudStorageOrder from "../../../models/CloudStorageOrder.js";
+import * as CloudStorageOrderService from "../../../service/storage/СloudStorageOrderService.js";
 
-jest.mock('../../models/CloudStorageOrder.js', () => ({
+jest.mock('../../../models/CloudStorageOrder.js', () => ({
     __esModule: true, // <- обязательно, если используешь ES-модули
     default: {
         create: jest.fn(),

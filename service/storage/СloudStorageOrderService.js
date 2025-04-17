@@ -1,5 +1,5 @@
 
-import CloudStorageOrder from "../models/CloudStorageOrder.js";
+import CloudStorageOrder from "../../models/CloudStorageOrder.js";
 
 export const createOrder = async (orderData) => {
     try {
@@ -31,7 +31,6 @@ export const getOrderById = async (id) => {
     }
 };
 
-// CloudStorageOrderService.js
 export const updateOrder = async (id, data, res) => {
     try {
         const order = await CloudStorageOrder.findByPk(id);
@@ -42,7 +41,6 @@ export const updateOrder = async (id, data, res) => {
 
         const [updatedCount] = await CloudStorageOrder.update(data, { where: { order_id: id } });
 
-        // Убедитесь, что вызывается res.json
         res.json({ updated: updatedCount });
     } catch (error) {
         throw new Error("Error updating order");

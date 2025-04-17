@@ -1,9 +1,9 @@
 import express from "express";
-import * as storageController from "../../service/storage/CloudStorageService.js";
+import CloudStorageController from "../../controllers/storage/CloudStorageController.js";
 const router = express.Router();
-router.get('/cloud', CloudStorageController.getAllCloud);
-router.get('/cloud/:id', CloudStorageController.getCloudById);
-router.post('/cloud', CloudStorageController.createCloud);
-router.put('/cloud/:id', CloudStorageController.updateCloud);
-router.delete('/cloud/:id', CloudStorageController.deleteCloud);
+router.get('', CloudStorageController.getAllCloud);
+router.get('/:id', CloudStorageController.getCloudById);
+router.post('', CloudStorageController.createCloud);
+router.put('/:id', CloudStorageController.updateCloud);
+router.delete('/:id', CloudStorageController.deleteCloud);
 export default router;
