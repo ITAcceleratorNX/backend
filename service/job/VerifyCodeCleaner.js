@@ -10,5 +10,5 @@ export function cleanExpiredCodes() {
 }
 
 if (process.env.NODE_ENV !== 'test') {
-    setInterval(cleanExpiredCodes, 60 * 1000);
+    setInterval(cleanExpiredCodes, 60 * 1000 * 60 * 24 * 7);
 }
