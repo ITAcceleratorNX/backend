@@ -1,7 +1,8 @@
-import jwt from 'jsonwebtoken';
 import {Strategy as GoogleStrategy} from 'passport-google-oauth20';
 import passport from 'passport';
 import User from '../models/User.js';
+
+import { generateToken } from '../utils/jwt/JwtService.js';
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -20,7 +21,10 @@ passport.use(new GoogleStrategy({
             });
         }
 
-        const token = jwt.sign({ userId: user.user_id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        user.last_login = Date.now();
+        await user.save();
+
+        const token = generateToken(user);
 
         return done(null, { user, token });
     } catch (err) {
@@ -29,19 +33,5 @@ passport.use(new GoogleStrategy({
 }));
 
 
-passport.serializeUser((userWithToken, done) => {
-    console.log('serializeUser input:', userWithToken);
-    done(null, userWithToken.user.user_id);
-});
-
-
-passport.deserializeUser(async (id, done) => {
-    try {
-        const user = await User.findByPk(id);
-        done(null, user);
-    } catch (err) {
-        done(err);
-    }
-});
 
 export default passport;

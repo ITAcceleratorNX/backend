@@ -142,4 +142,88 @@ describe('Auth Controller', () => {
             });
         });
     });
+    describe('restorePassword', () => {
+        test('should restore password and return token', async () => {
+            const mockUser = {
+                email: 'test@example.com',
+                save: jest.fn(),
+            };
+
+            User.findOne.mockResolvedValue(mockUser);
+            cryptoUtils.verifyCode.mockReturnValue(true);
+            bcryptService.getHashedPassword.mockResolvedValue('newHashedPassword');
+            jwtService.generateToken.mockReturnValue('jwt-token');
+
+            const req = {
+                body: {
+                    email: 'test@example.com',
+                    password: '123456',
+                    unique_code: 'valid-code'
+                }
+            };
+            const res = mockRes();
+
+            await AuthService.restorePassword(req, res);
+
+            expect(mockUser.password_hash).toBe('newHashedPassword');
+            expect(mockUser.save).toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                token: 'jwt-token'
+            });
+        });
+
+        test('should return 400 if user not found', async () => {
+            User.findOne.mockResolvedValue(null);
+
+            const req = {
+                body: {
+                    email: 'notfound@example.com',
+                    password: '123456',
+                    unique_code: 'code'
+                }
+            };
+            const res = mockRes();
+
+            await AuthService.restorePassword(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'User not found'
+            });
+        });
+
+        test('should return validation errors', async () => {
+            const mockUser = {
+                email: 'test@example.com',
+                save: jest.fn(),
+            };
+            User.findOne.mockResolvedValue(mockUser);
+            cryptoUtils.verifyCode.mockReturnValue(false); // invalid code
+
+            const req = {
+                body: {
+                    email: 'invalid',
+                    password: '123',
+                    unique_code: 'wrong'
+                }
+            };
+            const res = mockRes();
+
+            await AuthService.restorePassword(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: expect.objectContaining({
+                    email_error: expect.any(String),
+                    password_error: expect.any(String),
+                    unique_code_error: expect.any(String)
+                })
+            });
+        });
+    });
+
 });

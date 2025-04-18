@@ -49,6 +49,45 @@ export async function login(req, res) {
     return res.status(200)
     .json({success: true, token: token});
 }
+export async function restorePassword(req, res) {
+    let message = {};
+    const { email, unique_code, password } = req.body;
+
+    const user = await User.findOne({
+        where: { email: email }
+    });
+
+    if (!user) {
+        return res.status(400)
+            .json({ success: false, message: "User not found" });
+    }
+
+    if (password.length < 6) {
+        message.password_error = "Password must be at least 6 characters";
+    }
+
+    if (!validator.isEmail(email)) {
+        message.email_error = "Invalid email address";
+    }
+
+    if (!verifyCode(unique_code, email)) {
+        message.unique_code_error = "Invalid unique code";
+    }
+
+    if (Object.keys(message).length !== 0) {
+        console.log(message);
+        return res.status(400)
+            .json({ success: false, message });
+    }
+
+    user.password_hash = await getHashedPassword(password);
+    await user.save();
+
+    const token = generateToken(user);
+    console.log("Password restored for user: ", user.email);
+    return res.status(200)
+        .json({ success: true, token });
+}
 
 export async function register(req, res) {
     let message = {};
