@@ -7,9 +7,6 @@ export default defineConfig([
     plugins: { js },
     extends: ["js/recommended"],
     ignores: ["node_modules", "dist", "coverage"],
-    env: {
-      node: true,
-    }
   },
   {
     files: ["**/*.{js,mjs,cjs}"],
@@ -29,6 +26,7 @@ export default defineConfig([
         jest : "readonly",
         document: "readonly",
         window: "readonly",
+        setInterval: "readonly",
       },
     },
   },
