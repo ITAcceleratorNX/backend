@@ -1,5 +1,5 @@
 import User from "../../models/User.js";
-import {generateSecureCode, verifyCode} from "../../utils/crypto/UniqueCodeGenerator.js";
+import {generateSecureCode} from "../../utils/crypto/UniqueCodeGenerator.js";
 import {sendVerificationCode} from "../../utils/sendgird/SendGrid.js";
 import validator from "validator";
 import {comparePassword, getHashedPassword} from "../../utils/bcrypt/BCryptService.js";
