@@ -4,8 +4,10 @@ import * as bcryptService from '../../../utils/bcrypt/BCryptService.js';
 import * as jwtService from '../../../utils/jwt/JwtService.js';
 import * as cryptoUtils from '../../../utils/crypto/UniqueCodeGenerator.js';
 import * as sendGrid from '../../../utils/sendgird/SendGrid.js';
+import CloudStorage from "../../../models/CloudStorage.js";
 
 jest.mock('../../../models/User.js');
+jest.mock('../../../models/CloudStorage.js');
 jest.mock('../../../utils/sendgird/SendGrid.js');
 jest.mock('../../../utils/bcrypt/BCryptService.js');
 jest.mock('../../../utils/jwt/JwtService.js');
@@ -92,6 +94,7 @@ describe('Auth Controller', () => {
     describe('register', () => {
         test('should register user and return token', async () => {
             User.findOne.mockResolvedValue(null);
+            CloudStorage.findOne.mockResolvedValue({ custom_id: '123456' });
             cryptoUtils.verifyCode.mockReturnValue(true);
             bcryptService.getHashedPassword.mockResolvedValue('hashed');
             jwtService.generateToken.mockReturnValue('jwt-token');
@@ -118,6 +121,7 @@ describe('Auth Controller', () => {
 
         test('should return validation errors for invalid input', async () => {
             User.findOne.mockResolvedValue(null);
+            CloudStorage.findOne.mockResolvedValue(null);
             cryptoUtils.verifyCode.mockReturnValue(false);
 
             const req = {
