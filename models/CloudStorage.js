@@ -8,15 +8,20 @@ const CloudStorage = sequelize.define('CloudStorage', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    status: { type: DataTypes.ENUM('active', 'completed') },
+    status: {
+        type: DataTypes.ENUM('active', 'completed'),
+    },
     total_volume: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
+    custom_id: {
+        type: DataTypes.STRING(50),
+        unique: true
+    }
 }, {
     tableName: 'cloud_storage',
     timestamps: false
 });
 
-
-export default CloudStorage
+export default CloudStorage;

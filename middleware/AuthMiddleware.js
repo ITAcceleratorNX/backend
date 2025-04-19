@@ -1,4 +1,6 @@
-const isEmpty = (value) => !value?.trim();
+const isEmpty = (value) => {
+    return typeof value !== 'string' || value.trim().length === 0;
+};
 
 export const checkEmailExists = (req, res, next) => {
     const { email } = req.body;
@@ -10,6 +12,10 @@ export const checkEmailExists = (req, res, next) => {
 
 export const checkEmailAndUniqueCode = (req, res, next) => {
     const { email, unique_code, password } = req.body;
+    console.log("💡 req.body:", req.body);
+    console.log("💡 unique_code:", unique_code);
+    console.log("💡 req.body.unique_code:", req.body?.unique_code);
+
     const message = {};
 
     if (isEmpty(email)) {

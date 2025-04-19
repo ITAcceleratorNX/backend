@@ -1,48 +1,56 @@
 import CloudStorage from "../../models/CloudStorage.js";
 
+let cloudCounter = 1;
+function generateCloudCustomId() {
+    return `CLOUD-ES-${String(cloudCounter++).padStart(3, '0')}`;
+}
+
 const getAllCloud = async () => {
     try {
         return await CloudStorage.findAll();
-    } catch (error) {
-        console.error("Ошибка при получении всех облачных хранилищ:", error);
-        throw error;
+    } catch (err) {
+        console.error("Error fetching all cloud storage:", err);
+        throw err;
     }
 };
 
 const getCloudById = async (id) => {
     try {
         return await CloudStorage.findByPk(id);
-    } catch (error) {
-        console.error(`Ошибка при получении облачного хранилища с id ${id}:`, error);
-        throw error;
+    } catch (err) {
+        console.error("Error fetching cloud storage by ID:", err);
+        throw err;
     }
 };
 
 const createCloud = async (data) => {
     try {
-        return await CloudStorage.create(data);
-    } catch (error) {
-        console.error("Ошибка при создании облачного хранилища:", error);
-        throw error;
+        const newData = {
+            ...data,
+            custom_id: generateCloudCustomId()
+        };
+        return await CloudStorage.create(newData);
+    } catch (err) {
+        console.error("Error creating cloud storage:", err);
+        throw err;
     }
 };
 
 const updateCloud = async (id, data) => {
     try {
-        const [updatedRows] = await CloudStorage.update(data, { where: { storage_id: id } });
-        return updatedRows;
-    } catch (error) {
-        console.error(`Ошибка при обновлении облачного хранилища с id ${id}:`, error);
-        throw error;
+        return await CloudStorage.update(data, { where: { storage_id: id } });
+    } catch (err) {
+        console.error("Error updating cloud storage:", err);
+        throw err;
     }
 };
 
 const deleteCloud = async (id) => {
     try {
         return await CloudStorage.destroy({ where: { storage_id: id } });
-    } catch (error) {
-        console.error(`Ошибка при удалении облачного хранилища с id ${id}:`, error);
-        throw error;
+    } catch (err) {
+        console.error("Error deleting cloud storage:", err);
+        throw err;
     }
 };
 

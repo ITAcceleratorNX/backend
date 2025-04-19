@@ -1,3 +1,4 @@
+// 📁 tests/service/storage/IndividualStorageService.test.js
 import * as service from "../../../service/storage/IndividualStorageService.js";
 import IndividualStorage from "../../../models/IndividualStorage.js";
 
@@ -30,12 +31,12 @@ describe("IndividualStorageService", () => {
 
     test("should create a storage", async () => {
         const input = { name: "Storage A" };
-        const created = { id: 1, ...input };
+        const created = { id: 1, ...input, custom_id: "IND-MT-001" };
         IndividualStorage.create.mockResolvedValue(created);
 
         const result = await service.create(input);
 
-        expect(IndividualStorage.create).toHaveBeenCalledWith(input);
+        expect(IndividualStorage.create).toHaveBeenCalledWith(expect.objectContaining(input));
         expect(result).toEqual(created);
     });
 
