@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-export const StorageType = sequelize.define('StorageType', {
+export const Storage = sequelize.define('StorageType', {
     type_id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -25,4 +25,4 @@ export const StorageType = sequelize.define('StorageType', {
     timestamps: false
 });
 
-export default StorageType;
+export default Storage;
