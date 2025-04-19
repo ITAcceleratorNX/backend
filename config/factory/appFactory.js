@@ -1,7 +1,6 @@
 import express from 'express';
 import session from 'express-session';
 import passport from '../../config/passport.js';
-import cors from 'cors';
 import googleAuthRoutes from '../../routes/auth/google.js';
 import basicAuthRoutes from '../../routes/auth/BasicAuthRouter.js';
 import authenticateJWT from "../../middleware/jwt.js";
@@ -12,9 +11,6 @@ import CloudStorageOrderRoutes from "../../routes/storage/СloudStorageOrderRout
 import CloudStorageRoutes from "../../routes/storage/CloudStorageRoutes.js";
 import CloudItemRoutes from "../../routes/storage/CloudItemRoutes.js";
 import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
-import * as fs from "node:fs";
-import * as yaml from "yaml";
-import swaggerUi from "swagger-ui-express";
 
 export default function appFactory() {
     const app = express();
