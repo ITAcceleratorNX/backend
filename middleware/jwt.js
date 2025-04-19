@@ -18,11 +18,12 @@ export function generateAccessToken(user) {
 // 🔄 Refresh token генерациялау
 export function generateRefreshToken(user) {
     return jwt.sign(
-        { id: user.id },
-        REFRESH_SECRET,
-        { expiresIn: REFRESH_EXPIRES_IN }
+        { id: user.user_id }, // ✅ user_id болуы керек
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: '7d' }
     );
 }
+
 
 // ✅ Access token тексеру
 export function verifyAccessToken(token) {

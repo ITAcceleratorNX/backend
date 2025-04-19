@@ -12,7 +12,7 @@
 
 
 import express from "express";
-import {checkEmail, login, refreshTokenHandler, register} from "../../service/auth/AuthService.js";
+import {checkEmail, login, register, refreshTokenHandler} from "../../service/auth/AuthService.js";
 import {checkEmailExists, checkEmailAndUniqueCode, checkEmailAndPassword} from "../../middleware/AuthMiddleware.js";
 
 const router = express.Router();

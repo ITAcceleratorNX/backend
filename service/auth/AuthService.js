@@ -4,7 +4,6 @@ import {sendVerificationCode} from "../../utils/sendgird/SendGrid.js";
 import validator from "validator";
 import {comparePassword, getHashedPassword} from "../../utils/bcrypt/BCryptService.js";
 // import {comparePassword, getHashedPassword} from "../../utils/bcrypt/BCryptService.js";
-import {generateToken} from "../../middleware/jwt.js";
 import CloudStorage from "../../models/CloudStorage.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../middleware/jwt.js";
 

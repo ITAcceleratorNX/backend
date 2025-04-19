@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { sequelize } from "./config/database.js";
-import BasicAuthRouter from "./routes/BasicAuthRouter.js";
+import BasicAuthRouter from "./routes/auth/BasicAuthRouter.js";
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/auth", BasicAuthRouter);
+
 
 const startServer = async () => {
     try {
@@ -28,5 +28,5 @@ const startServer = async () => {
 if (process.env.NODE_ENV !== "test") {
     startServer();
 }
-
+app.use("/auth", BasicAuthRouter);
 export default app;
