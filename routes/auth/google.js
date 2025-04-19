@@ -3,7 +3,6 @@ import passport from "passport";
 
 const router = express.Router();
 
-// Вход через Google
 router.get('/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));

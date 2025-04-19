@@ -6,13 +6,16 @@ import {
     updateOrder,
     deleteOrder
 } from '../../controllers/storage/СloudStorageOrderController.js';
+import {validateBody} from "../../middleware/validate.js";
+import {CloudItemDto} from "../../dto/storage/CloudItem.dto.js";
+import {CloudStorageOrderDto, CloudStorageOrderUpdateDto} from "../../dto/storage/CloudStorageOrder.dto.js";
 
 const router = express.Router();
 
-router.post('', createOrder);
+router.post('',validateBody(CloudStorageOrderDto), createOrder);
 router.get('', getAllOrders);
 router.get('/:id', getOrderById);
-router.put('/:id', updateOrder);
+router.put('/:id',validateBody(CloudStorageOrderUpdateDto), updateOrder);
 router.delete('/:id', deleteOrder);
 
 export default router;
