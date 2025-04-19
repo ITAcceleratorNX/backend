@@ -6,9 +6,7 @@ export async function getHashedPassword(password) {
     return hash;
 }
 
-export async function comparePassword(password, hashedPassword) {
+export function comparePassword(password, hashedPassword) {
     console.log(password, hashedPassword);
-    console.log(await bcrypt.compare(password, hashedPassword));
-    console.log(hashedPassword === await bcrypt.hash(password, 10));
-    return await bcrypt.compare(password, hashedPassword);
+    return bcrypt.compare(password, hashedPassword);
 }

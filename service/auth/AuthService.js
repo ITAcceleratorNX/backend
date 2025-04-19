@@ -62,7 +62,7 @@ export async function login(req, res) {
     if (!user) {
         return res.status(400).json({ success: false, message: "User not found" });
     }
-    if (!comparePassword(password, user.password_hash)) {
+    if (!await comparePassword(password, user.password_hash)) {
         return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
