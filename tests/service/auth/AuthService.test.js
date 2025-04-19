@@ -55,7 +55,12 @@ describe('Auth Controller', () => {
 
     describe('login', () => {
         test('should return token on successful login', async () => {
-            const mockUser = { email: 'test@example.com', password_hash: 'hash', last_login: null };
+            const mockUser = {
+                email: 'test@example.com',
+                password_hash: 'hash',
+                last_login: null,
+                save: jest.fn()
+            };
             User.findOne.mockResolvedValue(mockUser);
             bcryptService.comparePassword.mockReturnValue(true);
             jwtService.generateToken.mockReturnValue('jwt-token');
@@ -65,12 +70,14 @@ describe('Auth Controller', () => {
 
             await AuthService.login(req, res);
 
+            expect(mockUser.save).toHaveBeenCalled();
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
                 token: 'jwt-token'
             });
-        });
+
+    });
 
         test('should return error for invalid password', async () => {
             User.findOne.mockResolvedValue({ password_hash: 'hash' });
