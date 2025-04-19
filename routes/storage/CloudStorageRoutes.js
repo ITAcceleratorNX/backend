@@ -1,7 +1,6 @@
 import express from "express";
 import CloudStorageController from "../../controllers/storage/CloudStorageController.js";
 import {validateBody} from "../../middleware/validate.js";
-import {CloudItemDto} from "../../dto/storage/CloudItem.dto.js";
 import {CloudStorageDto, CloudStorageUpdateDto} from "../../dto/storage/CloudStorage.dto.js";
 const router = express.Router();
 router.get('', CloudStorageController.getAllCloud);

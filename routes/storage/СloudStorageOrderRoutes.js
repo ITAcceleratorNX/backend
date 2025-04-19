@@ -7,7 +7,6 @@ import {
     deleteOrder
 } from '../../controllers/storage/СloudStorageOrderController.js';
 import {validateBody} from "../../middleware/validate.js";
-import {CloudItemDto} from "../../dto/storage/CloudItem.dto.js";
 import {CloudStorageOrderDto, CloudStorageOrderUpdateDto} from "../../dto/storage/CloudStorageOrder.dto.js";
 
 const router = express.Router();
