@@ -1,7 +1,9 @@
 import * as AuthService from '../../../service/auth/AuthService.js';
 import User from '../../../models/User.js';
 import * as bcryptService from '../../../utils/bcrypt/BCryptService.js';
-import * as jwtService from '../../../utils/jwt/JwtService.js';
+// import * as jwtService from '../../../utils/jwt/JwtService.js';
+import * as jwtService from '../../../middleware/jwt.js';
+
 import * as cryptoUtils from '../../../utils/crypto/UniqueCodeGenerator.js';
 import * as sendGrid from '../../../utils/sendgird/SendGrid.js';
 import CloudStorage from "../../../models/CloudStorage.js";
@@ -10,7 +12,8 @@ jest.mock('../../../models/User.js');
 jest.mock('../../../models/CloudStorage.js');
 jest.mock('../../../utils/sendgird/SendGrid.js');
 jest.mock('../../../utils/bcrypt/BCryptService.js');
-jest.mock('../../../utils/jwt/JwtService.js');
+// jest.mock('../../../utils/jwt/JwtService.js');
+jest.mock('../../../middleware/jwt.js');
 jest.mock('../../../utils/crypto/UniqueCodeGenerator.js');
 
 describe('Auth Controller', () => {
@@ -18,6 +21,7 @@ describe('Auth Controller', () => {
         const res = {};
         res.status = jest.fn(() => res);
         res.json = jest.fn(() => res);
+        res.cookie = jest.fn();
         return res;
     };
 
@@ -60,7 +64,9 @@ describe('Auth Controller', () => {
             const mockUser = { email: 'test@example.com', password_hash: 'hash', last_login: null };
             User.findOne.mockResolvedValue(mockUser);
             bcryptService.comparePassword.mockReturnValue(true);
-            jwtService.generateToken.mockReturnValue('jwt-token');
+
+            jwtService.generateAccessToken = jest.fn().mockReturnValue('jwt-token');
+            jwtService.generateRefreshToken = jest.fn().mockReturnValue('refresh-token');
 
             const req = { body: { email: 'test@example.com', password: 'password' } };
             const res = mockRes();
@@ -70,9 +76,10 @@ describe('Auth Controller', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
-                token: 'jwt-token'
+                accessToken: 'jwt-token'
             });
         });
+
 
         test('should return error for invalid password', async () => {
             User.findOne.mockResolvedValue({ password_hash: 'hash' });
@@ -83,10 +90,10 @@ describe('Auth Controller', () => {
 
             await AuthService.login(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({
                 success: false,
-                message: 'Invalid password'
+                message: 'Invalid credentials'
             });
         });
     });
@@ -97,7 +104,7 @@ describe('Auth Controller', () => {
             CloudStorage.findOne.mockResolvedValue({ custom_id: '123456' });
             cryptoUtils.verifyCode.mockReturnValue(true);
             bcryptService.getHashedPassword.mockResolvedValue('hashed');
-            jwtService.generateToken.mockReturnValue('jwt-token');
+            jwtService.generateAccessToken.mockReturnValue('jwt-token');
             User.create.mockResolvedValue({ email: 'test@example.com' });
 
             const req = {
@@ -115,7 +122,7 @@ describe('Auth Controller', () => {
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
-                token: 'jwt-token'
+                accessToken: 'jwt-token'
             });
         });
 
@@ -146,4 +153,54 @@ describe('Auth Controller', () => {
             });
         });
     });
+
+    describe('refreshTokenHandler', () => {
+        test('should return new access token if refresh token is valid', async () => {
+            const mockUser = { id: 1, email: 'test@example.com' };
+            const req = {
+                cookies: {
+                    refreshToken: 'valid-refresh-token'
+                }
+            };
+            const res = mockRes();
+
+            jwtService.verifyRefreshToken = jest.fn().mockReturnValue({ id: 1 });
+            User.findByPk.mockResolvedValue(mockUser);
+            jwtService.generateAccessToken = jest.fn().mockReturnValue('new-access-token');
+
+            await AuthService.refreshTokenHandler(req, res);
+
+            expect(jwtService.verifyRefreshToken).toHaveBeenCalledWith('valid-refresh-token');
+            expect(jwtService.generateAccessToken).toHaveBeenCalledWith(mockUser);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({ accessToken: 'new-access-token' });
+        });
+
+        test('should return 401 if no refresh token is present', async () => {
+            const req = { cookies: {} };
+            const res = mockRes();
+
+            await AuthService.refreshTokenHandler(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Refresh token missing' });
+        });
+
+        test('should return 403 if token is invalid or user not found', async () => {
+            const req = {
+                cookies: { refreshToken: 'invalid-token' }
+            };
+            const res = mockRes();
+
+            jwtService.verifyRefreshToken = jest.fn(() => {
+                throw new Error("Invalid token");
+            });
+
+            await AuthService.refreshTokenHandler(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Invalid or expired refresh token' });
+        });
+    });
+
 });
