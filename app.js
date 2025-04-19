@@ -3,7 +3,6 @@ import {sequelize} from './config/database.js';
 import appFactory from './config/factory/appFactory.js';
 
 dotenv.config();
-
 const app = appFactory();
 
 const startServer = async () => {
@@ -23,5 +22,6 @@ const startServer = async () => {
 if (process.env.NODE_ENV !== 'test') {
     startServer();
 }
+
 
 export default app;
