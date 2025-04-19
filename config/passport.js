@@ -32,6 +32,19 @@ passport.use(new GoogleStrategy({
     }
 }));
 
+passport.serializeUser((userWithToken, done) => {
+    console.log('serializeUser input:', userWithToken);
+    done(null, userWithToken.user.user_id);
+});
 
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findByPk(id);
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
+});
 
 export default passport;
