@@ -26,6 +26,7 @@ export default defineConfig([
         jest : "readonly",
         document: "readonly",
         window: "readonly",
+        setInterval: "readonly",
       },
     },
   },
