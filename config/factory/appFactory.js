@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import cors from 'cors';
 import passport from '../../config/passport.js';
 import googleAuthRoutes from '../../routes/auth/google.js';
 import basicAuthRoutes from '../../routes/auth/BasicAuthRouter.js';
@@ -27,10 +28,10 @@ export default function appFactory() {
 
     app.use(passport.initialize());
     app.use(passport.session());
-    // app.use(cors({
-    //     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    //     credentials: true
-    // }));
+    app.use(cors({
+        origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
+        credentials: true
+    }));
 
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
