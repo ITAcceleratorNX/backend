@@ -17,6 +17,7 @@ export function generateSecureCode(email) {
 export function verifyCode(code, email) {
     const record = emailVerifyCodesByUserId[email];
     if (!record || record.code !== code || Date.now() > record.expiresAt) {
+        console.error(record,"user code: ", code);
         return false;
     }
     delete emailVerifyCodesByUserId[email];
