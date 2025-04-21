@@ -11,9 +11,15 @@ const IndividualStorage = sequelize.define('IndividualStorage', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    type_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+    name: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT
+    },
+    image_url: {
+        type: DataTypes.STRING(255)
     },
     user_id: {
         type: DataTypes.INTEGER,
