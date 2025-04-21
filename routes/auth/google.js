@@ -10,8 +10,8 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/'
 }), (req, res) => {
-    res.redirect('/');
-
+    const token = req.user.token;
+    res.redirect(`/?token=${token}`);
 });
 
 router.get('/logout', (req, res) => {
