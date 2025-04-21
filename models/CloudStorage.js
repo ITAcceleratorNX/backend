@@ -4,9 +4,15 @@ import sequelize from '../config/database.js';
 const CloudStorage = sequelize.define('CloudStorage', {
     storage_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     warehouse_id: { type: DataTypes.INTEGER, allowNull: false },
-    type_id: {
-        type: DataTypes.INTEGER,
+    name: {
+        type: DataTypes.STRING(50),
         allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT
+    },
+    image_url: {
+        type: DataTypes.STRING(255)
     },
     status: { type: DataTypes.ENUM('active', 'completed') },
     total_volume: {
