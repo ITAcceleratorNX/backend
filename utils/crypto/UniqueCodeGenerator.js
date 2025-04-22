@@ -1,21 +1,25 @@
 import crypto from 'crypto';
 
-let emailVerifyCodesByUserId = {};
+export const emailVerifyCodesByUserId = {};
 
 export function generateSecureCode(email) {
+    delete emailVerifyCodesByUserId[email];
     const buffer = crypto.randomBytes(3);
     const hex = buffer.toString('hex');
     const numeric = parseInt(hex, 16).toString().slice(0, 6);
     const uniqueCode = numeric.padStart(6, '0');
-    emailVerifyCodesByUserId[email] = uniqueCode;
+
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+    emailVerifyCodesByUserId[email] = { code: uniqueCode, expiresAt };
     return uniqueCode;
 }
 
 export function verifyCode(code, email) {
-    if (emailVerifyCodesByUserId[email] !== code) {
-        console.log(code, emailVerifyCodesByUserId[email], email);
+    const record = emailVerifyCodesByUserId[email];
+    if (!record || record.code !== code || Date.now() > record.expiresAt) {
+        console.error(record,"user code: ", code);
         return false;
     }
-    emailVerifyCodesByUserId[email].delete;
+    delete emailVerifyCodesByUserId[email];
     return true;
 }

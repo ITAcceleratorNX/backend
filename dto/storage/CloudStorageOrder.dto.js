@@ -16,10 +16,4 @@ export const CloudStorageOrderDto = z.object({
         return true;
     })
 });
-export const CloudStorageOrderUpdateDto = z.object({
-    user_id: z.number().int().min(1, "User ID is required").optional(),
-    storage_id: z.number().int().min(1, "Storage ID is required").optional(),
-    volume: z.number().min(0, "Volume must be a positive number").optional(),
-    rental_start: z.date().optional(),
-    rental_end: z.date().optional()
-});
+export const CloudStorageOrderUpdateDto = CloudStorageOrderDto.partial();
