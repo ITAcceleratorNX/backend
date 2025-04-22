@@ -15,7 +15,6 @@ import UserRole from "../UserRole.js";
 import Callback from "../Callback.js";
 import WarehouseStatus from "../WarehouseStatus.js";
 import Warehouse from "../Warehouse.js";
-import Storage from "../Storage.js";
 import PaymentSystem from "../PaymentSystem.js";
 import FAQ from "../Faq.js";
 import FAQCategory from "../FaqCategory.js";
@@ -34,10 +33,6 @@ Warehouse.belongsTo(WarehouseStatus, { foreignKey: 'status_code' });
 Warehouse.hasMany(IndividualStorage);
 Warehouse.hasMany(CloudStorage);
 User.hasMany(Contract);
-
-Storage.hasMany(Price);
-Storage.hasMany(IndividualStorage);
-Storage.hasMany(CloudStorage);
 
 Price.hasMany(OrderItem);
 

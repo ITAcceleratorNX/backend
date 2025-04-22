@@ -44,9 +44,9 @@ export async function checkEmailForRestorePassword(req, res) {
             let uniqueCode = generateSecureCode(email);
             console.log("Generated unique code: ", uniqueCode, " for email: ", email);
             sendVerificationCode(email, uniqueCode);
-            return res.status(200).json({ user_exists: false, email });
+            return res.status(200).json({ user_exists: true, email });
         }
-        return res.status(200).json({ user_exists: true });
+        return res.status(200).json({ user_exists: false, email });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -62,7 +62,7 @@ export async function login(req, res) {
     if (!user) {
         return res.status(400).json({ success: false, message: "User not found" });
     }
-    if (!comparePassword(password, user.password_hash)) {
+    if (!await comparePassword(password, user.password_hash)) {
         return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
