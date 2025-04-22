@@ -27,7 +27,7 @@ export async function checkEmail(req, res) {
         if (!user) {
             let uniqueCode = generateSecureCode(email);
             console.log("Generated unique code: ", uniqueCode, " for email: ", email);
-            sendVerificationCode(email, uniqueCode);
+            await sendVerificationCode(email, uniqueCode);
             return res.status(200).json({ user_exists: false, email });
         }
         return res.status(200).json({ user_exists: true });
@@ -62,7 +62,7 @@ export async function login(req, res) {
     if (!user) {
         return res.status(400).json({ success: false, message: "User not found" });
     }
-    if (!comparePassword(password, user.password_hash)) {
+    if (!await comparePassword(password, user.password_hash)) {
         return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
