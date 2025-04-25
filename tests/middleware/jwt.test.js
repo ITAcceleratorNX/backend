@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import authenticateJWT from '../../middleware/jwt';
+import {authenticateJWT, authorizeAdmin} from '../../middleware/jwt';
 
 jest.mock('jsonwebtoken');
 
@@ -66,5 +66,49 @@ describe('authenticateJWT Middleware', () => {
         expect(next).toHaveBeenCalled();
         expect(res.status).not.toHaveBeenCalled();
         expect(res.json).not.toHaveBeenCalled();
+    });
+});
+const mockRes = () => {
+    const res = {};
+    res.status = jest.fn().mockReturnValue(res);
+    res.json = jest.fn().mockReturnValue(res);
+    return res;
+};
+
+describe('authorizeAdmin middleware', () => {
+    it('should call next() if user is admin', () => {
+        const req = { user: { role: 'Admin' } };
+        const res = mockRes();
+        const next = jest.fn();
+
+        authorizeAdmin(req, res, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(res.status).not.toHaveBeenCalled();
+        expect(res.json).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 if user is not admin', () => {
+        const req = { user: { role: 'User' } };
+        const res = mockRes();
+        const next = jest.fn();
+
+        authorizeAdmin(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return 403 if user has no role', () => {
+        const req = { user: {} };
+        const res = mockRes();
+        const next = jest.fn();
+
+        authorizeAdmin(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(403);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
+        expect(next).not.toHaveBeenCalled();
     });
 });

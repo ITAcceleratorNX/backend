@@ -15,5 +15,12 @@ const authenticateJWT = (req, res, next) => {
         next();
     });
 };
+const authorizeAdmin = (req, res, next) => {
+    if (req.user?.role !== 'Admin') {
+        return res.status(403).json({ message: 'Доступ запрещён. Только для Admin.' });
+    }
+    next();
+};
 
-export default authenticateJWT;
+export  {authorizeAdmin,
+    authenticateJWT}
