@@ -3,10 +3,10 @@ import js from "@eslint/js";
 
 export default defineConfig([
   {
+    ignores: ["coverage/**", "node_modules/**", "dist/**"], // МІНДЕТТІ түрде **/** жазу керек
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js },
     extends: ["js/recommended"],
-    ignores: ["node_modules", "dist", "coverage"],
   },
   {
     files: ["**/*.{js,mjs,cjs}"],
@@ -19,11 +19,11 @@ export default defineConfig([
         beforeEach: "readonly",
         test: "readonly",
         afterAll: "readonly",
-        afterEach : "readonly",
+        afterEach: "readonly",
         describe: "readonly",
         it: "readonly",
         expect: "readonly",
-        jest : "readonly",
+        jest: "readonly",
         document: "readonly",
         window: "readonly",
         setInterval: "readonly",
