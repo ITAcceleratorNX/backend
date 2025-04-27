@@ -12,6 +12,7 @@ import CloudStorageOrderRoutes from "../../routes/storage/СloudStorageOrderRout
 import CloudStorageRoutes from "../../routes/storage/CloudStorageRoutes.js";
 import CloudItemRoutes from "../../routes/storage/CloudItemRoutes.js";
 import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
+import userRoutes from '../../routes/storage/UserRoutes.js';
 
 export default function appFactory() {
     const app = express();
@@ -52,6 +53,7 @@ export default function appFactory() {
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
+    app.use('/api/users', userRoutes);
 
     return app;
 }
