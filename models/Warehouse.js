@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
 export const Warehouse = sequelize.define('Warehouse', {
-    warehouse_id: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -15,19 +15,10 @@ export const Warehouse = sequelize.define('Warehouse', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    city: {
-        type: DataTypes.STRING(50),
-        allowNull: false
-    },
-    latitude: {
-        type: DataTypes.DECIMAL(10, 8)
-    },
-    longitude: {
-        type: DataTypes.DECIMAL(11, 8)
-    },
-    status_code: {
-        type: DataTypes.STRING(20),
-        allowNull: false
+    status: {
+        type: DataTypes.ENUM("AVAILABLE", "UNAVAILABLE"),
+        allowNull: false,
+        defaultValue: "AVAILABLE"
     }
 }, {
     tableName: 'warehouses',

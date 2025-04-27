@@ -2,29 +2,35 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
 export const MovingOrder = sequelize.define('MovingOrder', {
-    moving_id: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    order_id: {
+    contract_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'Contract',
+            key: 'id',
+        }
     },
-    from_address: {
-        type: DataTypes.TEXT,
-        allowNull: false
+    address_from: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    to_address: {
-        type: DataTypes.TEXT,
-        allowNull: false
+    address_to: {
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     moving_date: {
-        type: DataTypes.DATE
+        type: DataTypes.DATE,
+        allowNull: true,
     },
     vehicle_type: {
-        type: DataTypes.ENUM('small', 'medium', 'large')
-    }
+        type: DataTypes.ENUM('SMALL', 'MEDIUM', 'LARGE'),
+        allowNull: false,
+    },
 }, {
     tableName: 'moving_orders',
     timestamps: false

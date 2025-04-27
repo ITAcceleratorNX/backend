@@ -1,7 +1,7 @@
 import express from 'express';
 import { WarehouseController } from '../../controllers/storage/WarehouseController.js';
 import {validateBody} from "../../middleware/validate.js";
-import {WarehouseDto, WarehouseUpdateDto} from "../../dto/storage/Warehause.dto.js";
+import {WarehouseDto, WarehouseUpdateDto} from "../../dto/warehouse/Warehause.dto.js";
 
 const router = express.Router();
 
