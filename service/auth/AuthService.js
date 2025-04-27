@@ -27,7 +27,7 @@ export async function checkEmail(req, res) {
         if (!user) {
             let uniqueCode = generateSecureCode(email);
             console.log("Generated unique code: ", uniqueCode, " for email: ", email);
-            await sendVerificationCode(email, uniqueCode);
+            sendVerificationCode(email, uniqueCode);
             return res.status(200).json({ user_exists: false, email });
         }
         return res.status(200).json({ user_exists: true });
