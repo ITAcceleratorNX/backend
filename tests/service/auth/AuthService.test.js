@@ -1,11 +1,11 @@
 import * as AuthService from '../../../service/auth/AuthService.js';
-import User from '../../../models/User.js';
+import {User} from '../../../models/init/index.js';
 import * as bcryptService from '../../../utils/bcrypt/BCryptService.js';
 import * as jwtService from '../../../utils/jwt/JwtService.js';
 import * as cryptoUtils from '../../../utils/crypto/UniqueCodeGenerator.js';
 import * as sendGrid from '../../../utils/sendgird/SendGrid.js';
 
-jest.mock('../../../models/User.js');
+jest.mock('../../../models/init/index.js');
 jest.mock('../../../utils/sendgird/SendGrid.js');
 jest.mock('../../../utils/bcrypt/BCryptService.js');
 jest.mock('../../../utils/jwt/JwtService.js');
