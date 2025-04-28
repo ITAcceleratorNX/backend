@@ -3,10 +3,11 @@ import js from "@eslint/js";
 
 export default defineConfig([
   {
+    ignores: ["coverage/**", "node_modules/**", "dist/**"],
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js },
     extends: ["js/recommended"],
-    ignores: ["node_modules", "dist", "coverage"],
+    //ignores: ["node_modules", "dist", "coverage"],
   },
   {
     files: ["**/*.{js,mjs,cjs}"],

@@ -158,3 +158,179 @@ paths:
                       email_error: Email is required
                       unique_code_error: Unique code is required
                       password_error: Password is required
+
+  /api/racks:
+    get:
+      summary: Получить все стеллажи (Racks)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список всех стеллажей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: Создать новый стеллаж (Rack)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [storage_id, number]
+              properties:
+                storage_id:
+                  type: integer
+                number:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Стеллаж создан
+
+  /api/racks/{id}:
+    get:
+      summary: Получить стеллаж по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детали стеллажа
+    put:
+      summary: Обновить стеллаж по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Стеллаж обновлен
+    delete:
+      summary: Удалить стеллаж по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Стеллаж удален
+
+  /api/tenants:
+    get:
+      summary: Получить всех арендаторов (Tenants)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список арендаторов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: Создать арендатора
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [storage_id, user_id]
+              properties:
+                storage_id:
+                  type: integer
+                user_id:
+                  type: integer
+                status:
+                  type: string
+                  enum: [active, completed]
+      responses:
+        '201':
+          description: Арендатор создан
+
+  /api/tenants/{id}:
+    get:
+      summary: Получить арендатора по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Детали арендатора
+    put:
+      summary: Обновить арендатора по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [active, completed]
+      responses:
+        '200':
+          description: Арендатор обновлен
+    delete:
+      summary: Удалить арендатора по ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Арендатор удален

@@ -12,6 +12,11 @@ import CloudStorageOrderRoutes from "../../routes/storage/СloudStorageOrderRout
 import CloudStorageRoutes from "../../routes/storage/CloudStorageRoutes.js";
 import CloudItemRoutes from "../../routes/storage/CloudItemRoutes.js";
 import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
+import rackStorageRoutes from "../../routes/storage/RackStorageRoutes.js";
+import tenantRoutes from '../../routes/storage/TenantRoutes.js';
+import contractRoutes from '../../routes/storage/ContractRoutes.js';
+import rackItemRoutes from '../../routes/storage/RackItemRoutes.js';
+import deliveryRoutes from '../../routes/storage/DeliveryRoutes.js';
 
 export default function appFactory() {
     const app = express();
@@ -38,7 +43,7 @@ export default function appFactory() {
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);
     app.use("/api/cloud-order", authenticateJWT,CloudStorageOrderRoutes);
-    app.use("/api/cloud", authenticateJWT,authorizeAdmin, CloudStorageRoutes);
+    app.use("/api/cloud", authenticateJWT, authorizeAdmin, CloudStorageRoutes);
     app.use('/api/cloud-items', authenticateJWT, CloudItemRoutes);
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
@@ -53,5 +58,10 @@ export default function appFactory() {
         res.status(404).json({ error: 'Не найдено' });
     });
 
+    app.use("/api/racks", authenticateJWT, rackStorageRoutes);
+    app.use('/api/tenants', authenticateJWT, tenantRoutes);
+    app.use('/api/contracts', authenticateJWT, contractRoutes);
+    app.use('/api/rack-items', authenticateJWT, rackItemRoutes);
+    app.use('/api/delivery-request', deliveryRoutes);
     return app;
 }

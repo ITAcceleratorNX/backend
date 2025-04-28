@@ -34,7 +34,7 @@ export const getOrderById = async (id) => {
     }
 };
 
-export const updateOrder = async (id, data, res) => {
+export const updateOrder = async (id, data) => {
     try {
         const order = await CloudStorageOrder.findByPk(id);
 
@@ -44,12 +44,14 @@ export const updateOrder = async (id, data, res) => {
 
         const [updatedCount] = await CloudStorageOrder.update(data, { where: { order_id: id } });
 
-        res.json({ updated: updatedCount });
+        return updatedCount; // ✅ Тек сан қайтарады
     } catch (error) {
-        console.error('Ошибка при получении всех элементов:', error);
+        console.error('Ошибка при обновлении заказа:', error);
         throw new Error("Error updating order");
     }
 };
+
+
 
 
 

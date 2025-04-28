@@ -31,11 +31,12 @@ export const getOrderById = async (req, res) => {
 export const updateOrder = async (req, res) => {
     try {
         const updated = await CloudStorageOrderService.updateOrder(req.params.id, req.body);
-        res.json(updated);
+        res.json({ updated }); // ✅ жауап тек осында
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 export const deleteOrder = async (req, res) => {
     try {
