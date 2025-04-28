@@ -115,7 +115,6 @@ export async function register(req, res) {
     }
 
     let message = validateEmailAndPassword(email, password);
-    console.log(verifyCode(unique_code, email));
     if (!verifyCode(unique_code, email)) {
         message.unique_code_error = "Invalid unique code";
     }
