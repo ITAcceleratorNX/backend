@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
 export const User = sequelize.define('User', {
-    user_id: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -39,9 +39,10 @@ export const User = sequelize.define('User', {
     last_login: {
         type: DataTypes.DATE
     },
-    role_code: {
-        type: DataTypes.STRING(20),
-        allowNull: false
+    role: {
+        type: DataTypes.ENUM("ADMIN", "USER"),
+        allowNull: false,
+        defaultValue: 'USER'
     }
 }, {
     tableName: 'users',

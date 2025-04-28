@@ -1,4 +1,4 @@
-import { Warehouse} from '../../models/Warehouse.js';
+import { Warehouse} from '../../models/init/index.js';
 
 
 export class WarehouseService {

@@ -1,6 +1,6 @@
 // routes/UserRoutes.js
 import express from "express";
-import * as UserController from "../../controllers/storage/UserController.js";
+import * as UserController from "../../controllers/user/UserController.js";
 import { validateBody } from "../../middleware/validate.js";
 import { UserDto, UpdateUserDto } from "../../dto/storage/User.dto.js";
 

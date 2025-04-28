@@ -77,7 +77,7 @@ const mockRes = () => {
 
 describe('authorizeAdmin middleware', () => {
     it('should call next() if user is admin', () => {
-        const req = { user: { role: 'Admin' } };
+        const req = { user: { role: 'ADMIN' } };
         const res = mockRes();
         const next = jest.fn();
 
