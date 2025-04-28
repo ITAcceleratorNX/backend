@@ -7,7 +7,7 @@ export const User = sequelize.define('User', {
         primaryKey: true,
         autoIncrement: true
     },
-    name: { //ФИО
+    name: {
         type: DataTypes.STRING(100),
         allowNull: true
     },
@@ -22,12 +22,12 @@ export const User = sequelize.define('User', {
     },
     iin: {
         type: DataTypes.STRING(12),
-        allowNull: false
-    },// ИИН
+        allowNull: true
+    },
     address: {
         type: DataTypes.STRING(255),
-        allowNull: false
-    }, // Адрес
+        allowNull: true
+    },
     password_hash: {
         type: DataTypes.STRING(255),
         allowNull: true
