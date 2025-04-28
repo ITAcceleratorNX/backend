@@ -1,4 +1,4 @@
-import User from "../../models/User.js";
+import {User} from "../../models/init/index.js";
 import { generateSecureCode, verifyCode } from "../../utils/crypto/UniqueCodeGenerator.js";
 import { sendVerificationCode } from "../../utils/sendgird/SendGrid.js";
 import validator from "validator";
