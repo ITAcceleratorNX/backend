@@ -11,6 +11,7 @@ import swaggerUi from "swagger-ui-express";
 import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
 import warehouseRoutes from "../../routes/warehouse/WarehouseRoutes.js";
 import userRoutes from '../../routes/user/UserRoutes.js';
+import logger from "../../utils/winston/logger.js";
 
 export default function appFactory() {
     const app = express();
@@ -19,11 +20,16 @@ export default function appFactory() {
     const swaggerDocument = yaml.parse(swaggerFile);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+    app.use(express.json());
     app.use(session({
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true
     }));
+    app.use((req, res, next) => {
+        logger.info(`Request: ${req.method} ${req.url}`);
+        next();
+    });
 
     app.use(passport.initialize());
     app.use(passport.session());
@@ -40,7 +46,6 @@ export default function appFactory() {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
 
-    app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);

@@ -12,7 +12,6 @@ const authenticateJWT = (req, res, next) => {
             return res.status(401).json({ message: 'Неверный токен.' });
         }
         req.user = user;
-        console.log("user ", user);
         next();
     });
 };
