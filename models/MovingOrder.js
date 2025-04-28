@@ -11,7 +11,7 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Contract',
+            model: 'contracts',
             key: 'id',
         }
     },

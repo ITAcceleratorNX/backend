@@ -11,7 +11,7 @@ const Storage = sequelize.define('Storage', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Warehouse',
+            model: 'warehouses',
             key: 'id'
         }
     },

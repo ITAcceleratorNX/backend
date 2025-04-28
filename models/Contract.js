@@ -10,7 +10,7 @@ const Contract = sequelize.define('Contract', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Storage',
+            model: 'storages',
             key: 'id',
         }
     },
@@ -18,7 +18,7 @@ const Contract = sequelize.define('Contract', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'User',
+            model: 'users',
             key: 'id',
         }
     },

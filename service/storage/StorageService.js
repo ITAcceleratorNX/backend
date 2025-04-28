@@ -1,4 +1,4 @@
-import Storage from "../../models/Storage.js";
+import {Storage} from "../../models/init/index.js";
 
 export const getAll = async () => {
     return Storage.findAll();
