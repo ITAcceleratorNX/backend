@@ -12,11 +12,12 @@ const authenticateJWT = (req, res, next) => {
             return res.status(401).json({ message: 'Неверный токен.' });
         }
         req.user = user;
+        console.log("user ", user);
         next();
     });
 };
 const authorizeAdmin = (req, res, next) => {
-    if (req.user?.role !== 'Admin') {
+    if (req.user?.role !== 'ADMIN') {
         return res.status(403).json({ message: 'Доступ запрещён. Только для Admin.' });
     }
     next();

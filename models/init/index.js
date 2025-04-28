@@ -1,73 +1,70 @@
-import IndividualStorage from "../IndividualStorage.js";
-import CloudStorage from "../CloudStorage.js";
+import Callback from '../Callback.js';
+import Contract from '../Contract.js';
+import FAQ from '../FAQ.js';
+import FAQCategory from '../FAQCategory.js';
+import MovingOrder from '../MovingOrder.js';
+import Notification from '../Notification.js';
+import PaymentSystem from '../PaymentSystem.js';
+import Price from '../Price.js';
+import Storage from '../Storage.js';
+import Transaction from '../Transaction.js';
+import TransactionStatus from '../TransactionStatus.js';
+import User from '../User.js';
+import Warehouse from '../Warehouse.js';
 
-import Price from "../Price.js";
-import OrderStatus from "../OrderStatus.js";
-import Order from "../Order.js";
-import OrderType from "../OrderType.js";
-import User from "../User.js";
-import ItemCategory from "../ItemCategory.js";
-import CloudItem from "../CloudItem.js";
-import Transaction from "../Transaction.js";
-import MovingOrder from "../MovingOrder.js";
-import OrderItem from "../OrderItem.js";
-import UserRole from "../UserRole.js";
-import Callback from "../Callback.js";
-import WarehouseStatus from "../WarehouseStatus.js";
-import Warehouse from "../Warehouse.js";
-import PaymentSystem from "../PaymentSystem.js";
-import FAQ from "../Faq.js";
-import FAQCategory from "../FaqCategory.js";
-import TransactionStatus from "../TransactionStatus.js";
-import Contract from "../Contract.js";
-import Notification from "../Notification.js";
-import CloudStorageOrder from "../CloudStorageOrder.js";
-
-User.belongsTo(UserRole, { foreignKey: 'role_code' });
-User.hasMany(Order);
-User.hasMany(IndividualStorage);
-User.hasMany(CloudStorageOrder);
-User.hasMany(Callback);
-User.hasMany(Notification);
-Warehouse.belongsTo(WarehouseStatus, { foreignKey: 'status_code' });
-Warehouse.hasMany(IndividualStorage);
-Warehouse.hasMany(CloudStorage);
-User.hasMany(Contract);
-
-Price.hasMany(OrderItem);
-
-CloudStorage.belongsTo(User);
-CloudStorage.belongsTo(Warehouse);
-CloudStorageOrder.hasMany(CloudItem);
-CloudStorageOrder.belongsTo(CloudStorage, {
-    foreignKey: 'storage_id'
+// FAQ - FAQCategory
+FAQ.belongsTo(FAQCategory, {
+    foreignKey: 'category_code',
+    targetKey: 'category_code'
+});
+FAQCategory.hasMany(FAQ, {
+    foreignKey: 'category_code',
+    sourceKey: 'category_code'
 });
 
-CloudStorage.hasMany(CloudStorageOrder);
-
-CloudItem.belongsTo(CloudStorageOrder, { foreignKey: 'storage_order_id' });
-CloudItem.belongsTo(ItemCategory, { foreignKey: 'category_code' });
-
-Order.belongsTo(User);
-Order.belongsTo(OrderType, { foreignKey: 'order_type_code' });
-Order.belongsTo(OrderStatus, { foreignKey: 'status_code' });
-Order.hasMany(OrderItem);
-Order.hasMany(Transaction);
-Order.hasOne(MovingOrder);
-Order.hasMany(Notification);
-Order.hasMany(Contract);
-
-OrderItem.belongsTo(Order);
-OrderItem.belongsTo(Price);
-
-PaymentSystem.hasMany(Transaction);
-Transaction.belongsTo(PaymentSystem);
-Transaction.belongsTo(Order);
-Transaction.belongsTo(TransactionStatus, { foreignKey: 'status_code' });
-
-MovingOrder.belongsTo(Order);
+// Contract - User
 Contract.belongsTo(User, { foreignKey: 'user_id' });
-Contract.belongsTo(Order, { foreignKey: 'order_id' });
-FAQ.belongsTo(FAQCategory, { foreignKey: 'category_code' });
+User.hasMany(Contract, { foreignKey: 'user_id' });
+
+// Contract - Storage
+Contract.belongsTo(Storage, { foreignKey: 'storage_id' });
+Storage.hasMany(Contract, { foreignKey: 'storage_id' });
+
+// MovingOrder - Contract
+MovingOrder.belongsTo(Contract, { foreignKey: 'contract_id' });
+Contract.hasMany(MovingOrder, { foreignKey: 'contract_id' });
+
+// Notification - User
 Notification.belongsTo(User, { foreignKey: 'user_id' });
-Notification.belongsTo(Order, { foreignKey: 'related_order_id' });
+User.hasMany(Notification, { foreignKey: 'user_id' });
+
+// Storage - Warehouse
+Storage.belongsTo(Warehouse, { foreignKey: 'warehouse_id' });
+Warehouse.hasMany(Storage, { foreignKey: 'warehouse_id' });
+
+// Transaction - PaymentSystem
+Transaction.belongsTo(PaymentSystem, { foreignKey: 'payment_id' });
+PaymentSystem.hasMany(Transaction, { foreignKey: 'payment_id' });
+
+// Transaction - TransactionStatus
+Transaction.belongsTo(TransactionStatus, { foreignKey: 'status_code', targetKey: 'status_code' });
+TransactionStatus.hasMany(Transaction, { foreignKey: 'status_code', sourceKey: 'status_code' });
+
+Transaction.belongsTo(MovingOrder, { foreignKey: 'order_id' });
+MovingOrder.hasMany(Transaction, { foreignKey: 'order_id' });
+
+export {
+    Callback,
+    Contract,
+    FAQ,
+    FAQCategory,
+    MovingOrder,
+    Notification,
+    PaymentSystem,
+    Price,
+    Storage,
+    Transaction,
+    TransactionStatus,
+    User,
+    Warehouse,
+};

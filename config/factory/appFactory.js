@@ -4,14 +4,12 @@ import cors from 'cors';
 import passport from '../../config/passport.js';
 import googleAuthRoutes from '../../routes/auth/google.js';
 import basicAuthRoutes from '../../routes/auth/BasicAuthRouter.js';
-import {authenticateJWT, authorizeAdmin} from "../../middleware/jwt.js";
+import {authenticateJWT} from "../../middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
-import CloudStorageOrderRoutes from "../../routes/storage/СloudStorageOrderRoutes.js";
-import CloudStorageRoutes from "../../routes/storage/CloudStorageRoutes.js";
-import CloudItemRoutes from "../../routes/storage/CloudItemRoutes.js";
-import individualStorageRoutes from "../../routes/storage/IndividualStorageRoutes.js";
+import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
+import warehouseRoutes from "../../routes/storage/WarehouseRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -33,21 +31,20 @@ export default function appFactory() {
         credentials: true
     }));
 
+    app.get('/', (req, res) => {
+        res.status(200).json({ message: 'ExtraSpace API работает!' });
+    });
+    app.get('/protected', authenticateJWT, (req, res) => {
+        res.json({ message: 'Этот маршрут защищён!', user: req.user });
+    });
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);
-    app.use("/api/cloud-order", authenticateJWT,CloudStorageOrderRoutes);
-    app.use("/api/cloud", authenticateJWT,authorizeAdmin, CloudStorageRoutes);
-    app.use('/api/cloud-items', authenticateJWT, CloudItemRoutes);
-    app.get('/', (req, res) => {
-        res.status(200).json({ message: 'ExtraSpace API работает!' });
-    });
 
-    app.get('/protected', authenticateJWT, (req, res) => {
-        res.json({ message: 'Этот маршрут защищён!', user: req.user });
-    });
-    app.use("/individual",authenticateJWT, individualStorageRoutes);
+    app.use("/storages", authenticateJWT, individualStorageRoutes);
+    app.use("/warehouses", authenticateJWT, warehouseRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
