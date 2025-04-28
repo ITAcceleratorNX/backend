@@ -10,7 +10,7 @@ import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
 import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
 import warehouseRoutes from "../../routes/warehouse/WarehouseRoutes.js";
-import userRoutes from '../../routes/storage/UserRoutes.js';
+import userRoutes from '../../routes/user/UserRoutes.js';
 
 export default function appFactory() {
     const app = express();
