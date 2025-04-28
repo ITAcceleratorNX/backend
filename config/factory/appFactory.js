@@ -17,6 +17,7 @@ import tenantRoutes from '../../routes/storage/TenantRoutes.js';
 import contractRoutes from '../../routes/storage/ContractRoutes.js';
 import rackItemRoutes from '../../routes/storage/RackItemRoutes.js';
 import deliveryRoutes from '../../routes/storage/DeliveryRoutes.js';
+import userRoutes from '../../routes/storage/UserRoutes.js';
 
 export default function appFactory() {
     const app = express();
@@ -63,5 +64,6 @@ export default function appFactory() {
     app.use('/api/contracts', authenticateJWT, contractRoutes);
     app.use('/api/rack-items', authenticateJWT, rackItemRoutes);
     app.use('/api/delivery-request', deliveryRoutes);
+    app.use('/api/users', userRoutes);
     return app;
 }
