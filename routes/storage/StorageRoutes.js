@@ -2,7 +2,7 @@ import express from "express";
 import {validateBody} from "../../middleware/validate.js";
 import {StorageDto, UpdateStorageDto} from "../../dto/storage/Storage.dto.js";
 import * as storageController from "../../controllers/storage/StorageController.js";
-import {authorizeAdmin} from "../../middleware/jwt.js";
+import { authorizeAdmin} from "../../middleware/jwt.js";
 
 const router = express.Router();
 
