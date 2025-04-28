@@ -12,14 +12,6 @@ jest.mock('../../../models/CloudStorageOrder.js', () => ({
     }
 }));
 
-
-const mockRes = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
-};
-
 describe('CloudStorageOrder Service', () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -79,24 +71,15 @@ describe('CloudStorageOrder Service', () => {
 
     describe('updateOrder', () => {
         test('should update and return affected rows count', async () => {
-            // Мокируем, что заказ с id = 1 найден
             const mockOrder = { order_id: 1, storage_id: 2, length: 2, width: 2, height: 2 };
             CloudStorageOrder.findByPk.mockResolvedValue(mockOrder);
-
-            // Мокируем обновление, которое возвращает количество обновленных строк
             CloudStorageOrder.update.mockResolvedValue([1]);
 
-            const req = { params: { id: 1 }, body: { length: 3, width: 3, height: 3 } };
-            const res = mockRes();
+            const result = await CloudStorageOrderService.updateOrder(1, { length: 3, width: 3, height: 3 });
 
-            // Вызов обновления
-            await CloudStorageOrderService.updateOrder(req.params.id, req.body, res); // передаем res
-
-            // Проверяем, что метод update был вызван с правильными параметрами
-            expect(CloudStorageOrder.update).toHaveBeenCalledWith(req.body, { where: { order_id: req.params.id } });
-
-            // Проверяем, что результат был отправлен в response
-            expect(res.json).toHaveBeenCalledWith({ updated: 1 });
+            expect(CloudStorageOrder.findByPk).toHaveBeenCalledWith(1);
+            expect(CloudStorageOrder.update).toHaveBeenCalledWith({ length: 3, width: 3, height: 3 }, { where: { order_id: 1 } });
+            expect(result).toBe(1);
         });
     });
 

@@ -3,7 +3,7 @@ import js from "@eslint/js";
 
 export default defineConfig([
   {
-    ignores: ["coverage/**", "node_modules/**", "dist/**"], // МІНДЕТТІ түрде **/** жазу керек
+    ignores: ["coverage/**", "node_modules/**", "dist/**"],
     files: ["**/*.{js,mjs,cjs}"],
     plugins: { js },
     extends: ["js/recommended"],

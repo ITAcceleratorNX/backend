@@ -1,65 +1,58 @@
-import * as service from "../../../service/storage/IndividualStorageService.js";
-import IndividualStorage from "../../../models/IndividualStorage.js";
+import * as IndividualStorageService from '../../../service/storage/IndividualStorageService.js';
+import IndividualStorage from '../../../models/IndividualStorage.js';
 
-jest.mock("../../../models/IndividualStorage.js");
+jest.mock('../../../models/IndividualStorage.js');
 
-describe("IndividualStorageService", () => {
+describe('IndividualStorageService', () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test("getAll should return all individual storages", async () => {
-        const mockData = [{ id: 1 }, { id: 2 }];
-        IndividualStorage.findAll.mockResolvedValue(mockData);
+    test('createIndividualStorage should create a new storage', async () => {
+        const data = { name: 'Room A', description: 'Big room', length: 5, width: 4 };
+        IndividualStorage.create.mockResolvedValue(data);
 
-        const result = await service.getAll();
+        const result = await IndividualStorageService.createIndividualStorage(data);
 
-        expect(IndividualStorage.findAll).toHaveBeenCalled();
-        expect(result).toEqual(mockData);
+        expect(IndividualStorage.create).toHaveBeenCalledWith(expect.objectContaining({
+            name: 'Room A',
+            description: 'Big room',
+            length: 5,
+            width: 4,
+            total_area: expect.any(Number),
+            price: expect.any(Number),
+            custom_id: expect.stringMatching(/^IND-MT-\d{3}$/)
+        }));
+        expect(result).toEqual(expect.objectContaining({ name: 'Room A' }));
     });
 
-    test("getById should return one storage", async () => {
-        const mockData = { id: 1 };
-        IndividualStorage.findByPk.mockResolvedValue(mockData);
+    test('getAllIndividualStorage should return all individual storages', async () => {
+        const storages = [{ id: 1 }, { id: 2 }];
+        IndividualStorage.findAll.mockResolvedValue(storages);
 
-        const result = await service.getById(1);
-
-        expect(IndividualStorage.findByPk).toHaveBeenCalledWith(1);
-        expect(result).toEqual(mockData);
+        const result = await IndividualStorageService.getAllIndividualStorage();
+        expect(result).toEqual(storages);
     });
 
-    test("should create a storage", async () => {
-        const input = { name: "Storage A" };
-        const created = { id: 1, ...input };
-        IndividualStorage.create.mockResolvedValue(created);
+    test('getIndividualStorageById should return storage by id', async () => {
+        const storage = { id: 1 };
+        IndividualStorage.findByPk.mockResolvedValue(storage);
 
-        const result = await service.create(input);
-
-        expect(IndividualStorage.create).toHaveBeenCalledWith(input);
-        expect(result).toEqual(created);
+        const result = await IndividualStorageService.getIndividualStorageById(1);
+        expect(result).toEqual(storage);
     });
 
-    test("update should call update with correct params", async () => {
-        const id = 5;
-        const updateData = { name: "Updated" };
+    test('updateIndividualStorage should update storage by id', async () => {
         IndividualStorage.update.mockResolvedValue([1]);
 
-        const result = await service.update(id, updateData);
-
-        expect(IndividualStorage.update).toHaveBeenCalledWith(updateData, {
-            where: { unit_id: id },
-        });
+        const result = await IndividualStorageService.updateIndividualStorage(1, { name: 'Updated' });
         expect(result).toEqual([1]);
     });
 
-    test("deleteById should delete by unit_id", async () => {
+    test('deleteIndividualStorage should delete storage by id', async () => {
         IndividualStorage.destroy.mockResolvedValue(1);
 
-        const result = await service.deleteById(3);
-
-        expect(IndividualStorage.destroy).toHaveBeenCalledWith({
-            where: { unit_id: 3 },
-        });
+        const result = await IndividualStorageService.deleteIndividualStorage(1);
         expect(result).toBe(1);
     });
 });

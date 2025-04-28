@@ -1,28 +1,59 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js';
+import { sequelize } from '../config/database.js';
 
-const CloudStorage = sequelize.define('CloudStorage', {
-    storage_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    warehouse_id: { type: DataTypes.INTEGER, allowNull: false },
+const CloudStorage = sequelize.define('cloud_storage', {
+    storage_id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+    },
+    warehouse_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
     name: {
-        type: DataTypes.STRING(50),
-        allowNull: false
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     description: {
-        type: DataTypes.TEXT
+        type: DataTypes.TEXT,
+        allowNull: false,
     },
     image_url: {
-        type: DataTypes.STRING(255)
+        type: DataTypes.STRING,
+        allowNull: false,
     },
-    status: { type: DataTypes.ENUM('active', 'completed') },
+    length: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    width: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
+    height: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+    },
     total_volume: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
+        type: DataTypes.FLOAT,
+        allowNull: true, // авто есептеледі
     },
+    custom_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
+    price: {
+        type: DataTypes.FLOAT,
+        allowNull: true, // авто есептеледі
+    },
+    status: {
+        type: DataTypes.ENUM('available', 'occupied', 'maintenance'),
+        defaultValue: 'available',
+    }
 }, {
-    tableName: 'cloud_storage',
-    timestamps: false
+    timestamps: false,
 });
 
-
-export default CloudStorage
+export default CloudStorage;

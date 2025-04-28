@@ -1,5 +1,7 @@
 import CloudStorage from "../../models/CloudStorage.js";
 
+let cloudCounter = 1; // CLOUD-ES-001 бастап санау үшін
+
 const getAllCloud = async () => {
     try {
         return await CloudStorage.findAll();
@@ -20,12 +22,31 @@ const getCloudById = async (id) => {
 
 const createCloud = async (data) => {
     try {
-        return await CloudStorage.create(data);
+        const { name, description, image_url, length, width, height } = data;
+
+        const total_volume = length * width * height;
+        const price = total_volume * 1000;
+
+        const custom_id = `CLOUD-ES-${String(cloudCounter).padStart(3, '0')}`;
+        cloudCounter++;
+
+        return await CloudStorage.create({
+            name,
+            description,
+            image_url,
+            length,
+            width,
+            height,
+            total_volume,
+            price,
+            custom_id
+        });
     } catch (error) {
         console.error("Ошибка при создании облачного хранилища:", error);
         throw error;
     }
 };
+
 
 const updateCloud = async (id, data) => {
     try {
