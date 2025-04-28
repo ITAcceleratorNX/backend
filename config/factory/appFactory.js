@@ -9,6 +9,7 @@ import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
 import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
+import warehouseRoutes from "../../routes/storage/WarehouseRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -43,6 +44,7 @@ export default function appFactory() {
     app.use("/auth", basicAuthRoutes);
 
     app.use("/storages", authenticateJWT, individualStorageRoutes);
+    app.use("/warehouses", authenticateJWT, warehouseRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });

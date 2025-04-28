@@ -1,13 +1,14 @@
 import express from 'express';
-import { WarehouseController } from '../../controllers/storage/WarehouseController.js';
+import { WarehouseController } from '../../controllers/warehouse/WarehouseController.js';
 import {validateBody} from "../../middleware/validate.js";
 import {WarehouseDto, WarehouseUpdateDto} from "../../dto/warehouse/Warehause.dto.js";
+import {authorizeAdmin} from "../../middleware/jwt.js";
 
 const router = express.Router();
 
-router.post('/',validateBody(WarehouseDto) ,WarehouseController.create);
+router.post('/',validateBody(WarehouseDto), authorizeAdmin, WarehouseController.create);
 router.get('/', WarehouseController.getAll);
 router.get('/:id', WarehouseController.getById);
-router.put('/:id',validateBody(WarehouseUpdateDto) , WarehouseController.update);
+router.put('/:id',validateBody(WarehouseUpdateDto), authorizeAdmin, WarehouseController.update);
 
 export default router;
