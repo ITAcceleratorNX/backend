@@ -1,5 +1,6 @@
 import express from "express";
 import passport from "passport";
+import {setTokenCookie} from "../../utils/jwt/JwtService.js";
 
 const router = express.Router();
 
@@ -11,7 +12,8 @@ router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/'
 }), (req, res) => {
     const token = req.user.token;
-    res.redirect(`/?token=${token}`);
+    setTokenCookie(res, token);
+    res.redirect(`/`);
 });
 
 router.get('/logout', (req, res) => {

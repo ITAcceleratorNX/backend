@@ -16,8 +16,10 @@ describe('Auth Controller', () => {
         const res = {};
         res.status = jest.fn(() => res);
         res.json = jest.fn(() => res);
+        res.cookie = jest.fn(() => res); // <-- добавил мок для cookie
         return res;
     };
+
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -54,7 +56,7 @@ describe('Auth Controller', () => {
     });
 
     describe('login', () => {
-        test('should return token on successful login', async () => {
+        test('should set cookie and return success on login', async () => {
             const mockUser = {
                 email: 'test@example.com',
                 password_hash: 'hash',
@@ -71,13 +73,10 @@ describe('Auth Controller', () => {
             await AuthService.login(req, res);
 
             expect(mockUser.save).toHaveBeenCalled();
+            expect(res.cookie).toHaveBeenCalledWith('token', 'jwt-token', expect.any(Object));
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith({
-                success: true,
-                token: 'jwt-token'
-            });
-
-    });
+            expect(res.json).toHaveBeenCalledWith({ success: true });
+        });
 
         test('should return error for invalid password', async () => {
             User.findOne.mockResolvedValue({ password_hash: 'hash' });
@@ -97,7 +96,7 @@ describe('Auth Controller', () => {
     });
 
     describe('register', () => {
-        test('should register user and return token', async () => {
+        test('should register user and set token cookie', async () => {
             User.findOne.mockResolvedValue(null);
             cryptoUtils.verifyCode.mockReturnValue(true);
             bcryptService.getHashedPassword.mockResolvedValue('hashed');
@@ -116,11 +115,9 @@ describe('Auth Controller', () => {
             await AuthService.register(req, res);
 
             expect(User.create).toHaveBeenCalled();
+            expect(res.cookie).toHaveBeenCalledWith('token', 'jwt-token', expect.any(Object));
             expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith({
-                success: true,
-                token: 'jwt-token'
-            });
+            expect(res.json).toHaveBeenCalledWith({ success: true });
         });
 
         test('should return validation errors for invalid input', async () => {
@@ -149,8 +146,9 @@ describe('Auth Controller', () => {
             });
         });
     });
+
     describe('restorePassword', () => {
-        test('should restore password and return token', async () => {
+        test('should restore password and set token cookie', async () => {
             const mockUser = {
                 email: 'test@example.com',
                 save: jest.fn(),
@@ -174,11 +172,9 @@ describe('Auth Controller', () => {
 
             expect(mockUser.password_hash).toBe('newHashedPassword');
             expect(mockUser.save).toHaveBeenCalled();
+            expect(res.cookie).toHaveBeenCalledWith('token', 'jwt-token', expect.any(Object));
             expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalledWith({
-                success: true,
-                token: 'jwt-token'
-            });
+            expect(res.json).toHaveBeenCalledWith({ success: true });
         });
 
         test('should return 400 if user not found', async () => {
@@ -232,5 +228,4 @@ describe('Auth Controller', () => {
             });
         });
     });
-
 });

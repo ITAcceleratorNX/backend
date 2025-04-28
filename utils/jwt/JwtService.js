@@ -10,3 +10,11 @@ export const generateToken = (user) => {
         {expiresIn: JWT_EXPIRES_IN,}
     );
 };
+export const setTokenCookie=(res, token) =>{
+    res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // ставить secure=true в продакшене
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 дней
+    });
+}
