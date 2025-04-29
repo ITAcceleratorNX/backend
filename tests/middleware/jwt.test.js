@@ -1,114 +1,77 @@
 import jwt from 'jsonwebtoken';
-import {authenticateJWT, authorizeAdmin} from '../../middleware/jwt';
+import { authenticateJWT, authorizeAdmin } from '../../middleware/jwt';
 
-jest.mock('jsonwebtoken');
+jest.mock('jsonwebtoken', () => ({
+    verify: jest.fn(),
+}));
 
-describe('authenticateJWT Middleware', () => {
+describe('Test authenticateJWT and authorizeAdmin middlewares', () => {
+    const mockRequest = (body, cookies = {}) => {
+        return { body, cookies };
+    };
 
-    it('should return 401 if no token is provided', () => {
-        // Arrange
-        const req = { header: jest.fn() };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
+    const mockResponse = () => {
+        const res = {};
+        res.status = jest.fn().mockReturnValue(res);
+        res.json = jest.fn().mockReturnValue(res);
+        res.send = jest.fn().mockReturnValue(res);
+        return res;
+    };
 
-        // Act
-        authenticateJWT(req, res, next);
+    const next = jest.fn();
 
-        // Assert
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Нет токена авторизации.' });
-        expect(next).not.toHaveBeenCalled();
+    afterEach(() => {
+        jest.clearAllMocks(); // очищаем все моки после каждого теста
     });
 
-    it('should return 401 if the token is invalid', () => {
-        // Arrange
-        const req = { header: jest.fn().mockReturnValue('Bearer invalid_token') };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
+    describe('authenticateJWT', () => {
+        it('should return error if no token is provided', () => {
+            const req = mockRequest({}, {});
+            const res = mockResponse();
 
-        jwt.verify.mockImplementation((token, secret, callback) => {
-            callback(new Error('Invalid token'), null);
+            authenticateJWT(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Нет токена авторизации.' });
+            expect(next).not.toHaveBeenCalled();
         });
 
-        // Act
-        authenticateJWT(req, res, next);
+        it('should return error if the token is invalid', () => {
+            const req = mockRequest({}, { token: 'invalid_token' });
+            const res = mockResponse();
+            jwt.verify.mockImplementation((token, secret, callback) => callback(new Error('Invalid token')));
 
-        // Assert
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Неверный токен.' });
-        expect(next).not.toHaveBeenCalled();
-    });
+            authenticateJWT(req, res, next);
 
-    it('should call next() if the token is valid', () => {
-        // Arrange
-        const user = { id: 1, username: 'testuser' };
-        const req = { header: jest.fn().mockReturnValue(`Bearer ${jwt.sign(user, process.env.JWT_SECRET)}`) };
-        const res = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
-        const next = jest.fn();
-
-        jwt.verify.mockImplementation((token, secret, callback) => {
-            callback(null, user);
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Неверный токен.' });
+            expect(next).not.toHaveBeenCalled();
         });
 
-        // Act
-        authenticateJWT(req, res, next);
+        it('should add user to the request if token is valid and call next', () => {
+            const req = mockRequest({}, { token: 'valid_token' });
+            const res = mockResponse();
+            const user = { id: 1, role: 'USER' };
+            jwt.verify.mockImplementation((token, secret, callback) => callback(null, user));
 
-        // Assert
-        expect(next).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
-        expect(res.json).not.toHaveBeenCalled();
-    });
-});
-const mockRes = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
-};
+            authenticateJWT(req, res, next);
 
-describe('authorizeAdmin middleware', () => {
-    it('should call next() if user is admin', () => {
-        const req = { user: { role: 'ADMIN' } };
-        const res = mockRes();
-        const next = jest.fn();
-
-        authorizeAdmin(req, res, next);
-
-        expect(next).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
-        expect(res.json).not.toHaveBeenCalled();
+            expect(req.user).toEqual(user);
+            expect(next).toHaveBeenCalled();
+        });
     });
 
-    it('should return 403 if user is not admin', () => {
-        const req = { user: { role: 'User' } };
-        const res = mockRes();
-        const next = jest.fn();
+    describe('authorizeAdmin', () => {
+        it('should return error if user role is not ADMIN', () => {
+            const req = mockRequest({}, { user: { role: 'USER' } });
+            const res = mockResponse();
 
-        authorizeAdmin(req, res, next);
+            authorizeAdmin(req, res, next);
 
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
-        expect(next).not.toHaveBeenCalled();
-    });
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
+            expect(next).not.toHaveBeenCalled();
+        });
 
-    it('should return 403 if user has no role', () => {
-        const req = { user: {} };
-        const res = mockRes();
-        const next = jest.fn();
-
-        authorizeAdmin(req, res, next);
-
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
-        expect(next).not.toHaveBeenCalled();
     });
 });

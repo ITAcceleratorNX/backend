@@ -11,16 +11,23 @@ import swaggerUi from "swagger-ui-express";
 import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
 import warehouseRoutes from "../../routes/warehouse/WarehouseRoutes.js";
 import userRoutes from '../../routes/user/UserRoutes.js';
+import cookieParser from 'cookie-parser';
 import logger from "../../utils/winston/logger.js";
 
 export default function appFactory() {
     const app = express();
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
+    app.use(cors({
+        origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
+        credentials: true
+    }));
     //swagger
     const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8');
     const swaggerDocument = yaml.parse(swaggerFile);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-    app.use(express.json());
     app.use(session({
         secret: process.env.SESSION_SECRET,
         resave: false,
@@ -33,11 +40,6 @@ export default function appFactory() {
 
     app.use(passport.initialize());
     app.use(passport.session());
-    app.use(cors({
-        origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
-        credentials: true
-    }));
-
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
@@ -45,8 +47,6 @@ export default function appFactory() {
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
-
-    app.use(express.urlencoded({ extended: true }));
     app.use('/auth', googleAuthRoutes);
     app.use("/auth", basicAuthRoutes);
 

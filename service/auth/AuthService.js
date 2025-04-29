@@ -1,9 +1,9 @@
-import {User} from "../../models/init/index.js";
+import { User } from "../../models/init/index.js";
 import { generateSecureCode, verifyCode } from "../../utils/crypto/UniqueCodeGenerator.js";
 import { sendVerificationCode } from "../../utils/sendgird/SendGrid.js";
 import validator from "validator";
 import { comparePassword, getHashedPassword } from "../../utils/bcrypt/BCryptService.js";
-import { generateToken } from "../../utils/jwt/JwtService.js";
+import {generateToken, setTokenCookie} from "../../utils/jwt/JwtService.js";
 
 function validateEmailAndPassword(email, password) {
     let message = {};
@@ -36,6 +36,7 @@ export async function checkEmail(req, res) {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
+
 export async function checkEmailForRestorePassword(req, res) {
     const { email } = req.body;
     try {
@@ -52,6 +53,9 @@ export async function checkEmailForRestorePassword(req, res) {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
+
+
+
 export async function login(req, res) {
     const { email, password } = req.body;
     if (!validator.isEmail(email)) {
@@ -68,9 +72,11 @@ export async function login(req, res) {
 
     user.last_login = Date.now();
     await user.save();
-    const token = generateToken(user);
 
-    return res.status(200).json({ success: true, token });
+    const token = generateToken(user);
+    setTokenCookie(res, token);
+
+    return res.status(200).json({ success: true });
 }
 
 export async function restorePassword(req, res) {
@@ -94,8 +100,10 @@ export async function restorePassword(req, res) {
     await user.save();
 
     const token = generateToken(user);
+    setTokenCookie(res, token);
+
     console.log("Password restored for user: ", user.email);
-    return res.status(200).json({ success: true, token });
+    return res.status(200).json({ success: true });
 }
 
 export async function register(req, res) {
@@ -123,6 +131,8 @@ export async function register(req, res) {
     });
 
     const token = generateToken(user);
+    setTokenCookie(res, token);
+
     console.log("Created user: ", user);
-    return res.status(201).json({ success: true, token });
+    return res.status(201).json({ success: true });
 }
