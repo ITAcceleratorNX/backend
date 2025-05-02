@@ -13,6 +13,7 @@ import warehouseRoutes from "../../routes/warehouse/WarehouseRoutes.js";
 import userRoutes from '../../routes/user/UserRoutes.js';
 import cookieParser from 'cookie-parser';
 import logger from "../../utils/winston/logger.js";
+import {errorHandler} from "../../middleware/errorHandler.js";
 
 export default function appFactory() {
     const app = express();
@@ -57,6 +58,7 @@ export default function appFactory() {
         res.status(404).json({ error: 'Не найдено' });
     });
     app.use('/api/users', userRoutes);
+    app.use(errorHandler);
 
     return app;
 }
