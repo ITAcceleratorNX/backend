@@ -13,7 +13,7 @@ router.get('/google/callback', passport.authenticate('google', {
 }), (req, res) => {
     const token = req.user.token;
     setTokenCookie(res, token);
-    res.redirect(`/`);
+    res.redirect(`https://extraspace-backend.onrender.com`);
 });
 
 router.get('/logout', (req, res) => {
