@@ -12,6 +12,8 @@ import individualStorageRoutes from "../../routes/storage/StorageRoutes.js";
 import warehouseRoutes from "../../routes/warehouse/WarehouseRoutes.js";
 import userRoutes from '../../routes/user/UserRoutes.js';
 import cookieParser from 'cookie-parser';
+import logger from "../../utils/winston/logger.js";
+
 export default function appFactory() {
     const app = express();
     app.use(express.json());
@@ -25,11 +27,17 @@ export default function appFactory() {
     const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8');
     const swaggerDocument = yaml.parse(swaggerFile);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
     app.use(session({
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true
     }));
+    app.use((req, res, next) => {
+        logger.info(`Request: ${req.method} ${req.url}`);
+        next();
+    });
+
     app.use(passport.initialize());
     app.use(passport.session());
     app.get('/', (req, res) => {
