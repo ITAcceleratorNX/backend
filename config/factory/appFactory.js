@@ -16,13 +16,14 @@ import http from "http";
 import { setWSS } from "../ws.js";
 import sequelize from "../database.js";
 
+import logger from "../../utils/winston/logger.js";
+import {errorHandler} from "../../middleware/errorHandler.js";
+
 export default function appFactory() {
     const app = express();
-
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
-
     app.use(cors({
         origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
         credentials: true
@@ -35,7 +36,6 @@ export default function appFactory() {
     const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8');
     const swaggerDocument = yaml.parse(swaggerFile);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
     app.use(session({
         secret: process.env.SESSION_SECRET,
         resave: false,
@@ -48,9 +48,13 @@ export default function appFactory() {
         .catch((err) => {
             console.error('❌ Ошибка синхронизации таблиц:', err);
         });
+    app.use((req, res, next) => {
+        logger.info(`Request: ${req.method} ${req.url}`);
+        next();
+    });
+
     app.use(passport.initialize());
     app.use(passport.session());
-
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
@@ -58,7 +62,6 @@ export default function appFactory() {
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
-
     app.use('/auth', googleAuthRoutes);
     app.use('/auth', basicAuthRoutes);
     app.use('/storages', authenticateJWT, individualStorageRoutes);
@@ -68,6 +71,7 @@ export default function appFactory() {
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
+    app.use(errorHandler);
 
     return { app, server };
 }
