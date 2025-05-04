@@ -1,7 +1,5 @@
 import { WebSocketServer } from 'ws';
 import { Chat, User, Message } from '../models/init/index.js';
-import cookie from 'cookie';
-import jwt from "jsonwebtoken"; // npm install cookie
 
 let wssInstance = null;
 
@@ -21,35 +19,15 @@ class MyWebSocketServer {
         this.setup();
     }
 
-
     setup() {
         this.ws.on('connection', (ws, req) => {
-            const cookies = req.headers.cookie;
+            const url = new URL(req.url, `http://${req.headers.host}`);
+            const userId = url.searchParams.get('userId');
 
-            if (!cookies) {
-                ws.close(4001, 'Cookie not provided');
-                return;
+            if (userId) {
+                this.clients.set(userId, ws);
+                console.log(`Client connected: ${userId}`);
             }
-
-            const parsedCookies = cookie.parse(cookies);
-            const token = parsedCookies.token;
-
-            if (!token) {
-                ws.close(4001, 'JWT token not found in cookies');
-                return;
-            }
-
-            let userId;
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                userId = decoded.id; // или decoded.userId
-            } catch (err) {
-                ws.close(4002, 'Invalid JWT token');
-                return;
-            }
-
-            this.clients.set(String(userId), ws);
-            console.log(`Client connected: ${userId}`);
 
             ws.on('message', async (message) => {
                 try {
@@ -61,12 +39,11 @@ class MyWebSocketServer {
             });
 
             ws.on('close', () => {
-                this.clients.delete(String(userId));
+                this.clients.delete(userId);
                 console.log(`Client disconnected: ${userId}`);
             });
         });
     }
-
 
     async handleMessage(data, ws) {
         switch (data.type) {
@@ -109,15 +86,16 @@ class MyWebSocketServer {
         }
     }
     async acceptChat({ chatId, managerId }) {
+        const [updatedCount] = await Chat.update(
+            { manager_id: managerId, status: 'ACCEPTED' },
+            { where: { id: chatId, status: 'PENDING' } }
+        );
+
+        if (updatedCount === 0) {
+            return;
+        }
+
         const chat = await Chat.findByPk(chatId);
-        if (!chat || chat.status !== 'PENDING') return;
-
-        await chat.update({
-            manager_id: managerId,
-            status: 'ACCEPTED'
-        });
-
-        // Уведомить пользователя, что чат принят
         const userWs = this.clients.get(String(chat.user_id));
         if (userWs) {
             userWs.send(JSON.stringify({
