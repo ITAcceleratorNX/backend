@@ -30,7 +30,7 @@ export default function appFactory() {
     }));
 
     const server = http.createServer(app);
-    const wss = setWSS(server);
+    setWSS(server);
 
     // Swagger
     const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8');
