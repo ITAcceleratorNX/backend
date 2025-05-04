@@ -11,7 +11,8 @@ import Transaction from '../Transaction.js';
 import TransactionStatus from '../TransactionStatus.js';
 import User from '../User.js';
 import Warehouse from '../Warehouse.js';
-
+import Chat from "../Chat.js";
+import Message from "../Message.js";
 // FAQ - FAQCategory
 FAQ.belongsTo(FAQCategory, {
     foreignKey: 'category_code',
@@ -50,6 +51,11 @@ PaymentSystem.hasMany(Transaction, { foreignKey: 'payment_id' });
 Transaction.belongsTo(TransactionStatus, { foreignKey: 'status_code', targetKey: 'status_code' });
 TransactionStatus.hasMany(Transaction, { foreignKey: 'status_code', sourceKey: 'status_code' });
 
+User.hasMany(Chat, { foreignKey: 'user_id' });
+Chat.belongsTo(User, { foreignKey: 'user_id' });
+
+Chat.hasMany(Message, { foreignKey: 'chat_id' });
+Message.belongsTo(Chat, { foreignKey: 'chat_id' });
 Transaction.belongsTo(MovingOrder, { foreignKey: 'order_id' });
 MovingOrder.hasMany(Transaction, { foreignKey: 'order_id' });
 
@@ -67,4 +73,6 @@ export {
     TransactionStatus,
     User,
     Warehouse,
+    Chat,
+    Message
 };
