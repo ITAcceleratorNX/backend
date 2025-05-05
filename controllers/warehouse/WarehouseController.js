@@ -1,4 +1,4 @@
-import { WarehouseService } from '../../service/storage/WarehouseService.js';
+import { WarehouseService } from '../../service/warehouse/WarehouseService.js';
 
 export class WarehouseController {
     static async create(req, res) {

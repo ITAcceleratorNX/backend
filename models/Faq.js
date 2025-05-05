@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
 export const FAQ = sequelize.define('FAQ', {
-    faq_id: {
+    id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
@@ -15,8 +15,8 @@ export const FAQ = sequelize.define('FAQ', {
         type: DataTypes.TEXT,
         allowNull: false
     },
-    category_code: {
-        type: DataTypes.STRING(20),
+    type: {
+        type: DataTypes.STRING,
         allowNull: false
     }
 }, {
