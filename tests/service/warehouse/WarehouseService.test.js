@@ -1,4 +1,4 @@
-import { WarehouseService } from '../../../service/storage/WarehouseService.js';
+import { WarehouseService } from '../../../service/warehouse/WarehouseService.js';
 import { Warehouse } from '../../../models/init/index.js';
 
 jest.mock('../../../models/init/index.js');

@@ -1,6 +1,6 @@
 // tests/service/storage/UserService.test.js
 
-import * as UserService from '../../../service/storage/UserService.js';
+import * as UserService from '../../../service/user/UserService.js';
 import User from '../../../models/User.js';
 
 jest.mock('../../../models/User.js');
