@@ -1,7 +1,6 @@
 import Callback from '../Callback.js';
 import Contract from '../Contract.js';
 import FAQ from '../Faq.js';
-import FAQCategory from '../FaqCategory.js';
 import MovingOrder from '../MovingOrder.js';
 import Notification from '../Notification.js';
 import PaymentSystem from '../PaymentSystem.js';
@@ -13,15 +12,6 @@ import User from '../User.js';
 import Warehouse from '../Warehouse.js';
 import Chat from "../Chat.js";
 import Message from "../Message.js";
-// FAQ - FAQCategory
-FAQ.belongsTo(FAQCategory, {
-    foreignKey: 'category_code',
-    targetKey: 'category_code'
-});
-FAQCategory.hasMany(FAQ, {
-    foreignKey: 'category_code',
-    sourceKey: 'category_code'
-});
 
 // Contract - User
 Contract.belongsTo(User, { foreignKey: 'user_id' });
@@ -63,7 +53,6 @@ export {
     Callback,
     Contract,
     FAQ,
-    FAQCategory,
     MovingOrder,
     Notification,
     PaymentSystem,

@@ -1,5 +1,5 @@
 // controllers/UserController.js
-import * as UserService from "../../service/storage/UserService.js";
+import * as UserService from "../../service/user/UserService.js";
 
 export const createUser = async (req, res) => {
     try {

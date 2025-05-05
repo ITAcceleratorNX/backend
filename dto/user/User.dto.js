@@ -1,4 +1,3 @@
-// dto/User.dto.js
 import { z } from 'zod';
 
 export const UserDto = z.object({
