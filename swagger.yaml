@@ -1,8 +1,9 @@
 openapi: 3.0.0
 info:
-  title: Auth API
+  title: Auth API + WebSocket Chat
   version: 1.0.1
-  description: Документация по авторизации
+  description: |
+    Документация по авторизации и WebSocket чату.
 
 servers:
   - url: http://localhost:3000
@@ -158,3 +159,58 @@ paths:
                       email_error: Email is required
                       unique_code_error: Unique code is required
                       password_error: Password is required
+
+# --- WebSocket documentation section (non-standard) ---
+components:
+  schemas:
+    WebSocketMessage:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          example: START_CHAT
+        userId:
+          type: integer
+          example: 5
+
+x-websocket:
+  url: ws://localhost:3000?userId={userId}
+  description: |
+    WebSocket сервер для чатов.
+    При подключении необходимо передать `userId` в query параметрах.
+
+    **Типы входящих сообщений (от клиента):**
+    - `START_CHAT`: создать чат
+    - `SEND_MESSAGE`: отправить сообщение
+    - `ACCEPT_CHAT`: менеджер принимает чат
+
+    **Типы исходящих сообщений (от сервера):**
+    - `WAITING_FOR_MANAGER`: ожидание ответа менеджера
+    - `NEW_CHAT`: уведомление менеджерам о новом чате
+    - `CHAT_ACCEPTED`: чат принят
+    - `NEW_MESSAGE`: новое сообщение
+    - `CHAT_TAKEN`: чат уже принят другим менеджером
+
+  examples:
+    START_CHAT:
+      summary: Начать чат
+      value:
+        type: START_CHAT
+        userId: 5
+
+    SEND_MESSAGE:
+      summary: Отправка сообщения
+      value:
+        type: SEND_MESSAGE
+        chatId: 1
+        senderId: 5
+        message: "Привет!"
+        isFromUser: true
+
+    ACCEPT_CHAT:
+      summary: Принятие чата
+      value:
+        type: ACCEPT_CHAT
+        chatId: 1
+        managerId: 2
