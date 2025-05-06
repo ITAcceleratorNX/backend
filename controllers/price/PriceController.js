@@ -1,4 +1,5 @@
 import * as priceService from "../../service/price/PriceService.js";
+import {isEmpty} from "validator";
 
 export const getAllPrices = async (req, res) => {
     try {
@@ -10,12 +11,12 @@ export const getAllPrices = async (req, res) => {
     }
 };
 
-export const getPriceById = async (req, res) => {
+export const getPriceByType = async (req, res) => {
     try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+        const type = String(req.params.type);
+        if (isEmpty(type)) return res.status(400).json({ error: 'Invalid type' });
 
-        const result = await priceService.getById(id);
+        const result = await priceService.getByType(req.params.type);
         if (!result) return res.status(404).json({ error: 'Not found' });
 
         return res.json(result);
