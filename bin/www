@@ -1,18 +1,15 @@
 #!/usr/bin/env node
-
-import app from '../app.js';
+import appFactory from "../config/factory/appFactory.js";
 import debug from 'debug';
-import http from 'http';
 
 const serverDebug = debug('extraspace:server');
 
+const { app, server } = appFactory();
 const port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
-const server = http.createServer(app);
-
 server.listen(port);
-server.on('error', onError);
+server.on('error', (error) => onError(error, port));
 server.on('listening', onListening);
 
 function normalizePort(val) {
@@ -22,7 +19,7 @@ function normalizePort(val) {
   return false;
 }
 
-function onError(error) {
+function onError(error, port) {
   if (error.syscall !== 'listen') throw error;
 
   const bind = typeof port === 'string'
@@ -33,11 +30,9 @@ function onError(error) {
     case 'EACCES':
       console.error(bind + ' requires elevated privileges');
       process.exit(1);
-      break;
     case 'EADDRINUSE':
       console.error(bind + ' is already in use');
       process.exit(1);
-      break;
     default:
       throw error;
   }
@@ -49,4 +44,5 @@ function onListening() {
       ? 'pipe ' + addr
       : 'port ' + addr.port;
   serverDebug('Listening on ' + bind);
+  console.log(addr.port)
 }
