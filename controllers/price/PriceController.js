@@ -1,5 +1,4 @@
 import * as priceService from "../../service/price/PriceService.js";
-import {CalculatePriceDto} from "../../dto/price/Pirce.dto.js";
 
 export const getAllPrices = async (req, res) => {
     try {
