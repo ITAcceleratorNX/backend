@@ -25,7 +25,7 @@ export default function appFactory() {
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
     app.use(cors({
-        origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
+        origin: ['http://localhost:5173', 'https://frontend-19x7.onrender.com'],
         credentials: true
     }));
 
