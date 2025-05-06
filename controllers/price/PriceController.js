@@ -1,4 +1,5 @@
 import * as priceService from "../../service/price/PriceService.js";
+import {CalculatePriceDto} from "../../dto/price/Pirce.dto.js";
 
 export const getAllPrices = async (req, res) => {
     try {
@@ -66,3 +67,7 @@ export const deletePrice = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+export const calculatePrice = async (req, res) => {
+    return await priceService.calculate(req.body, res);
+}

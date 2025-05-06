@@ -8,3 +8,10 @@ export const PriceDto = z.object({
 });
 
 export const UpdatePriceDto = PriceDto.partial();
+
+export const CalculatePriceDto = z.object({
+    type: PriceType,
+    area: z.number().positive(),
+    month: z.number().positive(),
+    day: z.number().int().gte(-1).default(0)
+});
