@@ -9,7 +9,8 @@ export const Price = sequelize.define('Price', {
     },
     type: {
         type: DataTypes.ENUM("INDIVIDUAL_STORAGE", "CLOUD_STORAGE", "RACK_STORAGE", "MOVING"),
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     amount: {
         type: DataTypes.DECIMAL(10, 2),
