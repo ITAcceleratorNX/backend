@@ -18,6 +18,7 @@ import sequelize from "../database.js";
 
 import logger from "../../utils/winston/logger.js";
 import {errorHandler} from "../../middleware/errorHandler.js";
+import priceRoutes from "../../routes/price/PriceRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -66,7 +67,8 @@ export default function appFactory() {
     app.use('/auth', basicAuthRoutes);
     app.use('/storages', authenticateJWT, individualStorageRoutes);
     app.use('/warehouses', authenticateJWT, warehouseRoutes);
-    app.use('/api/users', userRoutes);
+    app.use('/users', userRoutes);
+    app.use('/prices', priceRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
