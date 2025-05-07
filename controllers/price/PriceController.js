@@ -1,5 +1,5 @@
 import * as priceService from "../../service/price/PriceService.js";
-import {isEmpty} from "validator";
+import {PriceType} from "../../dto/price/Pirce.dto.js";
 
 export const getAllPrices = async (req, res) => {
     try {
@@ -13,8 +13,10 @@ export const getAllPrices = async (req, res) => {
 
 export const getPriceByType = async (req, res) => {
     try {
-        const type = String(req.params.type);
-        if (isEmpty(type)) return res.status(400).json({ error: 'Invalid type' });
+        const type = req.params.type;
+        if (!PriceType.safeParse(type).success) {
+            return res.status(400).json({ error: 'Invalid type' });
+        }
 
         const result = await priceService.getByType(req.params.type);
         if (!result) return res.status(404).json({ error: 'Not found' });
