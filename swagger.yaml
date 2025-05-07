@@ -6,12 +6,14 @@ info:
     Документация по авторизации и WebSocket чату.
 
 servers:
-  - url: http://localhost:3000
+  - url: https://extraspace-backend.onrender.com
 
 paths:
   /auth/google:
     get:
       summary: Авторизация через Google
+      tags:
+        - Auth
       description: Редиректит на Google OAuth
       responses:
         '302':
@@ -20,6 +22,8 @@ paths:
   /auth/google/callback:
     get:
       summary: Callback после Google OAuth
+      tags:
+        - Auth
       responses:
         '302':
           description: Редирект на главную страницу при успехе или неудаче
@@ -27,6 +31,8 @@ paths:
   /auth/email:
     post:
       summary: Проверка email — зарегистрирован или нет
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -69,6 +75,8 @@ paths:
   /auth/login:
     post:
       summary: Логин пользователя
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -114,6 +122,8 @@ paths:
   /auth/register:
     post:
       summary: Регистрация пользователя
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -161,6 +171,8 @@ paths:
                       password_error: Password is required
   /chats/{chatId}/messages:
     get:
+      tags:
+        - Chat
       summary: Получить сообщения чата с пагинацией
       parameters:
         - in: path
@@ -195,6 +207,8 @@ paths:
                     type: boolean
     delete:
       summary: Удалить все сообщения
+      tags:
+        - Chat
       parameters:
         - in: path
           name: chatId
@@ -208,6 +222,8 @@ paths:
   /chats/{chatId}/manager:
     put:
       summary: Назначить менеджера
+      tags:
+        - Chat
       parameters:
         - in: path
           name: chatId
@@ -227,6 +243,500 @@ paths:
       responses:
         '200':
           description: OK
+
+  /auth/check-email:
+    post:
+      tags:
+        - Auth
+      summary: Проверка существования email
+      description: Это нужно для отправить перед восстановление пароля.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Успешная проверка email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_exists:
+                    type: boolean
+                  email:
+                    type: string
+        "400":
+          description: Email не передан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Email is required"
+
+  /auth/restore-password:
+    post:
+      summary: Восстановление пароля
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - unique_code
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                unique_code:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Пароль успешно восстановлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Ошибка валидации или неправильный код
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: object
+                    additionalProperties:
+                      type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+  /faq:
+    get:
+      tags:
+        - FAQ
+      summary: Получить все вопросы FAQ
+      responses:
+        '200':
+          description: Список FAQ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FAQ'
+
+    post:
+      tags:
+        - FAQ
+      summary: Создать новый FAQ (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQInput'
+      responses:
+        '201':
+          description: FAQ успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+        '403':
+          description: Доступ запрещён
+
+  /faq/{id}:
+    get:
+      tags:
+        - FAQ
+      summary: Получить FAQ по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Найденный FAQ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+        '404':
+          description: Не найден
+
+    put:
+      tags:
+        - FAQ
+      summary: Обновить FAQ по ID (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQUpdate'
+      responses:
+        '200':
+          description: Обновление прошло успешно
+        '404':
+          description: Не найден
+
+    delete:
+      tags:
+        - FAQ
+      summary: Удалить FAQ по ID (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Удаление прошло успешно
+        '404':
+          description: Не найден
+
+  /prices:
+    get:
+      tags:
+        - Price
+      summary: Получить все цены
+      responses:
+        200:
+          description: Список всех цен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Price'
+    post:
+      tags:
+        - Price
+      summary: Создать новую цену (только для ADMIN)
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceDto'
+      responses:
+        201:
+          description: Успешное создание
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+        400:
+          description: Неверные данные или цена уже существует
+
+  /prices/{type}:
+    get:
+      tags:
+        - Price
+      summary: Получить цену по типу
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            $ref: '#/components/schemas/PriceType'
+      responses:
+        200:
+          description: Найденная цена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+        400:
+          description: Неверный тип
+        404:
+          description: Цена не найдена
+
+  /prices/{id}:
+    put:
+      tags:
+        - Price
+      summary: Обновить цену (только для ADMIN)
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePriceDto'
+      responses:
+        200:
+          description: Успешное обновление
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+        400:
+          description: Неверный ID
+        404:
+          description: Цена не найдена
+
+    delete:
+      tags:
+        - Price
+      summary: Удалить цену (только для ADMIN)
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Успешное удаление
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+        400:
+          description: Неверный ID
+        404:
+          description: Цена не найдена
+
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get all users
+      security:
+        - cookieAuth: [ ]
+      responses:
+        200:
+          description: List of users
+        403:
+          description: Forbidden (Admin only)
+        401:
+          description: Unauthorized (no token)
+
+  /users/{id}:
+    get:
+      tags:
+        - User
+      summary: Get user by ID
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User found
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+
+    put:
+      tags:
+        - User
+      summary: Update user by ID
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+      responses:
+        200:
+          description: User updated
+        400:
+          description: Validation or bad request
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+
+    delete:
+      tags:
+        - User
+      summary: Delete user by ID
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User deleted
+        404:
+          description: User not found
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden (Admin only)
+
+  /warehouses:
+    post:
+      tags:
+        - Warehouse
+      summary: Create a new warehouse (Admin only)
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseDto'
+      responses:
+        201:
+          description: Warehouse created successfully
+        400:
+          description: Bad request (validation error or other issues)
+        401:
+          description: Unauthorized (no token)
+        403:
+          description: Forbidden (only for Admin)
+
+    get:
+      tags:
+        - Warehouse
+      summary: Get all warehouses
+      responses:
+        200:
+          description: List of all warehouses
+        401:
+          description: Unauthorized (no token)
+
+  /warehouses/{id}:
+    get:
+      tags:
+        - Warehouse
+      summary: Get warehouse by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Warehouse found
+        404:
+          description: Warehouse not found
+        401:
+          description: Unauthorized (no token)
+
+    put:
+      tags:
+        - Warehouse
+      summary: Update warehouse by ID (Admin only)
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseUpdateDto'
+      responses:
+        200:
+          description: Warehouse updated successfully
+        400:
+          description: Bad request (validation error)
+        404:
+          description: Warehouse not found
+        401:
+          description: Unauthorized (no token)
+        403:
+          description: Forbidden (only for Admin)
+
 
 # --- WebSocket documentation section (non-standard) ---
 components:
@@ -287,6 +797,140 @@ components:
           type: integer
           example: 2
 
+    FAQ:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        question:
+          type: string
+          example: "Как арендовать склад?"
+        answer:
+          type: string
+          example: "Вы можете оставить заявку через сайт или связаться с менеджером."
+        type:
+          type: string
+          example: "general"
+
+    FAQInput:
+      type: object
+      required:
+        - question
+        - answer
+        - type
+      properties:
+        question:
+          type: string
+          example: "Как оплатить аренду?"
+        answer:
+          type: string
+          example: "Через личный кабинет или в отделении."
+        type:
+          type: string
+          example: "payment"
+
+    FAQUpdate:
+      type: object
+      properties:
+        question:
+          type: string
+          example: "Обновленный вопрос"
+        answer:
+          type: string
+          example: "Обновленный ответ"
+        type:
+          type: string
+          example: "general"
+
+    PriceType:
+      type: string
+      enum:
+        - INDIVIDUAL_STORAGE
+        - CLOUD_STORAGE
+        - RACK_STORAGE
+        - MOVING
+
+    PriceDto:
+      type: object
+      required:
+        - type
+        - amount
+      properties:
+        type:
+          $ref: '#/components/schemas/PriceType'
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+
+    UpdatePriceDto:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/PriceType'
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+
+    Price:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          $ref: '#/components/schemas/PriceType'
+        amount:
+          type: number
+
+    UpdateUserDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "user@example.com"
+        phone:
+          type: string
+          example: "+77011234567"
+        iin:
+          type: string
+          example: "010101123456"
+
+    WarehouseDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Main Warehouse"
+        address:
+          type: string
+          example: "123 Main St, City, Country"
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+          example: "AVAILABLE"
+
+    WarehouseUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Updated Warehouse Name"
+        address:
+          type: string
+          example: "456 Updated St, City, Country"
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+          example: "UNAVAILABLE"
 x-websocket:
   url: ws://localhost:3000?userId={userId}
   description: |

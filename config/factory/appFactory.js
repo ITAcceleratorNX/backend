@@ -20,6 +20,7 @@ import logger from "../../utils/winston/logger.js";
 import {errorHandler} from "../../middleware/errorHandler.js";
 import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
+import FAQRoutes from "../../routes/faq/FAQRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -71,6 +72,7 @@ export default function appFactory() {
     app.use('/chats',authenticateJWT,chatRoutes)
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
+    app.use('/faq', FAQRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
