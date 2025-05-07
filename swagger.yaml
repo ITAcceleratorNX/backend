@@ -6,7 +6,7 @@ info:
     Документация по авторизации и WebSocket чату.
 
 servers:
-  - url: http://localhost:3000
+  - url: https://extraspace-backend.onrender.com
 
 paths:
   /auth/google:
@@ -159,6 +159,108 @@ paths:
                       email_error: Email is required
                       unique_code_error: Unique code is required
                       password_error: Password is required
+
+  /check-email:
+    post:
+      summary: Проверка существования email
+      description: Это нужно для отправить перед восстановление пароля.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Успешная проверка email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_exists:
+                    type: boolean
+                  email:
+                    type: string
+        "400":
+          description: Email не передан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Email is required"
+
+  /restore-password:
+    post:
+      summary: Восстановление пароля
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - unique_code
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                unique_code:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Пароль успешно восстановлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          description: Ошибка валидации или неправильный код
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: object
+                    additionalProperties:
+                      type: string
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
 
 # --- WebSocket documentation section (non-standard) ---
 components:
