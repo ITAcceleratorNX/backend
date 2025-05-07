@@ -12,6 +12,8 @@ paths:
   /auth/google:
     get:
       summary: Авторизация через Google
+      tags:
+        - Auth
       description: Редиректит на Google OAuth
       responses:
         '302':
@@ -20,6 +22,8 @@ paths:
   /auth/google/callback:
     get:
       summary: Callback после Google OAuth
+      tags:
+        - Auth
       responses:
         '302':
           description: Редирект на главную страницу при успехе или неудаче
@@ -27,6 +31,8 @@ paths:
   /auth/email:
     post:
       summary: Проверка email — зарегистрирован или нет
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -69,6 +75,8 @@ paths:
   /auth/login:
     post:
       summary: Логин пользователя
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -114,6 +122,8 @@ paths:
   /auth/register:
     post:
       summary: Регистрация пользователя
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -160,8 +170,10 @@ paths:
                       unique_code_error: Unique code is required
                       password_error: Password is required
 
-  /check-email:
+  /auth/check-email:
     post:
+      tags:
+        - Auth
       summary: Проверка существования email
       description: Это нужно для отправить перед восстановление пароля.
       requestBody:
@@ -202,9 +214,11 @@ paths:
                     type: string
                     example: "Email is required"
 
-  /restore-password:
+  /auth/restore-password:
     post:
       summary: Восстановление пароля
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -261,6 +275,106 @@ paths:
                     example: false
                   message:
                     type: string
+  /faq:
+    get:
+      tags:
+        - FAQ
+      summary: Получить все вопросы FAQ
+      responses:
+        '200':
+          description: Список FAQ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FAQ'
+
+    post:
+      tags:
+        - FAQ
+      summary: Создать новый FAQ (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQInput'
+      responses:
+        '201':
+          description: FAQ успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+        '403':
+          description: Доступ запрещён
+
+  /faq/{id}:
+    get:
+      tags:
+        - FAQ
+      summary: Получить FAQ по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Найденный FAQ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAQ'
+        '404':
+          description: Не найден
+
+    put:
+      tags:
+        - FAQ
+      summary: Обновить FAQ по ID (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQUpdate'
+      responses:
+        '200':
+          description: Обновление прошло успешно
+        '404':
+          description: Не найден
+
+    delete:
+      tags:
+        - FAQ
+      summary: Удалить FAQ по ID (только для ADMIN)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Удаление прошло успешно
+        '404':
+          description: Не найден
+
 
 # --- WebSocket documentation section (non-standard) ---
 components:
@@ -275,6 +389,52 @@ components:
         userId:
           type: integer
           example: 5
+
+    FAQ:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        question:
+          type: string
+          example: "Как арендовать склад?"
+        answer:
+          type: string
+          example: "Вы можете оставить заявку через сайт или связаться с менеджером."
+        type:
+          type: string
+          example: "general"
+
+    FAQInput:
+      type: object
+      required:
+        - question
+        - answer
+        - type
+      properties:
+        question:
+          type: string
+          example: "Как оплатить аренду?"
+        answer:
+          type: string
+          example: "Через личный кабинет или в отделении."
+        type:
+          type: string
+          example: "payment"
+
+    FAQUpdate:
+      type: object
+      properties:
+        question:
+          type: string
+          example: "Обновленный вопрос"
+        answer:
+          type: string
+          example: "Обновленный ответ"
+        type:
+          type: string
+          example: "general"
 
 x-websocket:
   url: ws://localhost:3000?userId={userId}
