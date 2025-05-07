@@ -581,6 +581,88 @@ paths:
         403:
           description: Forbidden (Admin only)
 
+  /warehouses:
+    post:
+      tags:
+        - Warehouse
+      summary: Create a new warehouse (Admin only)
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseDto'
+      responses:
+        201:
+          description: Warehouse created successfully
+        400:
+          description: Bad request (validation error or other issues)
+        401:
+          description: Unauthorized (no token)
+        403:
+          description: Forbidden (only for Admin)
+
+    get:
+      tags:
+        - Warehouse
+      summary: Get all warehouses
+      responses:
+        200:
+          description: List of all warehouses
+        401:
+          description: Unauthorized (no token)
+
+  /warehouses/{id}:
+    get:
+      tags:
+        - Warehouse
+      summary: Get warehouse by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Warehouse found
+        404:
+          description: Warehouse not found
+        401:
+          description: Unauthorized (no token)
+
+    put:
+      tags:
+        - Warehouse
+      summary: Update warehouse by ID (Admin only)
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseUpdateDto'
+      responses:
+        200:
+          description: Warehouse updated successfully
+        400:
+          description: Bad request (validation error)
+        404:
+          description: Warehouse not found
+        401:
+          description: Unauthorized (no token)
+        403:
+          description: Forbidden (only for Admin)
+
 
 # --- WebSocket documentation section (non-standard) ---
 components:
@@ -699,6 +781,37 @@ components:
           type: string
           example: "010101123456"
 
+    WarehouseDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Main Warehouse"
+        address:
+          type: string
+          example: "123 Main St, City, Country"
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+          example: "AVAILABLE"
+
+    WarehouseUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Updated Warehouse Name"
+        address:
+          type: string
+          example: "456 Updated St, City, Country"
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+          example: "UNAVAILABLE"
 x-websocket:
   url: ws://localhost:3000?userId={userId}
   description: |
