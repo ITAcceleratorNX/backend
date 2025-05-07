@@ -68,7 +68,6 @@ export default function appFactory() {
     app.use('/auth', basicAuthRoutes);
     app.use('/storages', authenticateJWT, individualStorageRoutes);
     app.use('/warehouses', authenticateJWT, warehouseRoutes);
-    app.use('/api/users', userRoutes);
     app.use('/chats',authenticateJWT,chatRoutes)
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
