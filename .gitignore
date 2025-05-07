@@ -6,9 +6,10 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Logs
-log/
-*.log
-*.log.*
+/logs/
+logs/
+*.logs
+*.logs.*
 
 # Runtime
 pids/
@@ -53,6 +54,3 @@ static/
 
 # Docker
 docker-compose.override.yml
-
-#Logs
-log/

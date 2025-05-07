@@ -19,6 +19,7 @@ import sequelize from "../database.js";
 import logger from "../../utils/winston/logger.js";
 import {errorHandler} from "../../middleware/errorHandler.js";
 import chatRoutes from "../../routes/chat/ChatRoutes.js";
+import priceRoutes from "../../routes/price/PriceRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -26,7 +27,7 @@ export default function appFactory() {
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
     app.use(cors({
-        origin: ['http://localhost:5173', 'https://frontend-bice-xi-99.vercel.app'],
+        origin: ['http://localhost:5173', 'https://frontend-19x7.onrender.com'],
         credentials: true
     }));
 
@@ -69,6 +70,8 @@ export default function appFactory() {
     app.use('/warehouses', authenticateJWT, warehouseRoutes);
     app.use('/api/users', userRoutes);
     app.use('/chats',authenticateJWT,chatRoutes)
+    app.use('/users', userRoutes);
+    app.use('/prices', priceRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
