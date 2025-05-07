@@ -375,7 +375,7 @@ paths:
         '404':
           description: Не найден
 
-  /price:
+  /prices:
     get:
       tags:
         - Price
@@ -411,7 +411,7 @@ paths:
         400:
           description: Неверные данные или цена уже существует
 
-  /price/{type}:
+  /prices/{type}:
     get:
       tags:
         - Price
@@ -434,7 +434,7 @@ paths:
         404:
           description: Цена не найдена
 
-  /price/{id}:
+  /prices/{id}:
     put:
       tags:
         - Price
