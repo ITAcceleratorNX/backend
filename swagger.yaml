@@ -171,6 +171,8 @@ paths:
                       password_error: Password is required
   /chats/{chatId}/messages:
     get:
+      tags:
+        - Chat
       summary: Получить сообщения чата с пагинацией
       parameters:
         - in: path
@@ -205,6 +207,8 @@ paths:
                     type: boolean
     delete:
       summary: Удалить все сообщения
+      tags:
+        - Chat
       parameters:
         - in: path
           name: chatId
@@ -218,6 +222,8 @@ paths:
   /chats/{chatId}/manager:
     put:
       summary: Назначить менеджера
+      tags:
+        - Chat
       parameters:
         - in: path
           name: chatId
