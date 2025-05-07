@@ -18,6 +18,7 @@ import sequelize from "../database.js";
 
 import logger from "../../utils/winston/logger.js";
 import {errorHandler} from "../../middleware/errorHandler.js";
+import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
 
 export default function appFactory() {
@@ -67,6 +68,7 @@ export default function appFactory() {
     app.use('/auth', basicAuthRoutes);
     app.use('/storages', authenticateJWT, individualStorageRoutes);
     app.use('/warehouses', authenticateJWT, warehouseRoutes);
+    app.use('/chats',authenticateJWT,chatRoutes)
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
 
