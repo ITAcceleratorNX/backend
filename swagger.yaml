@@ -169,6 +169,74 @@ paths:
                       email_error: Email is required
                       unique_code_error: Unique code is required
                       password_error: Password is required
+  /chats/{chatId}/messages:
+    get:
+      summary: Получить сообщения чата с пагинацией
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: beforeId
+          schema:
+            type: integer
+          description: Вернуть сообщения до указанного ID
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Максимум сообщений
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  hasMore:
+                    type: boolean
+    delete:
+      summary: Удалить все сообщения
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешно
+
+  /chats/{chatId}/manager:
+    put:
+      summary: Назначить менеджера
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newManagerId]
+              properties:
+                newManagerId:
+                  type: integer
+      responses:
+        '200':
+          description: OK
 
   /auth/check-email:
     post:
@@ -667,6 +735,36 @@ paths:
 # --- WebSocket documentation section (non-standard) ---
 components:
   schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        chat_id:
+          type: integer
+        sender_id:
+          type: integer
+        message:
+          type: string
+        is_from_user:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Chat:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        manager_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
     WebSocketMessage:
       type: object
       required: [type]
@@ -677,6 +775,21 @@ components:
         userId:
           type: integer
           example: 5
+        chatId:
+          type: integer
+          example: 1
+        senderId:
+          type: integer
+          example: 5
+        message:
+          type: string
+          example: "Привет!"
+        isFromUser:
+          type: boolean
+          example: true
+        managerId:
+          type: integer
+          example: 2
 
     FAQ:
       type: object
