@@ -367,7 +367,7 @@ paths:
     post:
       tags:
         - FAQ
-      summary: Создать новый FAQ (только для ADMIN)
+      summary: Создать новый FAQ (только для ADMIN и MANAGER)
       security:
         - bearerAuth: [ ]
       requestBody:
@@ -410,7 +410,7 @@ paths:
     put:
       tags:
         - FAQ
-      summary: Обновить FAQ по ID (только для ADMIN)
+      summary: Обновить FAQ по ID (только для ADMIN и MANAGER)
       security:
         - bearerAuth: [ ]
       parameters:
@@ -434,7 +434,7 @@ paths:
     delete:
       tags:
         - FAQ
-      summary: Удалить FAQ по ID (только для ADMIN)
+      summary: Удалить FAQ по ID (только для ADMIN и MANAGER)
       security:
         - bearerAuth: [ ]
       parameters:
@@ -466,7 +466,7 @@ paths:
     post:
       tags:
         - Price
-      summary: Создать новую цену (только для ADMIN)
+      summary: Создать новую цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
       requestBody:
@@ -512,7 +512,7 @@ paths:
     put:
       tags:
         - Price
-      summary: Обновить цену (только для ADMIN)
+      summary: Обновить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
       parameters:
@@ -545,7 +545,7 @@ paths:
     delete:
       tags:
         - Price
-      summary: Удалить цену (только для ADMIN)
+      summary: Удалить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
       parameters:
@@ -573,7 +573,7 @@ paths:
     get:
       tags:
         - User
-      summary: Get all users
+      summary: Get all users (ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
       responses:
@@ -652,14 +652,12 @@ paths:
           description: User not found
         401:
           description: Unauthorized
-        403:
-          description: Forbidden (Admin only)
 
   /warehouses:
     post:
       tags:
         - Warehouse
-      summary: Create a new warehouse (Admin only)
+      summary: Create a new warehouse (Admin and MANAGER)
       security:
         - cookieAuth: [ ]
       requestBody:
@@ -710,7 +708,7 @@ paths:
     put:
       tags:
         - Warehouse
-      summary: Update warehouse by ID (Admin only)
+      summary: Update warehouse by ID (Admin and MANAGER)
       security:
         - cookieAuth: [ ]
       parameters:
