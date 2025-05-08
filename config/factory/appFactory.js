@@ -44,7 +44,7 @@ export default function appFactory() {
         resave: false,
         saveUninitialized: true
     }));
-    sequelize.sync({ alter: true }) // или force: true, если можно удалить и пересоздать
+    sequelize.sync({ alter: true })
         .then(() => {
             console.log('✅ Все таблицы синхронизированы');
         })
@@ -67,8 +67,8 @@ export default function appFactory() {
     });
     app.use('/auth', googleAuthRoutes);
     app.use('/auth', basicAuthRoutes);
-    app.use('/storages', authenticateJWT, individualStorageRoutes);
-    app.use('/warehouses', authenticateJWT, warehouseRoutes);
+    app.use('/storages', individualStorageRoutes);
+    app.use('/warehouses', warehouseRoutes);
     app.use('/chats',authenticateJWT,chatRoutes)
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
