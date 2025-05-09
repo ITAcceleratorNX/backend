@@ -7,8 +7,8 @@ import {authenticateJWT, authorizeAdminOrManager} from "../../middleware/jwt.js"
 const router = express.Router();
 
 router.get("/", authenticateJWT, authorizeAdminOrManager, UserController.getAllUsers);
-router.get("/:id", authenticateJWT, UserController.getUserById);
-router.put("/:id", authenticateJWT, validateBody(UpdateUserDto), UserController.updateUser);
-router.delete("/:id", authenticateJWT, UserController.deleteUser);
+router.get("/me", authenticateJWT, UserController.getUserById);
+router.put("/me", authenticateJWT, validateBody(UpdateUserDto), UserController.updateUser);
+router.delete("/me", authenticateJWT, UserController.deleteUser);
 
 export default router;
