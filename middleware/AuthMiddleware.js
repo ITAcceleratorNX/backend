@@ -46,3 +46,13 @@ export const checkEmailAndPassword = (req, res, next) => {
 
     next();
 };
+
+export const logout = (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+    });
+    res.status(200).json({ message: 'Успешный выход.' });
+}
