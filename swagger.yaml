@@ -9,6 +9,25 @@ servers:
   - url: https://extraspace-backend.onrender.com
 
 paths:
+  /logout:
+    get:
+      tags:
+        - Auth
+      summary: Выход из аккаунта
+      description: Удаляет JWT токен из cookies, тем самым выполняя logout пользователя.
+      responses:
+        '200':
+          description: Успешный выход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Успешный выход.
+        '500':
+          description: Внутренняя ошибка сервера
   /auth/google:
     get:
       summary: Авторизация через Google
