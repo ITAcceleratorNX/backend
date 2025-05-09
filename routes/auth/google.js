@@ -9,11 +9,11 @@ router.get('/google', passport.authenticate('google', {
 }));
 
 router.get('/google/callback', passport.authenticate('google', {
-    failureRedirect: '/'
+    failureRedirect: process.env.FRONTEND_URL + "/login"
 }), (req, res) => {
     const token = req.user.token;
     setTokenCookie(res, token);
-    res.redirect(`https://extraspace-backend.onrender.com`);
+    res.redirect(process.env.FRONTEND_URL);
 });
 
 router.get('/logout', (req, res) => {
