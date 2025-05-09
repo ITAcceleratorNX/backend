@@ -603,11 +603,11 @@ paths:
         401:
           description: Unauthorized (no token)
 
-  /users/{id}:
+  /users/me:
     get:
       tags:
         - User
-      summary: Get user by ID
+      summary: Get user info
       security:
         - cookieAuth: [ ]
       parameters:
@@ -627,7 +627,7 @@ paths:
     put:
       tags:
         - User
-      summary: Update user by ID
+      summary: Update user
       security:
         - cookieAuth: [ ]
       parameters:
@@ -655,7 +655,7 @@ paths:
     delete:
       tags:
         - User
-      summary: Delete user by ID
+      summary: Delete user
       security:
         - cookieAuth: [ ]
       parameters:
