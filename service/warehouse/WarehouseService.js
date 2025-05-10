@@ -23,4 +23,12 @@ export class WarehouseService {
     static async getAllWarehouses() {
         return await Warehouse.findAll();
     }
+
+    static async deleteWarehouseById(warehouseId) {
+        const warehouse = await Warehouse.findByPk(warehouseId);
+        if (!warehouse) {
+            throw new Error('Warehouse not found');
+        }
+        await warehouse.destroy();
+    }
 }

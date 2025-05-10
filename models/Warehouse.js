@@ -15,6 +15,22 @@ export const Warehouse = sequelize.define('Warehouse', {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    latitude: {
+        type: DataTypes.DECIMAL(10, 8),
+        allowNull: false
+    },
+    longitude: {
+        type: DataTypes.DECIMAL(10, 8),
+        allowNull: false
+    },
+    work_start: {
+        type: DataTypes.TIME,
+        allowNull: false
+    },
+    work_end: {
+        type: DataTypes.TIME,
+        allowNull: false
+    },
     status: {
         type: DataTypes.ENUM("AVAILABLE", "UNAVAILABLE"),
         allowNull: false,
