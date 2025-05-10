@@ -40,4 +40,13 @@ export class WarehouseController {
             res.status(400).json({ message: error.message });
         }
     }
+
+    static async delete(req, res) {
+        try {
+            const warehouse = await WarehouseService.deleteWarehouseById(req.params.id);
+            res.status(200).json(warehouse);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
+        }
+    }
 }

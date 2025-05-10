@@ -10,5 +10,6 @@ router.post('/', authenticateJWT, authorizeAdminOrManager, validateBody(Warehous
 router.get('/', WarehouseController.getAll);
 router.get('/:id', WarehouseController.getById);
 router.put('/:id', authenticateJWT, authorizeAdminOrManager, validateBody(WarehouseUpdateDto), WarehouseController.update);
+router.delete("/:id", authenticateJWT, authorizeAdminOrManager, WarehouseController.delete);
 
 export default router;
