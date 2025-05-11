@@ -14,7 +14,7 @@ export const getUserById = async (id) => {
 };
 
 export const updateUser = async (id, data) => {
-    return await User.update(data, { where: { user_id: id } });
+    return await User.update(data, { where: { id: id } });
 };
 
 export const deleteUser = async (id) => {
