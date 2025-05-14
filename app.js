@@ -11,7 +11,15 @@ const startServer = async () => {
         console.log('Подключение к PostgreSQL установлено.');
 
         if (process.env.NODE_ENV === "development") {
-            await sequelize.sync({alter:true});
+            //await sequelize.sync({alter:false});
+            sequelize.authenticate()
+                .then(() => {
+                    console.log('✅ Қосылу сәтті');
+                })
+                .catch(err => {
+                    console.error('❌ Қосылу қатесі:', err);
+                });
+
             console.log('Модели синхронизированы с БД.');
         }
 

@@ -17,10 +17,11 @@ import { setWSS } from "../ws.js";
 import sequelize from "../database.js";
 
 import logger from "../../utils/winston/logger.js";
-import {errorHandler} from "../../middleware/errorHandler.js";
+import { errorHandler } from "../../middleware/errorHandler.js";
 import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
 import FAQRoutes from "../../routes/faq/FAQRoutes.js";
+import StorageRoutes from "../../routes/storage/StorageRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -39,18 +40,22 @@ export default function appFactory() {
     const swaggerFile = fs.readFileSync('./swagger.yaml', 'utf8');
     const swaggerDocument = yaml.parse(swaggerFile);
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
     app.use(session({
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: true
     }));
+
+    // ❌ force: true болмайды! ✅ alter: true — кестені жоймайды
     sequelize.sync({ alter: true })
         .then(() => {
-            console.log('✅ Все таблицы синхронизированы');
+            console.log('✅ Все таблицы синхронизированы (без удаления данных)');
         })
         .catch((err) => {
             console.error('❌ Ошибка синхронизации таблиц:', err);
         });
+
     app.use((req, res, next) => {
         logger.info(`Request: ${req.method} ${req.url}`);
         next();
@@ -58,6 +63,7 @@ export default function appFactory() {
 
     app.use(passport.initialize());
     app.use(passport.session());
+
     app.get('/', (req, res) => {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
@@ -65,11 +71,14 @@ export default function appFactory() {
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
+
+    // Маршруты
     app.use('/auth', googleAuthRoutes);
     app.use('/auth', basicAuthRoutes);
+    app.use("/api/storages", StorageRoutes);
     app.use('/storages', individualStorageRoutes);
     app.use('/warehouses', warehouseRoutes);
-    app.use('/chats',authenticateJWT,chatRoutes)
+    app.use('/chats', authenticateJWT, chatRoutes);
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
     app.use('/faq', FAQRoutes);
@@ -77,7 +86,9 @@ export default function appFactory() {
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
+
     app.use(errorHandler);
+    app.use('/uploads', express.static('uploads'));
 
     return { app, server };
 }

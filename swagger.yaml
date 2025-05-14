@@ -9,6 +9,22 @@ servers:
   - url: https://extraspace-backend.onrender.com
 
 paths:
+  /storages/upload-image:
+    post:
+      summary: Upload image for storage
+      tags:
+        - Storages
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: image
+          type: file
+          required: true
+          description: Image file to upload
+      responses:
+        200:
+          description: Successful upload
   /logout:
     get:
       tags:

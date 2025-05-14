@@ -5,7 +5,7 @@ export const getAllStorages = async (req, res) => {
         const result = await storageService.getAll();
         return res.json(result);
     } catch (err) {
-        console.error('Get all IND storages error:', err);
+        console.error('Get all storages error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -20,20 +20,45 @@ export const getStorageById = async (req, res) => {
 
         return res.json(result);
     } catch (err) {
-        console.error('Get IND storage by ID error:', err);
+        console.error('Get storage by ID error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 export const createStorage = async (req, res) => {
     try {
-        const result = await storageService.create(req.body);
-        return res.status(201).json(result);
-    } catch (err) {
-        console.error('Create IND storage error:', err);
-        return res.status(500).json({ error: 'Internal server error' });
+        const file = req.file;
+        const imageUrl = file?.path || null;
+
+        // Пішіннен сандарды шығарып алу және тексеру
+        const length = parseFloat(req.body.length);
+        const width = parseFloat(req.body.width);
+        const height = parseFloat(req.body.height);
+
+        if (isNaN(length) || isNaN(width) || isNaN(height)) {
+            return res.status(400).json({ error: 'Length, width, and height must be numbers' });
+        }
+
+        // ✅ Көлемді есептеу
+        const total_volume = +(length * width * height).toFixed(2);
+
+        const storage = await storageService.create({
+            ...req.body,
+            length,
+            width,
+            height,
+            total_volume,
+            available_volume: total_volume,
+            image_url: imageUrl,
+        });
+
+        res.status(201).json(storage);
+    } catch (error) {
+        console.error("❌ Error in createStorage:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 export const updateStorage = async (req, res) => {
     try {
@@ -45,7 +70,7 @@ export const updateStorage = async (req, res) => {
 
         return res.json({ updated: updatedCount });
     } catch (err) {
-        console.error('Update IND storage error:', err);
+        console.error('Update storage error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -60,7 +85,8 @@ export const deleteStorage = async (req, res) => {
 
         return res.json({ deleted: deletedCount });
     } catch (err) {
-        console.error('Delete IND error:', err);
+        console.error('Delete storage error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
