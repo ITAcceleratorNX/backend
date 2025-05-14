@@ -38,7 +38,8 @@ describe('Auth Controller', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 user_exists: false,
-                email: 'test@example.com'
+                email: 'test@example.com',
+                unique_code: '123456',
             });
         });
 

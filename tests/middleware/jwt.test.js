@@ -69,7 +69,7 @@ describe('Test authenticateJWT and authorizeAdmin middlewares', () => {
             authorizeAdmin(req, res, next);
 
             expect(res.status).toHaveBeenCalledWith(403);
-            expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для Admin.' });
+            expect(res.json).toHaveBeenCalledWith({ message: 'Доступ запрещён. Только для ADMIN.' });
             expect(next).not.toHaveBeenCalled();
         });
 
