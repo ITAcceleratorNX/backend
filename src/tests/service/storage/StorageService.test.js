@@ -40,7 +40,7 @@ describe("StorageService", () => {
 
         const result = await service.create(input);
 
-        expect(Storage.create).toHaveBeenCalledWith(input, { transaction: undefined });
+        expect(Storage.create).toHaveBeenCalledWith(input, undefined);
         expect(result).toEqual(created);
     });
 
