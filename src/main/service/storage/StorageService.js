@@ -1,16 +1,11 @@
-import {Storage,StorageCells} from "../../models/init/index.js";
+import {Storage} from "../../models/init/index.js";
 
 export const getAll = async () => {
     return Storage.findAll();
 };
 
-export const getById = async (id) => {
-    return Storage.findByPk(id, {
-        include: {
-            model: StorageCells,
-            as: 'cells'
-        }
-    });
+export const getById = async (id, options = {}) => {
+    return Storage.findByPk(id, options);
 };
 
 export const create = async (data, options) => {

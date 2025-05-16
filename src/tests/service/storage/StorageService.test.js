@@ -24,12 +24,7 @@ describe("StorageService", () => {
 
         const result = await service.getById(1);
 
-        expect(Storage.findByPk).toHaveBeenCalledWith(1, {
-            include: {
-                model: expect.any(Function),
-                as: "cells",
-            },
-        });
+        expect(Storage.findByPk).toHaveBeenCalledWith(1, {});
         expect(result).toEqual(mockData);
     });
 

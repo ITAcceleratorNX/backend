@@ -1,5 +1,5 @@
 import Callback from '../Callback.js';
-import Contract from '../Contract.js';
+import Order from '../Order.js';
 import FAQ from '../Faq.js';
 import MovingOrder from '../MovingOrder.js';
 import Notification from '../Notification.js';
@@ -13,18 +13,19 @@ import Warehouse from '../Warehouse.js';
 import Chat from "../Chat.js";
 import Message from "../Message.js";
 import StorageCells from "../StorageCells.js";
+import OrderCells from "../OrderCell.js";
 
 // Contract - User
-Contract.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Contract, { foreignKey: 'user_id' });
+Order.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Order, { foreignKey: 'user_id' });
 
 // Contract - Storage
-Contract.belongsTo(Storage, { foreignKey: 'storage_id' });
-Storage.hasMany(Contract, { foreignKey: 'storage_id' });
+Order.belongsTo(Storage, { foreignKey: 'storage_id' });
+Storage.hasMany(Order, { foreignKey: 'storage_id' });
 
 // MovingOrder - Contract
-MovingOrder.belongsTo(Contract, { foreignKey: 'contract_id' });
-Contract.hasMany(MovingOrder, { foreignKey: 'contract_id' });
+MovingOrder.belongsTo(Order, { foreignKey: 'contract_id' });
+Order.hasMany(MovingOrder, { foreignKey: 'contract_id' });
 
 // Notification - User
 Notification.belongsTo(User, { foreignKey: 'user_id' });
@@ -61,9 +62,23 @@ StorageCells.belongsTo(Storage, {
     as: 'storage'
 });
 
+//Order - OrderCell
+Order.belongsToMany(StorageCells, {
+    through: OrderCells,
+    foreignKey: 'order_id',
+    otherKey: 'cell_id',
+});
+
+StorageCells.belongsToMany(Order, {
+    through: OrderCells,
+    foreignKey: 'cell_id',
+    otherKey: 'order_id',
+});
+
 export {
     Callback,
-    Contract,
+    Order,
+    OrderCells,
     FAQ,
     MovingOrder,
     Notification,

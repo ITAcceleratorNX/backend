@@ -8,7 +8,7 @@ export const Price = sequelize.define('Price', {
         autoIncrement: true
     },
     type: {
-        type: DataTypes.ENUM("INDIVIDUAL_STORAGE", "CLOUD_STORAGE", "RACK_STORAGE", "MOVING"),
+        type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "MOVING"),
         allowNull: false
     },
     amount: {
