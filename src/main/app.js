@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
-import {sequelize} from './config/database.js';
+import {sequelize, initDb} from './config/database.js';
 import appFactory from './config/factory/appFactory.js';
 
 dotenv.config();
+
 const app = appFactory();
 
 const startServer = async () => {
@@ -10,13 +11,15 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('Подключение к PostgreSQL установлено.');
 
-        if (process.env.NODE_ENV === "development") {
-            await sequelize.sync({alter:true});
-            console.log('Модели синхронизированы с БД.');
-        }
+        await initDb();
 
+        console.log('Миграции выполнены, сервер запускается.');
+
+        app.listen(process.env.PORT || 8080, () => {
+            console.log(`Сервер запущен на порту ${process.env.PORT || 8080}`);
+        });
     } catch (error) {
-        console.error('Ошибка при подключении:', error);
+        console.error('Ошибка при запуске сервера:', error);
         process.exit(1);
     }
 };
@@ -24,6 +27,5 @@ const startServer = async () => {
 if (process.env.NODE_ENV !== 'test') {
     startServer();
 }
-
 
 export default app;

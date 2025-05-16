@@ -1,6 +1,5 @@
-// models/Chat.js
 import {DataTypes} from 'sequelize';
-import sequelize from '../config/database.js';
+import {sequelize} from '../config/database.js';
 
 export const Chat = sequelize.define('Chat', {
     user_id: DataTypes.INTEGER,

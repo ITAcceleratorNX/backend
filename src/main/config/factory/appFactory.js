@@ -14,15 +14,16 @@ import userRoutes from '../../routes/user/UserRoutes.js';
 import cookieParser from 'cookie-parser';
 import http from "http";
 import { setWSS } from "../ws.js";
-import sequelize from "../database.js";
-
 import logger from "../../utils/winston/logger.js";
 import {errorHandler} from "../../middleware/errorHandler.js";
 import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
 import FAQRoutes from "../../routes/faq/FAQRoutes.js";
+import {initDb, sequelize} from "../database.js";
 
-export default function appFactory() {
+export default async function appFactory() {
+    await initDb();
+    await sequelize.authenticate();
     const app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
@@ -44,13 +45,6 @@ export default function appFactory() {
         resave: false,
         saveUninitialized: true
     }));
-    sequelize.sync({ alter: true })
-        .then(() => {
-            console.log('✅ Все таблицы синхронизированы');
-        })
-        .catch((err) => {
-            console.error('❌ Ошибка синхронизации таблиц:', err);
-        });
     app.use((req, res, next) => {
         logger.info(`Request: ${req.method} ${req.url}`);
         next();

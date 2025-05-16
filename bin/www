@@ -4,7 +4,7 @@ import debug from 'debug';
 
 const serverDebug = debug('extraspace:server');
 
-const { app, server } = appFactory();
+const { app, server } = await appFactory();
 const port = normalizePort(process.env.PORT || '5000');
 app.set('port', port);
 
