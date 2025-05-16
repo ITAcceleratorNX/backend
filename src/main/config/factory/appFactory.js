@@ -20,6 +20,7 @@ import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
 import FAQRoutes from "../../routes/faq/FAQRoutes.js";
 import {initDb, sequelize} from "../database.js";
+import orderRoutes from "../../routes/order/OrderRoutes.js";
 
 export default async function appFactory() {
     await initDb();
@@ -67,6 +68,7 @@ export default async function appFactory() {
     app.use('/users', userRoutes);
     app.use('/prices', priceRoutes);
     app.use('/faq', FAQRoutes);
+    app.use('/orders', orderRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });

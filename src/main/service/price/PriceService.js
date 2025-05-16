@@ -2,9 +2,14 @@ import {Price} from "../../models/init/index.js";
 import {CalculatePriceDto} from "../../dto/price/Pirce.dto.js";
 
 export const calculate = async (data, res) => {
+    let dto;
     try {
-        const dto = CalculatePriceDto.parse(data);
-
+        dto = CalculatePriceDto.parse(data);
+    } catch (error) {
+        console.error('Calculate price error:', error);
+        res.status(400).json({ error: "Invalid date" });
+        return;
+    }
         const price = await getByType(dto.type);
 
         if (!price) {
@@ -18,11 +23,7 @@ export const calculate = async (data, res) => {
 
         const monthlyCost = amount * area * month;
         const dailyCost = (amount * area / 30) * day;
-        return res.status(200).json({ price: monthlyCost + dailyCost })
-    } catch (error) {
-        console.error('Calculate price error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
+        return  monthlyCost + dailyCost;
 }
 
 
