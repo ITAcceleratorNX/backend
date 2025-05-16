@@ -30,23 +30,11 @@ const Storage = sequelize.define('Storage', {
     image_url: {
         type: DataTypes.STRING(255)
     },
-    length: {
-        type: DataTypes.DECIMAL,
-        allowNull: false
-    },
-    width: {
-        type: DataTypes.DECIMAL,
-        allowNull: false
-    },
     height: {
         type: DataTypes.DECIMAL,
         allowNull: false
     },
     total_volume: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
-    },
-    available_volume: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },

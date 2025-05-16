@@ -12,6 +12,7 @@ import User from '../User.js';
 import Warehouse from '../Warehouse.js';
 import Chat from "../Chat.js";
 import Message from "../Message.js";
+import StorageCells from "../StorageCells.js";
 
 // Contract - User
 Contract.belongsTo(User, { foreignKey: 'user_id' });
@@ -49,6 +50,17 @@ Message.belongsTo(Chat, { foreignKey: 'chat_id' });
 Transaction.belongsTo(MovingOrder, { foreignKey: 'order_id' });
 MovingOrder.hasMany(Transaction, { foreignKey: 'order_id' });
 
+// Storage - StorageCells
+Storage.hasMany(StorageCells, {
+    foreignKey: 'storage_id',
+    as: 'cells'
+});
+
+StorageCells.belongsTo(Storage, {
+    foreignKey: 'storage_id',
+    as: 'storage'
+});
+
 export {
     Callback,
     Contract,
@@ -63,5 +75,6 @@ export {
     User,
     Warehouse,
     Chat,
-    Message
+    Message,
+    StorageCells
 };
