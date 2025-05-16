@@ -1,4 +1,6 @@
 import * as storageService from "../../service/storage/StorageService.js";
+import * as storageCellsService from "../../service/storage/StorageCellsService.js";
+import {sequelize} from "../../config/database.js";
 
 export const getAllStorages = async (req, res) => {
     try {
@@ -27,8 +29,24 @@ export const getStorageById = async (req, res) => {
 
 export const createStorage = async (req, res) => {
     try {
-        const result = await storageService.create(req.body);
-        return res.status(201).json(result);
+        await sequelize.transaction(async (t) => {
+            const storage = await storageService.create(req.body, { transaction: t });
+
+            const cells = [];
+            for (let x = 1; x <= req.body.columns; x++) {
+                for (let y = 1; y <= req.body.rows; y++) {
+                    cells.push({
+                        storage_id: storage.id,
+                        x,
+                        y
+                    });
+                }
+            }
+
+            await storageCellsService.createCells(cells, { transaction: t });
+        });
+
+        res.status(201).json({ message: 'Storage created successfully' });
     } catch (err) {
         console.error('Create IND storage error:', err);
         return res.status(500).json({ error: 'Internal server error' });

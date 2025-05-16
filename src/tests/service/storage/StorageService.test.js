@@ -24,7 +24,12 @@ describe("StorageService", () => {
 
         const result = await service.getById(1);
 
-        expect(Storage.findByPk).toHaveBeenCalledWith(1);
+        expect(Storage.findByPk).toHaveBeenCalledWith(1, {
+            include: {
+                model: expect.any(Function),
+                as: "cells",
+            },
+        });
         expect(result).toEqual(mockData);
     });
 
@@ -35,7 +40,7 @@ describe("StorageService", () => {
 
         const result = await service.create(input);
 
-        expect(Storage.create).toHaveBeenCalledWith(input);
+        expect(Storage.create).toHaveBeenCalledWith(input, { transaction: undefined });
         expect(result).toEqual(created);
     });
 
