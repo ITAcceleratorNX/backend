@@ -1,7 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import cors from 'cors';
-import passport from '../../config/passport.js';
+import passport from '../passport.js';
 import googleAuthRoutes from '../../routes/auth/google.js';
 import basicAuthRoutes from '../../routes/auth/BasicAuthRouter.js';
 import { authenticateJWT } from "../../middleware/jwt.js";

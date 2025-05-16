@@ -1,6 +1,6 @@
-import { emailVerifyCodesByUserId } from "../../../utils/crypto/UniqueCodeGenerator.js";
-import "../../../service/job/VerifyCodeCleaner.js";
-import {cleanExpiredCodes} from "../../../service/job/VerifyCodeCleaner.js";
+import { emailVerifyCodesByUserId } from "../../../main/utils/crypto/UniqueCodeGenerator.js";
+import "../../../main/service/job/VerifyCodeCleaner.js";
+import {cleanExpiredCodes} from "../../../main/service/job/VerifyCodeCleaner.js";
 
 describe('cleanExpiredCodes()', () => {
     beforeEach(() => {

@@ -1,7 +1,7 @@
-import { ChatService } from '../../../service/chat/ChatService.js';
-import { Chat, Message } from '../../../models/init/index.js';
+import { ChatService } from '../../../main/service/chat/ChatService.js';
+import { Chat, Message } from '../../../main/models/init/index.js';
 
-jest.mock('../../../models/init/index.js', () => ({
+jest.mock('../../../main/models/init/index.js', () => ({
     Chat: {
         findByPk: jest.fn()
     },

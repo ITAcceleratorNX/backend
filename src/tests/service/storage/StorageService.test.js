@@ -1,7 +1,7 @@
-import * as service from "../../../service/storage/StorageService.js";
-import {Storage} from "../../../models/init/index.js";
+import * as service from "../../../main/service/storage/StorageService.js";
+import {Storage} from "../../../main/models/init/index.js";
 
-jest.mock("../../../models/init/index.js");
+jest.mock("../../../main/models/init/index.js");
 
 describe("StorageService", () => {
     afterEach(() => {

@@ -1,9 +1,9 @@
 import request from 'supertest';
 import express from 'express';
-import {errorHandler} from '../../middleware/errorHandler';
-import logger from '../../utils/winston/logger.js';
+import {errorHandler} from '../../main/middleware/errorHandler.js';
+import logger from '../../main/utils/winston/logger.js';
 
-jest.mock('../../utils/winston/logger.js', () => ({
+jest.mock('../../main/utils/winston/logger.js', () => ({
     error: jest.fn(),
 }));
 

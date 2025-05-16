@@ -1,63 +1,63 @@
-import * as service from "../../../service/faq/FAQService.js";
-import {FAQ} from "../../../models/init/index.js";
+import * as service from "../../../main/service/price/PriceService.js";
+import {Price} from "../../../main/models/init/index.js";
 
-jest.mock("../../../models/init/index.js");
+jest.mock("../../../main/models/init/index.js");
 
-describe("FAQService", () => {
+describe("Price Service", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
 
-    test("getAll should return all FAQ", async () => {
+    test("getAll should return all prices", async () => {
         const mockData = [{ id: 1 }, { id: 2 }];
-        FAQ.findAll.mockResolvedValue(mockData);
+        Price.findAll.mockResolvedValue(mockData);
 
         const result = await service.getAll();
 
-        expect(FAQ.findAll).toHaveBeenCalled();
+        expect(Price.findAll).toHaveBeenCalled();
         expect(result).toEqual(mockData);
     });
 
-    test("getById should return one FAQ", async () => {
+    test("getById should return one price", async () => {
         const mockData = { id: 1 };
-        FAQ.findByPk.mockResolvedValue(mockData);
+        Price.findByPk.mockResolvedValue(mockData);
 
         const result = await service.getById(1);
 
-        expect(FAQ.findByPk).toHaveBeenCalledWith(1);
+        expect(Price.findByPk).toHaveBeenCalledWith(1);
         expect(result).toEqual(mockData);
     });
 
-    test("should create a FAQ", async () => {
-        const input = { name: "FAQ A" };
+    test("should create a price", async () => {
+        const input = { amount: 1234, type: "INDIVIDUAL_STORAGE" };
         const created = { id: 1, ...input };
-        FAQ.create.mockResolvedValue(created);
+        Price.create.mockResolvedValue(created);
 
         const result = await service.create(input);
 
-        expect(FAQ.create).toHaveBeenCalledWith(input);
+        expect(Price.create).toHaveBeenCalledWith(input);
         expect(result).toEqual(created);
     });
 
     test("update should call update with correct params", async () => {
         const id = 5;
         const updateData = { name: "Updated" };
-        FAQ.update.mockResolvedValue([1]);
+        Price.update.mockResolvedValue([1]);
 
         const result = await service.update(id, updateData);
 
-        expect(FAQ.update).toHaveBeenCalledWith(updateData, {
+        expect(Price.update).toHaveBeenCalledWith(updateData, {
             where: { id: id },
         });
         expect(result).toEqual([1]);
     });
 
     test("deleteById should delete by id", async () => {
-        FAQ.destroy.mockResolvedValue(1);
+        Price.destroy.mockResolvedValue(1);
 
         const result = await service.deleteById(3);
 
-        expect(FAQ.destroy).toHaveBeenCalledWith({
+        expect(Price.destroy).toHaveBeenCalledWith({
             where: { id: 3 },
         });
         expect(result).toBe(1);

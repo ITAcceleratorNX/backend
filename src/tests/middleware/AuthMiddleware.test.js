@@ -1,4 +1,4 @@
-import {checkEmailAndPassword, checkEmailAndUniqueCode, checkEmailExists} from "../../middleware/AuthMiddleware.js";
+import {checkEmailAndPassword, checkEmailAndUniqueCode, checkEmailExists} from "../../main/middleware/AuthMiddleware.js";
 describe('Middleware tests', () => {
 
     const mockRequest = (body) => {

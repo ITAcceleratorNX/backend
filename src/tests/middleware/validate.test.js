@@ -1,7 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 import { z } from 'zod';
-import { validateBody } from '../../middleware/validate.js';
+import { validateBody } from '../../main/middleware/validate.js';
 
 const app = express();
 app.use(express.json());

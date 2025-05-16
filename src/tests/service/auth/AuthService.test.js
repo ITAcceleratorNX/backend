@@ -1,14 +1,14 @@
-import * as AuthService from '../../../service/auth/AuthService.js';
-import {User} from '../../../models/init/index.js';
-import * as bcryptService from '../../../utils/bcrypt/BCryptService.js';
-import * as cryptoUtils from '../../../utils/crypto/UniqueCodeGenerator.js';
-import * as sendGrid from '../../../utils/sendgird/SendGrid.js';
+import * as AuthService from '../../../main/service/auth/AuthService.js';
+import {User} from '../../../main/models/init/index.js';
+import * as bcryptService from '../../../main/utils/bcrypt/BCryptService.js';
+import * as cryptoUtils from '../../../main/utils/crypto/UniqueCodeGenerator.js';
+import * as sendGrid from '../../../main/utils/sendgird/SendGrid.js';
 
-jest.mock('../../../models/init/index.js');
-jest.mock('../../../utils/sendgird/SendGrid.js');
-jest.mock('../../../utils/bcrypt/BCryptService.js');
-jest.mock('../../../utils/jwt/JwtService.js');
-jest.mock('../../../utils/crypto/UniqueCodeGenerator.js');
+jest.mock('../../../main/models/init/index.js');
+jest.mock('../../../main/utils/sendgird/SendGrid.js');
+jest.mock('../../../main/utils/bcrypt/BCryptService.js');
+jest.mock('../../../main/utils/jwt/JwtService.js');
+jest.mock('../../../main/utils/crypto/UniqueCodeGenerator.js');
 
 describe('Auth Controller', () => {
     const mockRes = () => {

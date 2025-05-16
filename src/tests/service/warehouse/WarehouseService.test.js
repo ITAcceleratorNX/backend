@@ -1,7 +1,7 @@
-import { WarehouseService } from '../../../service/warehouse/WarehouseService.js';
-import { Warehouse } from '../../../models/init/index.js';
+import { WarehouseService } from '../../../main/service/warehouse/WarehouseService.js';
+import { Warehouse } from '../../../main/models/init/index.js';
 
-jest.mock('../../../models/init/index.js');
+jest.mock('../../../main/models/init/index.js');
 
 describe('WarehouseService', () => {
     afterEach(() => {

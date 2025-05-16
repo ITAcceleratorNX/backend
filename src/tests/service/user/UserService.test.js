@@ -1,9 +1,9 @@
 // tests/service/storage/UserService.test.js
 
-import * as UserService from '../../../service/user/UserService.js';
-import User from '../../../models/User.js';
+import * as UserService from '../../../main/service/user/UserService.js';
+import User from '../../../main/models/User.js';
 
-jest.mock('../../../models/User.js');
+jest.mock('../../../main/models/User.js');
 
 describe('🧪 UserService Тесттері', () => {
     afterEach(() => {
