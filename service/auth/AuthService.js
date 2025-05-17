@@ -25,19 +25,12 @@ export async function checkEmail(req, res) {
     try {
         const user = await findUserByEmail(email);
         if (!user) {
-            // Егер қолданушы жоқ болса ғана code қайтарылады
             let uniqueCode = generateSecureCode(email);
+            console.log("Generated unique code: ", uniqueCode, " for email: ", email);
             sendVerificationCode(email, uniqueCode);
-            return res.status(200).json({
-                user_exists: false,
-                email,
-                unique_code: uniqueCode, // ✅ Тек осы жерде келеді
-            });
+            return res.status(200).json({ user_exists: false, email });
         }
-
-// ✅ Қолданушы бар болса — тек бұл қайтады:
         return res.status(200).json({ user_exists: true });
-
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -83,10 +76,8 @@ export async function login(req, res) {
     const token = generateToken(user);
     setTokenCookie(res, token);
 
-    // ✅ Токенді JSON-мен клиентке қайтар
     return res.status(200).json({ success: true, token });
 }
-
 
 export async function restorePassword(req, res) {
     const { email, unique_code, password } = req.body;
@@ -112,13 +103,7 @@ export async function restorePassword(req, res) {
     setTokenCookie(res, token);
 
     console.log("Password restored for user: ", user.email);
-
-    console.log("TOKEN:", token); // ✅ Тексеру үшін логта шығару
-
-    return res.status(200).json({
-        success: true,
-        token // ✅ міндетті түрде қайтарылуы керек
-    });
+    return res.status(200).json({ success: true });
 }
 
 export async function register(req, res) {
@@ -141,11 +126,9 @@ export async function register(req, res) {
     const user = await User.create({
         email,
         password_hash: await getHashedPassword(password),
-        role: email === process.env.ADMIN_EMAIL ? 'ADMIN' : 'USER',
+        role_code: 1,
         last_login: Date.now()
     });
-
-
 
     const token = generateToken(user);
     setTokenCookie(res, token);

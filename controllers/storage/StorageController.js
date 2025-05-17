@@ -39,7 +39,6 @@ export const createStorage = async (req, res) => {
             return res.status(400).json({ error: 'Length, width, and height must be numbers' });
         }
 
-        // ✅ Көлемді есептеу
         const total_volume = +(length * width * height).toFixed(2);
 
         const storage = await storageService.create({

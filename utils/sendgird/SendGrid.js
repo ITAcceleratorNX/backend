@@ -9,5 +9,4 @@ export async function sendVerificationCode(email, code) {
         text: `Ваш код подтверждения: ${code}`,
     };
     await sgMail.send(msg);
-    console.log(code);
 }

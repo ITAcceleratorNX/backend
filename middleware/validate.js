@@ -1,8 +1,6 @@
 export const validateBody = (schema) => (req, res, next) => {
     try {
-        console.log("🚨 [validateBody] Raw req.body:", req.body);
         req.body = schema.parse(req.body);
-        console.log("✅ [validateBody] After parse:", req.body);
         next();
     } catch (error) {
         console.error("❌ [validateBody] Zod error:", error);

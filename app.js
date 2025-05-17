@@ -8,23 +8,15 @@ const app = appFactory();
 const startServer = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Подключение к PostgreSQL установлено.');
+        console.log('✅ Connection successful');
 
         if (process.env.NODE_ENV === "development") {
-            //await sequelize.sync({alter:false});
-            sequelize.authenticate()
-                .then(() => {
-                    console.log('✅ Қосылу сәтті');
-                })
-                .catch(err => {
-                    console.error('❌ Қосылу қатесі:', err);
-                });
-
-            console.log('Модели синхронизированы с БД.');
+            //await sequelize.sync({alter: false});
+            console.log('🛠 In Development mode, models can be synchronized.');
         }
 
     } catch (error) {
-        console.error('Ошибка при подключении:', error);
+        console.error('❌ Connection error:', error);
         process.exit(1);
     }
 };
@@ -32,6 +24,5 @@ const startServer = async () => {
 if (process.env.NODE_ENV !== 'test') {
     startServer();
 }
-
 
 export default app;

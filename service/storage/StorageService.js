@@ -1,21 +1,15 @@
-import { Storage } from "../../models/init/index.js";
+import {Storage} from "../../models/init/index.js";
 
 export const getAll = async () => {
     return Storage.findAll();
 };
 
-export const getById = async (id) => {
-    return Storage.findByPk(id);
+export const getById = async (id, options = {}) => {
+    return Storage.findByPk(id, options);
 };
 
-export const create = async (data) => {
-    try {
-        console.log("📦 Creating storage with data:", data);
-        return await Storage.create(data);
-    } catch (err) {
-        console.error("🔥 StorageService.create error:", err);
-        throw err;
-    }
+export const create = async (data, options) => {
+    return Storage.create(data, options);
 };
 
 export const update = async (id, data) => {

@@ -21,7 +21,6 @@ import { errorHandler } from "../../middleware/errorHandler.js";
 import chatRoutes from "../../routes/chat/ChatRoutes.js";
 import priceRoutes from "../../routes/price/PriceRoutes.js";
 import FAQRoutes from "../../routes/faq/FAQRoutes.js";
-import StorageRoutes from "../../routes/storage/StorageRoutes.js";
 
 export default function appFactory() {
     const app = express();
@@ -47,7 +46,6 @@ export default function appFactory() {
         saveUninitialized: true
     }));
 
-    // ❌ force: true болмайды! ✅ alter: true — кестені жоймайды
     sequelize.sync({ alter: true })
         .then(() => {
             console.log('✅ Все таблицы синхронизированы (без удаления данных)');
@@ -75,7 +73,6 @@ export default function appFactory() {
     // Маршруты
     app.use('/auth', googleAuthRoutes);
     app.use('/auth', basicAuthRoutes);
-    app.use("/api/storages", StorageRoutes);
     app.use('/storages', individualStorageRoutes);
     app.use('/warehouses', warehouseRoutes);
     app.use('/chats', authenticateJWT, chatRoutes);
