@@ -1,9 +1,9 @@
-CREATE TABLE transaction_statuses (
+CREATE TABLE IF NOT EXISTS transaction_statuses (
     status_code VARCHAR(20) PRIMARY KEY,
     status_name VARCHAR(50)
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100),
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -16,7 +16,7 @@ CREATE TABLE users (
     role VARCHAR(10) NOT NULL DEFAULT 'USER' CHECK (role IN ('ADMIN', 'USER', 'MANAGER'))
 );
 
-CREATE TABLE warehouses (
+CREATE TABLE IF NOT EXISTS warehouses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
@@ -27,36 +27,33 @@ CREATE TABLE warehouses (
     status VARCHAR(12) NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE', 'UNAVAILABLE'))
 );
 
-CREATE TABLE payment_systems (
+CREATE TABLE IF NOT EXISTS payment_systems (
     payment_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     code VARCHAR(20) NOT NULL,
     is_active BOOLEAN
 );
 
-CREATE TABLE prices (
+CREATE TABLE IF NOT EXISTS prices (
     id SERIAL PRIMARY KEY,
     type VARCHAR(20) NOT NULL CHECK (type IN ('INDIVIDUAL_STORAGE', 'CLOUD_STORAGE', 'RACK_STORAGE', 'MOVING')),
     amount DECIMAL(10, 2) NOT NULL,
     CONSTRAINT unique_price_type UNIQUE (type)
 );
 
-CREATE TABLE storages (
+CREATE TABLE IF NOT EXISTS storages (
     id SERIAL PRIMARY KEY,
     warehouse_id INTEGER NOT NULL REFERENCES warehouses(id),
     name VARCHAR(50) NOT NULL,
     storage_type VARCHAR(10) NOT NULL CHECK (storage_type IN ('INDIVIDUAL', 'CLOUD', 'RACK')),
     description TEXT,
     image_url VARCHAR(255),
-    length DECIMAL NOT NULL,
-    width DECIMAL NOT NULL,
     height DECIMAL NOT NULL,
     total_volume DECIMAL(10, 2) NOT NULL,
-    available_volume DECIMAL(10, 2) NOT NULL,
     status VARCHAR(10) NOT NULL DEFAULT 'VACANT' CHECK (status IN ('OCCUPIED', 'VACANT'))
-);
+    );
 
-CREATE TABLE contracts (
+CREATE TABLE IF NOT EXISTS contracts (
     id SERIAL PRIMARY KEY,
     storage_id INTEGER NOT NULL REFERENCES storages(id),
     user_id INTEGER NOT NULL REFERENCES users(id),
@@ -74,7 +71,7 @@ CREATE TABLE contracts (
     updated_at DATE
 );
 
-CREATE TABLE moving_orders (
+CREATE TABLE IF NOT EXISTS moving_orders (
     id SERIAL PRIMARY KEY,
     contract_id INTEGER NOT NULL REFERENCES contracts(id),
     address_from VARCHAR(255) NOT NULL,
@@ -83,7 +80,7 @@ CREATE TABLE moving_orders (
     vehicle_type VARCHAR(10) NOT NULL CHECK (vehicle_type IN ('SMALL', 'MEDIUM', 'LARGE'))
 );
 
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     notification_id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
     title VARCHAR(255) NOT NULL,
@@ -94,7 +91,7 @@ CREATE TABLE notifications (
     related_order_id INTEGER
 );
 
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
     transaction_id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL,
     payment_id INTEGER NOT NULL REFERENCES payment_systems(payment_id),
@@ -103,7 +100,7 @@ CREATE TABLE transactions (
     transaction_date TIMESTAMP
 );
 
-CREATE TABLE callbacks (
+CREATE TABLE IF NOT EXISTS callbacks (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
@@ -111,20 +108,20 @@ CREATE TABLE callbacks (
     created_at TIMESTAMP
 );
 
-CREATE TABLE chats (
+CREATE TABLE IF NOT EXISTS chats (
     user_id INTEGER,
     manager_id INTEGER,
     status VARCHAR(255) -- значения: 'PENDING', 'ACCEPTED', 'CLOSED'
 );
 
-CREATE TABLE faq (
+CREATE TABLE IF NOT EXISTS faq (
     id SERIAL PRIMARY KEY,
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
     type VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     chat_id INTEGER,
     sender_id INTEGER,
     text VARCHAR(255),

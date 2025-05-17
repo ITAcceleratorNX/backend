@@ -74,6 +74,7 @@ export default async function appFactory() {
         res.status(404).json({ error: 'Не найдено' });
     });
     app.use(errorHandler);
+    app.use('/uploads', express.static('uploads'));
 
     return { app, server };
 }
