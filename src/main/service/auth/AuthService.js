@@ -76,7 +76,7 @@ export async function login(req, res) {
     const token = generateToken(user);
     setTokenCookie(res, token);
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, token });
 }
 
 export async function restorePassword(req, res) {

@@ -1,3 +1,6 @@
+ALTER TABLE prices
+ALTER COLUMN type TYPE VARCHAR(20);
+
 ALTER TABLE prices DROP CONSTRAINT IF EXISTS prices_type_check;
 
 ALTER TABLE prices

@@ -33,30 +33,56 @@ export const getStorageById = async (req, res) => {
 };
 
 export const createStorage = async (req, res) => {
+    const t = await sequelize.transaction();
     try {
-        await sequelize.transaction(async (t) => {
-            const storage = await storageService.create(req.body, { transaction: t });
+        const file = req.file;
+        const imageUrl = file?.path || null;
 
-            const cells = [];
-            for (let x = 1; x <= req.body.columns; x++) {
-                for (let y = 1; y <= req.body.rows; y++) {
-                    cells.push({
-                        storage_id: storage.id,
-                        x,
-                        y
-                    });
-                }
+        const { name, warehouse_id, storage_type, description, status, rows, columns, height } = req.body;
+
+        const parsedRows = parseInt(rows);
+        const parsedCols = parseInt(columns);
+        const parsedHeight = parseFloat(height);
+
+        if (isNaN(parsedRows) || isNaN(parsedCols) || isNaN(parsedHeight)) {
+            return res.status(400).json({ error: 'Rows, columns, and height must be valid numbers' });
+        }
+
+        const total_volume = +(parsedRows * parsedCols * parsedHeight).toFixed(2);
+
+        const storage = await storageService.create({
+            name,
+            warehouse_id,
+            storage_type,
+            description,
+            status,
+            image_url: imageUrl,
+            height: parsedHeight,
+            total_volume,
+        }, { transaction: t });
+
+        const cells = [];
+        for (let x = 1; x <= parsedCols; x++) {
+            for (let y = 1; y <= parsedRows; y++) {
+                cells.push({
+                    storage_id: storage.id,
+                    x,
+                    y
+                });
             }
+        }
 
-            await storageCellsService.createCells(cells, { transaction: t });
-        });
+        await storageCellsService.createCells(cells, { transaction: t });
+        await t.commit();
 
-        res.status(201).json({ message: 'Storage created successfully' });
+        res.status(201).json({ message: 'Storage with cells created successfully', storage_id: storage.id });
     } catch (err) {
+        await t.rollback();
         console.error('Create IND storage error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 export const updateStorage = async (req, res) => {
     try {
