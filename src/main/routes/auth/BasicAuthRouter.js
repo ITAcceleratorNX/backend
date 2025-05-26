@@ -8,8 +8,7 @@ import {
 import {
     checkEmailExists,
     checkEmailAndUniqueCode,
-    checkEmailAndPassword,
-    logout
+    checkEmailAndPassword
 } from "../../middleware/AuthMiddleware.js";
 
 const router = express.Router();
@@ -19,5 +18,5 @@ router.post("/login", checkEmailAndPassword, login);
 router.post("/register", checkEmailAndUniqueCode, register);
 router.post("/restore-password", checkEmailAndUniqueCode, restorePassword);
 router.post("/check-email",checkEmailExists, checkEmailForRestorePassword);
-router.get('/logout', logout);
+
 export default router;
