@@ -1,7 +1,7 @@
 import {DataTypes} from "sequelize";
 import {sequelize} from '../config/database.js';
 
-const Contract = sequelize.define('Contract', {
+const Order = sequelize.define('Order', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -23,25 +23,13 @@ const Contract = sequelize.define('Contract', {
             key: 'id',
         }
     },
-    description: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     total_volume: {
         type: DataTypes.DECIMAL,
         allowNull: false,
     },
-    item_width: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-    },
-    item_length: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-    },
-    item_height: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
+    total_price: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false
     },
     start_date: {
         type: DataTypes.DATE,
@@ -51,29 +39,22 @@ const Contract = sequelize.define('Contract', {
         type: DataTypes.DATE,
         allowNull: false,
     },
-    deposit: {
-        type: DataTypes.DECIMAL,
+    contract_status: {
+        type: DataTypes.ENUM('SIGNED','UNSIGNED'),
         allowNull: false,
+        defaultValue: 'UNSIGNED',
     },
-    monthly_rent_price: {
-        type: DataTypes.DECIMAL,
+    payment_status: {
+        type: DataTypes.ENUM('PAID','UNPAID'),
         allowNull: false,
-    },
-    status: {
-        type: DataTypes.ENUM('PENDING','ACTIVE', 'EXPIRED', 'TERMINATED'),
-        defaultValue: 'ACTIVE',
+        defaultValue: 'UNPAID',
     },
     created_at: {
         type: DataTypes.DATEONLY,
         allowNull: false,
-    },
-    updated_at: {
-        type: DataTypes.DATEONLY,
-        allowNull: true,
     }
-
 }, {
-    tableName: 'contracts',
+    tableName: 'orders',
     timestamps: false,
 });
-export default Contract
+export default Order;

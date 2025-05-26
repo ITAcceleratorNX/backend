@@ -24,7 +24,7 @@ describe("StorageService", () => {
 
         const result = await service.getById(1);
 
-        expect(Storage.findByPk).toHaveBeenCalledWith(1);
+        expect(Storage.findByPk).toHaveBeenCalledWith(1, {});
         expect(result).toEqual(mockData);
     });
 
@@ -35,7 +35,7 @@ describe("StorageService", () => {
 
         const result = await service.create(input);
 
-        expect(Storage.create).toHaveBeenCalledWith(input);
+        expect(Storage.create).toHaveBeenCalledWith(input, undefined);
         expect(result).toEqual(created);
     });
 

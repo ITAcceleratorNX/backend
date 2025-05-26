@@ -1,4 +1,7 @@
 import * as storageService from "../../service/storage/StorageService.js";
+import * as storageCellsService from "../../service/storage/StorageCellsService.js";
+import {sequelize} from "../../config/database.js";
+import {StorageCells} from "../../models/init/index.js";
 
 export const getAllStorages = async (req, res) => {
     try {
@@ -15,7 +18,11 @@ export const getStorageById = async (req, res) => {
         const id = Number(req.params.id);
         if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const result = await storageService.getById(id);
+        const result = await storageService.getById(id, {
+            include: {
+            model: StorageCells,
+                as: 'cells'
+        }});
         if (!result) return res.status(404).json({ error: 'Not found' });
 
         return res.json(result);
@@ -27,8 +34,24 @@ export const getStorageById = async (req, res) => {
 
 export const createStorage = async (req, res) => {
     try {
-        const result = await storageService.create(req.body);
-        return res.status(201).json(result);
+        await sequelize.transaction(async (t) => {
+            const storage = await storageService.create(req.body, { transaction: t });
+
+            const cells = [];
+            for (let x = 1; x <= req.body.columns; x++) {
+                for (let y = 1; y <= req.body.rows; y++) {
+                    cells.push({
+                        storage_id: storage.id,
+                        x,
+                        y
+                    });
+                }
+            }
+
+            await storageCellsService.createCells(cells, { transaction: t });
+        });
+
+        res.status(201).json({ message: 'Storage created successfully' });
     } catch (err) {
         console.error('Create IND storage error:', err);
         return res.status(500).json({ error: 'Internal server error' });

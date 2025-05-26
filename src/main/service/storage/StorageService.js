@@ -4,12 +4,12 @@ export const getAll = async () => {
     return Storage.findAll();
 };
 
-export const getById = async (id) => {
-    return Storage.findByPk(id);
+export const getById = async (id, options = {}) => {
+    return Storage.findByPk(id, options);
 };
 
-export const create = async (data) => {
-    return Storage.create(data);
+export const create = async (data, options) => {
+    return Storage.create(data, options);
 };
 
 export const update = async (id, data) => {
