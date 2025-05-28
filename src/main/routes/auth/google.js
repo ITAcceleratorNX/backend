@@ -24,7 +24,7 @@ router.get('/logout', (req, res) => {
             secure: true,
             sameSite: 'strict',
             path: '/',
-        }).redirect(process.env.FRONTEND_URL);
+        }).redirect(process.env.FRONTEND_URL + "/login");
     });
 });
 export default router;
