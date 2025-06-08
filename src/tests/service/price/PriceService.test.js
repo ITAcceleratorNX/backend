@@ -62,4 +62,72 @@ describe("Price Service", () => {
         });
         expect(result).toBe(1);
     });
+
+    test("calculate should return error if price not found", async () => {
+        Price.findOne.mockResolvedValue(null);
+
+        const mockData = {
+            type: "UNKNOWN_TYPE",
+            area: 2,
+            month: 1,
+            day: 0
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        const result = await service.calculate(mockData, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: "Invalid date" });
+        expect(result).toBeUndefined();
+    });
+
+    test("calculate should return error if data is invalid", async () => {
+        const mockData = {
+            type: 123, // wrong type
+            area: "invalid", // wrong type
+            month: null,
+            day: null
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        const result = await service.calculate(mockData, mockRes);
+
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({ error: "Invalid date" });
+        expect(result).toBeUndefined();
+    });
+
+    test("calculate should return correct total price", async () => {
+        const mockPrice = { amount: 100 };
+        Price.findOne.mockResolvedValue(mockPrice);
+
+        const mockData = {
+            type: "INDIVIDUAL",
+            area: 2,
+            month: 1,
+            day: 15
+        };
+
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+
+        const result = await service.calculate(mockData, mockRes);
+
+        const expectedMonthly = 100 * 2 * 1; // 200
+        const expectedDaily = (100 * 2 / 30) * 15; // 100
+        const expectedTotal = expectedMonthly + expectedDaily; // 300
+
+        expect(result).toBe(expectedTotal);
+        expect(Price.findOne).toHaveBeenCalledWith({ where: { type: "INDIVIDUAL" } });
+    });
 });

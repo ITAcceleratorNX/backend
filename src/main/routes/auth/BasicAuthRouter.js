@@ -1,22 +1,16 @@
 import express from "express";
 import {
-    checkEmail, checkEmailForRestorePassword,
-    login,
-    register,
-    restorePassword
+    checkEmail, checkEmailForRestorePassword, login, register, restorePassword
 } from "../../service/auth/AuthService.js";
-import {
-    checkEmailExists,
-    checkEmailAndUniqueCode,
-    checkEmailAndPassword
-} from "../../middleware/AuthMiddleware.js";
+import {validateBody} from "../../middleware/validate.js";
+import {LoginDto, RegisterDto, UserEmailDto} from "../../dto/user/User.dto.js";
 
 const router = express.Router();
 
-router.post("/email", checkEmailExists, checkEmail);
-router.post("/login", checkEmailAndPassword, login);
-router.post("/register", checkEmailAndUniqueCode, register);
-router.post("/restore-password", checkEmailAndUniqueCode, restorePassword);
-router.post("/check-email",checkEmailExists, checkEmailForRestorePassword);
+router.post("/email", validateBody(UserEmailDto), checkEmail);
+router.post("/login", validateBody(LoginDto), login);
+router.post("/register", validateBody(RegisterDto), register);
+router.post("/restore-password", validateBody(RegisterDto), restorePassword);
+router.post("/check-email", validateBody(UserEmailDto), checkEmailForRestorePassword);
 
 export default router;
