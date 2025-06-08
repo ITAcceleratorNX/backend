@@ -1,66 +1,42 @@
 import * as FAQService from "../../service/faq/FAQService.js";
+import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
-export const getAllFAQ = async (req, res) => {
-    try {
-        const result = await FAQService.getAll();
-        return res.json(result);
-    } catch (err) {
-        console.error('Get FAQ error:', err);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
+export const getAllFAQ = asyncHandler(async (req, res) => {
+    const result = await FAQService.getAll();
+    res.json(result);
+});
 
-export const getFAQById = async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+export const getFAQById = asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const result = await FAQService.getById(id);
-        if (!result) return res.status(404).json({ error: 'Not found' });
+    const result = await FAQService.getById(id);
+    if (!result) return res.status(404).json({ error: 'Not found' });
 
-        return res.json(result);
-    } catch (err) {
-        console.error('Get FAQ by ID error:', err);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
+    res.json(result);
+});
 
-export const createFAQ = async (req, res) => {
-    try {
-        const result = await FAQService.create(req.body);
-        return res.status(201).json(result);
-    } catch (err) {
-        console.error('Create FAQ error:', err, "request body", req.body);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
+export const createFAQ = asyncHandler(async (req, res) => {
+    const result = await FAQService.create(req.body);
+    res.status(201).json(result);
+});
 
-export const updateFAQ = async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+export const updateFAQ = asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const [updatedCount] = await FAQService.update(id, req.body);
-        if (updatedCount === 0) return res.status(404).json({ error: 'Not found' });
+    const [updatedCount] = await FAQService.update(id, req.body);
+    if (updatedCount === 0) return res.status(404).json({ error: 'Not found' });
 
-        return res.json({ updated: updatedCount });
-    } catch (err) {
-        console.error('Update FAQ error:', err, "request body:", req.body);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
+    res.json({ updated: updatedCount });
+});
 
-export const deleteFAQ = async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+export const deleteFAQ = asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
 
-        const deletedCount = await FAQService.deleteById(id);
-        if (deletedCount === 0) return res.status(404).json({ error: 'Not found' });
+    const deletedCount = await FAQService.deleteById(id);
+    if (deletedCount === 0) return res.status(404).json({ error: 'Not found' });
 
-        return res.json({ deleted: deletedCount });
-    } catch (err) {
-        console.error('Delete FAQ error:', err, "request body:", req.body);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-};
+    res.json({ deleted: deletedCount });
+});
