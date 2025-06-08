@@ -39,7 +39,7 @@ export const getById = async (id) => {
 };
 
 export const getByUserId = async (userId) => {
-    return Order.findAll({
+    const orders = Order.findAll({
         where: { user_id: userId },
         include: [
             {
@@ -53,6 +53,12 @@ export const getByUserId = async (userId) => {
             }
         ]
     });
+    if (!orders) {
+        const error = new Error('Not Found');
+        error.status = 404;
+        throw error;
+    }
+    return orders;
 };
 
 export const create = async (data, options) => {

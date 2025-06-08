@@ -8,10 +8,8 @@ export const getAllOrders = base.getAll;
 
 export const getMyOrders = asyncHandler(async (req, res) => {
     const id = Number(req.user.id);
-    const result = await orderService.getByUserId(id);
-    if (!result) return res.status(404).json({ error: 'Not found' });
-
-    res.json(result);
+    const orders = await orderService.getByUserId(id);
+    res.json(orders);
 });
 
 export const getOrderById = base.getById;
