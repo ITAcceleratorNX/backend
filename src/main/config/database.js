@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import pg from 'pg';
 import migrate from 'node-pg-migrate';
-import { createSequelize } from './factory/sequelizeFactory.js';
+import { createSequelize } from './sequelize.js';
 
 dotenv.config();
 
