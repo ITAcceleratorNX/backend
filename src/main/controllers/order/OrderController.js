@@ -6,11 +6,11 @@ import * as storageCellsService from "../../service/storage/StorageCellsService.
 import * as priceService from "../../service/price/PriceService.js";
 import {calculateDayRemainder, calculateMonthDiff} from "../../utils/date/DateCalculator.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
+import { createBaseController } from "../base/BaseController.js";
 
-export const getAllOrders = asyncHandler(async (req, res) => {
-    const result = await orderService.getAll();
-    res.json(result);
-});
+const base = createBaseController(orderService);
+
+export const getAllOrders = base.getAll;
 
 export const getMyOrders = asyncHandler(async (req, res) => {
     const id = Number(req.user.id);
@@ -20,15 +20,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     res.json(result);
 });
 
-export const getOrderById = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
-
-    const result = await orderService.getById(id);
-    if (!result) return res.status(404).json({ error: 'Not found' });
-
-    res.json(result);
-});
+export const getOrderById = base.getById;
 
 export const createOrder = asyncHandler(async (req, res) => {
     const { cell_ids, ...data } = req.body;
@@ -98,22 +90,6 @@ export const createOrder = asyncHandler(async (req, res) => {
     });
 });
 
-export const updateOrder = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+export const updateOrder = base.update;
 
-    const [updatedCount] = await orderService.update(id, req.body);
-    if (updatedCount === 0) return res.status(404).json({ error: 'Not found' });
-
-    res.json({ updated: updatedCount });
-});
-
-export const deleteOrder = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
-
-    const deletedCount = await storageService.deleteById(id);
-    if (deletedCount === 0) return res.status(404).json({ error: 'Not found' });
-
-    res.json({ deleted: deletedCount });
-});
+export const deleteOrder = base.delete;

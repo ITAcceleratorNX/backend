@@ -1,11 +1,11 @@
 import * as priceService from "../../service/price/PriceService.js";
 import {PriceType} from "../../dto/price/Pirce.dto.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
+import { createBaseController } from "../base/BaseController.js";
 
-export const getAllPrices = asyncHandler(async (req, res) => {
-    const result = await priceService.getAll();
-    res.json(result);
-});
+const base = createBaseController(priceService);
+
+export const getAllPrices = base.getAll;
 
 export const getPriceByType = asyncHandler(async (req, res) => {
     const type = req.params.type;
@@ -27,25 +27,9 @@ export const createPrice = asyncHandler(async (req, res) => {
     res.status(201).json(result);
 });
 
-export const updatePrice = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
+export const updatePrice = base.update;
 
-    const [updatedCount] = await priceService.update(id, req.body);
-    if (updatedCount === 0) return res.status(404).json({ error: 'Not found' });
-
-    res.json({ updated: updatedCount });
-});
-
-export const deletePrice = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
-
-    const deletedCount = await priceService.deleteById(id);
-    if (deletedCount === 0) return res.status(404).json({ error: 'Not found' });
-
-    res.json({ deleted: deletedCount });
-});
+export const deletePrice = base.delete;
 
 export const calculatePrice = asyncHandler(async (req, res) => {
     await priceService.calculate(req.body, res);

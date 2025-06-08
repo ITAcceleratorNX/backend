@@ -12,7 +12,7 @@ describe('WarehouseService', () => {
         const data = { name: 'Warehouse 1', location: 'Location 1' };
         const mockWarehouse = { id: 1, ...data };
         Warehouse.create.mockResolvedValue(mockWarehouse);
-        const result = await WarehouseService.createWarehouse(data);
+        const result = await WarehouseService.create(data);
         expect(Warehouse.create).toHaveBeenCalledWith(data);
         expect(result).toEqual(mockWarehouse);
     });

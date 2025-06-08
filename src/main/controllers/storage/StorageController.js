@@ -3,26 +3,19 @@ import * as storageCellsService from "../../service/storage/StorageCellsService.
 import {sequelize} from "../../config/database.js";
 import {StorageCells} from "../../models/init/index.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
+import { createBaseController } from "../base/BaseController.js";
 
-export const getAllStorages = asyncHandler(async (req, res) => {
-    const result = await storageService.getAll();
-    res.json(result);
-});
-
-export const getStorageById = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid ID' });
-
-    const result = await storageService.getById(id, {
+const base = createBaseController(storageService, {
+    getById: {
         include: {
             model: StorageCells,
             as: 'cells'
         }
-    });
-    if (!result) return res.status(404).json({ error: 'Not found' });
-
-    res.json(result);
+    }
 });
+
+export const getAllStorages = base.getAll;
+export const getStorageById = base.getById;
 
 export const createStorage = asyncHandler(async (req, res) => {
     await sequelize.transaction(async (t) => {
