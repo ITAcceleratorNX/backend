@@ -36,6 +36,12 @@ export const getById = async (id) => {
 };
 
 export const create = async (data) => {
+    const priceTypeExists = await Price.findOne({ where: { type: data.type } });
+    if (priceTypeExists) {
+        const error = new Error('Price already exists for this type');
+        error.status = 400;
+        throw error;
+    }
     return Price.create(data);
 };
 
@@ -48,5 +54,11 @@ export const deleteById = async (id) => {
 };
 
 export const getByType = async (type) => {
-    return Price.findOne({ where: { type: type } });
+    const price = await Price.findOne({ where: { type: type } });
+    if (!price) {
+        const error = new Error('Not Found');
+        error.status = 404;
+        throw error;
+    }
+    return price;
 }

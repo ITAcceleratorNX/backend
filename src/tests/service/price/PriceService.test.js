@@ -28,15 +28,17 @@ describe("Price Service", () => {
         expect(result).toEqual(mockData);
     });
 
-    test("should create a price", async () => {
-        const input = { amount: 1234, type: "INDIVIDUAL_STORAGE" };
-        const created = { id: 1, ...input };
-        Price.create.mockResolvedValue(created);
+    it('should create a new price if type does not exist', async () => {
+        const mockData = { type: 'rack', amount: 100 };
 
-        const result = await service.create(input);
+        Price.findOne.mockResolvedValue(null);
+        Price.create.mockResolvedValue({ id: 1, ...mockData });
 
-        expect(Price.create).toHaveBeenCalledWith(input);
-        expect(result).toEqual(created);
+        const result = await service.create(mockData);
+
+        expect(Price.findOne).toHaveBeenCalledWith({ where: { type: 'rack' } });
+        expect(Price.create).toHaveBeenCalledWith(mockData);
+        expect(result).toEqual({ id: 1, ...mockData });
     });
 
     test("update should call update with correct params", async () => {

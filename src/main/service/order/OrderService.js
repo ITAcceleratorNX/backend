@@ -39,7 +39,7 @@ export const getById = async (id) => {
 };
 
 export const getByUserId = async (userId) => {
-    const orders = Order.findAll({
+    const orders = await Order.findAll({
         where: { user_id: userId },
         include: [
             {
