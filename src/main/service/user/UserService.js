@@ -9,13 +9,31 @@ export const getAll = async () => {
 };
 
 export const getById = async (id) => {
-    return await User.findByPk(id);
+    const user = await User.findByPk(id);
+    if (!user) {
+        const error = new Error('User not found');
+        error.status = 404;
+        throw error;
+    }
+    return user;
 };
 
 export const update = async (id, data) => {
-    return await User.update(data, { where: { user_id: id } });
+    const updated = await User.update(data, { where: { user_id: id } });
+    if (!updated) {
+        const error = new Error('User not found');
+        error.status = 404;
+        throw error;
+    }
+    return updated;
 };
 
 export const deleteById = async (id) => {
-    return await User.destroy({ where: { user_id: id } });
+    const deleted = await User.destroy({ where: { user_id: id } });
+    if (!deleted) {
+        const error = new Error('User not found');
+        error.status = 404;
+        throw error;
+    }
+    return deleted;
 };
