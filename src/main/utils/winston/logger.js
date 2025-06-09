@@ -1,5 +1,5 @@
 import winston from "winston";
-import DailyRotateFile from "winston-daily-rotate-file"; // ПРАВИЛЬНЫЙ импорт
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const logDirectory = process.env.LOG_DIR || 'logs';
 
