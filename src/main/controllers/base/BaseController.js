@@ -22,7 +22,7 @@ export function createBaseController(service, options = {}) {
                     requestId: req.id,
                     idParam: req.params.id
                 });
-                return res.status(400).json({ error: 'Invalid ID' });
+                return res.status(400).json({ error: 'Invalid ID', details: [{message: "Invalid ID"}] });
             }
 
             const result = await service.getById(id, options.getById || {});

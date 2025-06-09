@@ -82,9 +82,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   message:
                     type: string
                     example: Email is required
@@ -127,9 +127,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   details:
                     type: array
                     example:
@@ -195,9 +195,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   details:
                     type: array
                     example:
@@ -333,9 +333,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   details:
                     type: array
                     example:
@@ -386,9 +386,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   details:
                     type: array
                     example:
@@ -458,6 +458,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FAQ'
+        "400":
+          description: Ошибка валидации тела запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "question",
+                        "message": "Question is required"
+                      } ]
         '403':
           description: Доступ запрещён
 
