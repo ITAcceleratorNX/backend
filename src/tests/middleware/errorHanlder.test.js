@@ -30,7 +30,15 @@ describe('errorHandler middleware', () => {
                 expect(response.body.error).toBe('Test error');
             });
 
-        expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[GET] / - Test error: stack: Error: Test error'));
+        expect(logger.error).toHaveBeenCalledWith(
+            'Error occurred',
+            expect.objectContaining({
+                message: 'Test error',
+                method: 'GET',
+                url: '/',
+                stack: expect.stringContaining('Error: Test error'),
+            })
+        );
     });
 
     it('should handle internal server error if no status is set', async () => {
@@ -50,7 +58,13 @@ describe('errorHandler middleware', () => {
             });
 
         expect(logger.error).toHaveBeenCalledWith(
-            expect.stringContaining('[GET] / - Internal Server Error: stack:')
+            'Error occurred',
+            expect.objectContaining({
+                message: 'Test error',
+                method: 'GET',
+                url: '/',
+                stack: expect.stringContaining('Error: Test error'),
+            })
         );
     });
 });

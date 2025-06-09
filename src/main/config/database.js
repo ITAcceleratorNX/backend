@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import migrate from 'node-pg-migrate';
 import { createSequelize } from './sequelize.js';
+import logger from "../utils/winston/logger.js";
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ const pool = new pg.Pool({
 
 export async function initDb() {
     try {
-        console.log('🚀 Migration is running...');
+        logger.info('Migration is running...');
 
         await migrate({
             databaseUrl: {
@@ -41,9 +42,9 @@ export async function initDb() {
             sqlFile: true,
         });
 
-        console.log('✅ Migrations successfully.');
+        logger.info('Migrations successfully.');
     } catch (error) {
-        console.error('❌ Migration error:', error);
+        logger.error('Migration error:', error);
         process.exit(1);
     }
 }

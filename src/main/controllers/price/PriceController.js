@@ -2,6 +2,7 @@ import * as priceService from "../../service/price/PriceService.js";
 import {PriceType} from "../../dto/price/Pirce.dto.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import { createBaseController } from "../base/BaseController.js";
+import logger from "../../utils/winston/logger.js";
 
 const base = createBaseController(priceService);
 
@@ -10,14 +11,33 @@ export const getAllPrices = base.getAll;
 export const getPriceByType = asyncHandler(async (req, res) => {
     const type = req.params.type;
     if (!PriceType.safeParse(type).success) {
+        logger.warn('Invalid price type', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            requestId: req.id,
+            invalidType: req.params.type
+        });
         return res.status(400).json({ error: 'Invalid type' });
     }
     const result = await priceService.getByType(req.params.type);
+    logger.info('Fetched prices by type', {
+        userId: req.user?.id || null,
+        endpoint: req.originalUrl,
+        requestId: req.id,
+        priceType: type,
+        resultCount: result.length || (result ? 1 : 0)
+    });
     res.json(result);
 });
 
 export const createPrice = asyncHandler(async (req, res) => {
     const result = await priceService.create(req.body);
+    logger.info('Created new price', {
+        userId: req.user?.id || null,
+        endpoint: req.originalUrl,
+        requestId: req.id,
+        createdPrice: result
+    });
     res.status(201).json(result);
 });
 

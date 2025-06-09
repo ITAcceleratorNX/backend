@@ -47,7 +47,11 @@ export default async function appFactory() {
         saveUninitialized: true
     }));
     app.use((req, res, next) => {
-        logger.info(`Request: ${req.method} ${req.url}`);
+        logger.info('Incoming request', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            method: req.method,
+        });
         next();
     });
 
