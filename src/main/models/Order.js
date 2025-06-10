@@ -49,6 +49,25 @@ const Order = sequelize.define('Order', {
         allowNull: false,
         defaultValue: 'UNPAID',
     },
+    status: {
+        type: DataTypes.ENUM('ACTIVE','INACTIVE'),
+        allowNull: false,
+        defaultValue: 'INACTIVE',
+    },
+    box_amount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+    cargo_marks: {
+        type: DataTypes.ENUM("NO",'FRAGILE',"HEAVY"),
+        allowNull: false,
+        defaultValue: 'NO'
+    },
+    product_names: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    },
     created_at: {
         type: DataTypes.DATEONLY,
         allowNull: false,

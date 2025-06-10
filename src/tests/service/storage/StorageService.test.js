@@ -13,9 +13,6 @@ jest.mock("../../../main/models/init/index.js", () => ({
         transaction: jest.fn(),
     },
 }));
-jest.mock("../../../main/service/storage/StorageCellsService.js", () => ({
-    createCells: jest.fn(),
-}));
 
 describe("StorageService", () => {
     afterEach(() => {

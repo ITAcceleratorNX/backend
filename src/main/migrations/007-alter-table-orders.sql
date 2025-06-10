@@ -1,0 +1,5 @@
+ALTER TABLE orders
+    DROP COLUMN status;
+
+ALTER TABLE orders
+    ADD COLUMN status VARCHAR(10) DEFAULT 'INACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE'))

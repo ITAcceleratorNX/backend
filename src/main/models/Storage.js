@@ -38,6 +38,10 @@ const Storage = sequelize.define('Storage', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
+    available_volume: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false
+    },
     status: {
         type: DataTypes.ENUM('OCCUPIED', 'VACANT'),
         allowNull: false,

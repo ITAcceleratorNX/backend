@@ -1,23 +1,15 @@
 import * as storageService from "../../service/storage/StorageService.js";
-import {StorageCells} from "../../models/init/index.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 
-const base = createBaseController(storageService, {
-    getById: {
-        include: {
-            model: StorageCells,
-            as: 'cells'
-        }
-    }
-});
+const base = createBaseController(storageService);
 
 export const getAllStorages = base.getAll;
 export const getStorageById = base.getById;
 
 export const createStorage = asyncHandler(async (req, res) => {
-    await storageService.createStorage(req);
+    await storageService.create(req.body);
     logger.info('Created new storage', {
         userId: req.user?.id || null,
         endpoint: req.originalUrl,

@@ -1,6 +1,4 @@
 import {Storage} from "../../models/init/index.js";
-import {sequelize} from "../../config/database.js";
-import * as storageCellsService from "./StorageCellsService.js";
 
 export const getAll = async () => {
     return Storage.findAll();
@@ -33,23 +31,3 @@ export const deleteById = async (id) => {
     }
     return deletedCount;
 };
-
-export const createStorage = async (req) => {
-    await sequelize.transaction(async (t) => {
-        const storage = await create(req.body, { transaction: t });
-
-        const cells = [];
-        for (let x = 1; x <= req.body.columns; x++) {
-            for (let y = 1; y <= req.body.rows; y++) {
-                cells.push({
-                    storage_id: storage.id,
-                    x,
-                    y
-                });
-            }
-        }
-
-        await storageCellsService.createCells(cells, { transaction: t });
-        return true;
-    });
-}
