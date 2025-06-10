@@ -23,7 +23,7 @@ class MyWebSocketServer {
 
     setup() {
         this.ws.on('connection', (ws, req) => {
-            const url = new URL(req.url, `http://${req.headers.host}`);
+            const url = new URL(req.url, `https://${req.headers.host}`);
             const userId = url.searchParams.get('userId');
 
             if (userId) {
@@ -75,7 +75,7 @@ class MyWebSocketServer {
         }
 
         // Уведомляем всех менеджеров
-        const managers = await User.findAll({ where: { role: 'ADMIN' } });
+        const managers = await User.findAll({ where: { role: 'MANAGER' } });
         for (const manager of managers) {
             const managerWs = this.clients.get(String(manager.id));
             if (managerWs) {
