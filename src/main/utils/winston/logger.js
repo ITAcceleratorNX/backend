@@ -1,5 +1,5 @@
 import winston from "winston";
-import DailyRotateFile from "winston-daily-rotate-file"; // ПРАВИЛЬНЫЙ импорт
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const logDirectory = process.env.LOG_DIR || 'logs';
 
@@ -15,8 +15,17 @@ const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
         winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message }) => {
-            return `${timestamp} ${level}: ${message}`;
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+            const log = {
+                timestamp,
+                level,
+                message,
+                userId: meta.userId || null,
+                endpoint: meta.endpoint || null,
+                service: meta.service || 'backend',
+                requestId: meta.requestId || null
+            };
+            return JSON.stringify(log);
         })
     ),
     transports: [

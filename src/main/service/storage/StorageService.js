@@ -13,9 +13,21 @@ export const create = async (data, options) => {
 };
 
 export const update = async (id, data) => {
-    return Storage.update(data, { where: { id: id } });
+    const updatedCount = await Storage.update(data, { where: { id: id } });
+    if (updatedCount === 0) {
+        const error = new Error('Not Found');
+        error.status = 404;
+        throw error;
+    }
+    return updatedCount;
 };
 
 export const deleteById = async (id) => {
-    return Storage.destroy({ where: { id: id } });
+    const deletedCount = await Storage.destroy({ where: { id: id } });
+    if (deletedCount === 0) {
+        const error = new Error('Not Found');
+        error.status = 404;
+        throw error;
+    }
+    return deletedCount;
 };

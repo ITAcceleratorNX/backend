@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import appFactory from "../src/main/config/factory/appFactory.js";
+import appFactory from "../src/main/app.js";
 import debug from 'debug';
 
 const serverDebug = debug('extraspace:server');

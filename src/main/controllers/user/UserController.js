@@ -1,50 +1,40 @@
-// controllers/UserController.js
+import logger from "../../utils/winston/logger.js";
 import * as UserService from "../../service/user/UserService.js";
+import {asyncHandler} from "../../utils/handler/asyncHandler.js";
+import {createBaseController} from "../base/BaseController.js";
 
-export const createUser = async (req, res) => {
-    try {
-        const user = await UserService.createUser(req.body);
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+const base = createBaseController(UserService);
 
-export const getAllUsers = async (req, res) => {
-    try {
-        const users = await UserService.getAllUsers();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+export const createUser = base.create;
+export const getAllUsers = base.getAll;
 
-export const getUserById = async (req, res) => {
-    try {
-        const user = await UserService.getUserById(req.user.id);
-        if (!user) return res.status(404).json({ message: "User not found" });
-        res.json(user);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+export const getUserById = asyncHandler(async (req, res) => {
+    const user = await UserService.getById(req.user.id);
+    logger.info('Fetched user by ID', {
+      userId: req.user?.id || null,
+      endpoint: req.originalUrl,
+      requestId: req.id
+    });
+    res.json(user);
+});
 
-export const updateUser = async (req, res) => {
-    try {
-        const [updated] = await UserService.updateUser(req.user.id, req.body);
-        if (!updated) return res.status(404).json({ message: "User not found" });
-        res.json({ updated });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
+export const updateUser = asyncHandler(async (req, res) => {
+    const [updated] = await UserService.update(req.user.id, req.body);
+    logger.info('Updated user', {
+      userId: req.user?.id || null,
+      endpoint: req.originalUrl,
+      requestId: req.id,
+      updates: req.body
+    });
+    res.json({ updated });
+});
 
-export const deleteUser = async (req, res) => {
-    try {
-        const deleted = await UserService.deleteUser(req.user.id);
-        if (!deleted) return res.status(404).json({ message: "User not found" });
-        res.json({ deleted });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+export const deleteUser = asyncHandler(async (req, res) => {
+    const deleted = await UserService.deleteById(req.user.id);
+    logger.info('Deleted user', {
+      userId: req.user?.id || null,
+      endpoint: req.originalUrl,
+      requestId: req.id
+    });
+    res.json({ deleted });
+});

@@ -82,9 +82,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   message:
                     type: string
                     example: Email is required
@@ -120,10 +120,25 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  token:
-                    type: string
         '400':
           description: Ошибка валидации или неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [{
+                        "field": "password",
+                        "message": "Required"
+                      }]
+        '401':
+          description: Ошибка аутентификций
           content:
             application/json:
               schema:
@@ -132,11 +147,12 @@ paths:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
+                  details:
+                    type: array
                     example:
-                      email_error: Email is required
-                      password_error: Password is required
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
 
   /auth/register:
     post:
@@ -173,7 +189,24 @@ paths:
                   token:
                     type: string
         '400':
-          description: Ошибка валидации или недостающие поля
+          description: Ошибка валидации или неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
+        '401':
+          description: Ошибка авторизаций
           content:
             application/json:
               schema:
@@ -182,12 +215,12 @@ paths:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
+                  details:
+                    type: array
                     example:
-                      email_error: Email is required
-                      unique_code_error: Unique code is required
-                      password_error: Password is required
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
   /chats/{chatId}/messages:
     get:
       tags:
@@ -300,12 +333,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
+                  error:
                     type: string
-                    example: "Email is required"
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
 
   /auth/restore-password:
     post:
@@ -349,13 +386,32 @@ paths:
               schema:
                 type: object
                 properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
+        '401':
+          description: Ошибка аутентикаций
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
-                    additionalProperties:
-                      type: string
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
         "500":
           description: Внутренняя ошибка сервера
           content:
@@ -402,6 +458,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FAQ'
+        "400":
+          description: Ошибка валидации тела запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "question",
+                        "message": "Question is required"
+                      } ]
         '403':
           description: Доступ запрещён
 
@@ -468,10 +541,10 @@ paths:
         '404':
           description: Не найден
 
-  /prices:
+  /services:
     get:
       tags:
-        - Price
+        - Service
       summary: Получить все цены
       responses:
         200:
@@ -481,10 +554,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Price'
+                  $ref: '#/components/schemas/Service'
     post:
       tags:
-        - Price
+        - Service
       summary: Создать новую цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -493,44 +566,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PriceDto'
+              $ref: '#/components/schemas/ServiceDto'
       responses:
         201:
           description: Успешное создание
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Price'
+                $ref: '#/components/schemas/Service'
         400:
           description: Неверные данные или цена уже существует
 
-  /prices/{type}:
+  /services/{type}:
     get:
       tags:
-        - Price
+        - Service
       summary: Получить цену по типу
       parameters:
         - in: path
           name: type
           required: true
           schema:
-            $ref: '#/components/schemas/PriceType'
+            $ref: '#/components/schemas/ServiceType'
       responses:
         200:
           description: Найденная цена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Price'
+                $ref: '#/components/schemas/Service'
         400:
           description: Неверный тип
         404:
           description: Цена не найдена
 
-  /prices/{id}:
+  /services/{id}:
     put:
       tags:
-        - Price
+        - Service
       summary: Обновить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -545,7 +618,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePriceDto'
+              $ref: '#/components/schemas/UpdateServiceDto'
       responses:
         200:
           description: Успешное обновление
@@ -563,7 +636,7 @@ paths:
 
     delete:
       tags:
-        - Price
+        - Service
       summary: Удалить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -702,8 +775,12 @@ paths:
       responses:
         200:
           description: List of all warehouses
-        401:
-          description: Unauthorized (no token)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehouseWithStorage'
 
   /warehouses/{id}:
     get:
@@ -758,6 +835,77 @@ paths:
 # --- WebSocket documentation section (non-standard) ---
 components:
   schemas:
+    WarehouseWithStorage:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: warehouse 1
+        address:
+          type: string
+          example: warehouse 1 address
+        latitude:
+          type: string
+          example: "14.14000000"
+        longitude:
+          type: string
+          example: "14.14000000"
+        work_start:
+          type: string
+          format: time
+          example: "08:00:00"
+        work_end:
+          type: string
+          format: time
+          example: "19:00:00"
+        status:
+          type: string
+          enum: [ AVAILABLE, UNAVAILABLE ]
+          example: AVAILABLE
+        storage:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageUnit'
+
+    StorageUnit:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        warehouse_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: IND-A2
+        storage_type:
+          type: string
+          enum: [ INDIVIDUAL, CLOUD ]
+          example: INDIVIDUAL
+        description:
+          type: string
+          example: des
+        image_url:
+          type: string
+          format: uri
+          example: https://image
+        height:
+          type: string
+          example: "3"
+        total_volume:
+          type: string
+          example: "25.00"
+        available_volume:
+          type: string
+          example: "25.00"
+        status:
+          type: string
+          enum: [ VACANT, OCCUPIED ]
+          example: VACANT
     Message:
       type: object
       properties:
@@ -860,44 +1008,44 @@ components:
           type: string
           example: "general"
 
-    PriceType:
+    ServiceType:
       type: string
       enum:
-        - INDIVIDUAL_STORAGE
-        - CLOUD_STORAGE
-        - RACK_STORAGE
+        - INDIVIDUAL
+        - CLOUD
+        - RACK
         - MOVING
 
-    PriceDto:
+    ServiceDto:
       type: object
       required:
         - type
         - amount
       properties:
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
           format: float
           minimum: 0.01
 
-    UpdatePriceDto:
+    UpdateServiceDto:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
           format: float
           minimum: 0.01
 
-    Price:
+    Service:
       type: object
       properties:
         id:
           type: integer
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
 

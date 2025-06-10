@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import {sequelize} from '../config/database.js';
 
-export const Price = sequelize.define('Price', {
+export const Service = sequelize.define('Service', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -11,12 +11,12 @@ export const Price = sequelize.define('Price', {
         type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "MOVING"),
         allowNull: false
     },
-    amount: {
+    price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
 }, {
-    tableName: 'prices',
+    tableName: 'services',
     timestamps: false,
     indexes: [
         {
@@ -27,4 +27,4 @@ export const Price = sequelize.define('Price', {
     ]
 });
 
-export default Price;
+export default Service;

@@ -3,6 +3,7 @@ import passport from 'passport';
 import User from '../models/User.js';
 
 import { generateToken } from '../utils/jwt/JwtService.js';
+import logger from "../utils/winston/logger.js";
 
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
@@ -33,7 +34,7 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.serializeUser((userWithToken, done) => {
-    console.log('serializeUser input:', userWithToken);
+    logger.info('serializeUser input:', userWithToken);
     done(null, userWithToken.user.id);
 });
 
