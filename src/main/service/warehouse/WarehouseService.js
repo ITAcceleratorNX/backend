@@ -7,11 +7,17 @@ export class WarehouseService {
         return warehouse;
     }
 
-    static async getWarehouseById(warehouseId) {
-        return await Warehouse.findByPk(warehouseId);
+    static async getById(warehouseId) {
+        return await Warehouse.findByPk(warehouseId, {
+            include: [
+                {
+                    association: 'storage'
+                }
+            ]
+        });
     }
 
-    static async updateWarehouse(warehouseId, data) {
+    static async update(warehouseId, data) {
         const warehouse = await Warehouse.findByPk(warehouseId);
         if (!warehouse) {
             throw new Error('Warehouse not found');
@@ -20,11 +26,17 @@ export class WarehouseService {
         return warehouse;
     }
 
-    static async getAllWarehouses() {
-        return await Warehouse.findAll();
+    static async getAll() {
+        return await Warehouse.findAll({
+            include: [
+                {
+                    association: 'storage'
+                }
+            ]
+        });
     }
 
-    static async deleteWarehouseById(warehouseId) {
+    static async deleteById(warehouseId) {
         const warehouse = await Warehouse.findByPk(warehouseId);
         if (!warehouse) {
             throw new Error('Warehouse not found');

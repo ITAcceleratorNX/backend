@@ -21,8 +21,14 @@ describe('WarehouseService', () => {
         const warehouseId = 1;
         const mockWarehouse = { id: warehouseId, name: 'Warehouse 1', location: 'Location 1' };
         Warehouse.findByPk.mockResolvedValue(mockWarehouse);
-        const result = await WarehouseService.getWarehouseById(warehouseId);
-        expect(Warehouse.findByPk).toHaveBeenCalledWith(warehouseId);
+        const result = await WarehouseService.getById(warehouseId);
+        expect(Warehouse.findByPk).toHaveBeenCalledWith(warehouseId, {
+            include: [
+                {
+                    association: 'storage'
+                }
+            ]
+        });
         expect(result).toEqual(mockWarehouse);
     });
 
@@ -35,7 +41,7 @@ describe('WarehouseService', () => {
             update: jest.fn().mockResolvedValue(data)
         };
         Warehouse.findByPk.mockResolvedValue(mockWarehouse);
-        const result = await WarehouseService.updateWarehouse(warehouseId, data);
+        const result = await WarehouseService.update(warehouseId, data);
         expect(Warehouse.findByPk).toHaveBeenCalledWith(warehouseId);
         expect(mockWarehouse.update).toHaveBeenCalledWith(data);
         expect(result).toEqual(expect.objectContaining({ id: warehouseId, ...data }));
@@ -45,7 +51,7 @@ describe('WarehouseService', () => {
         const warehouseId = 999;
         const data = { name: 'Updated Warehouse', location: 'New Location' };
         Warehouse.findByPk.mockResolvedValue(null);
-        await expect(WarehouseService.updateWarehouse(warehouseId, data)).rejects.toThrow('Warehouse not found'); // Проверяем, что выбрасывается ошибка
+        await expect(WarehouseService.update(warehouseId, data)).rejects.toThrow('Warehouse not found'); // Проверяем, что выбрасывается ошибка
     });
 
     test('getAllWarehouses should return all warehouses', async () => {
@@ -54,7 +60,7 @@ describe('WarehouseService', () => {
             { id: 2, name: 'Warehouse 2', location: 'Location 2' }
         ];
         Warehouse.findAll.mockResolvedValue(mockWarehouses);
-        const result = await WarehouseService.getAllWarehouses();
+        const result = await WarehouseService.getAll();
         expect(Warehouse.findAll).toHaveBeenCalled();
         expect(result).toEqual(mockWarehouses);
     });

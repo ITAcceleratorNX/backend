@@ -775,8 +775,12 @@ paths:
       responses:
         200:
           description: List of all warehouses
-        401:
-          description: Unauthorized (no token)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehouseWithStorage'
 
   /warehouses/{id}:
     get:
@@ -831,6 +835,77 @@ paths:
 # --- WebSocket documentation section (non-standard) ---
 components:
   schemas:
+    WarehouseWithStorage:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: warehouse 1
+        address:
+          type: string
+          example: warehouse 1 address
+        latitude:
+          type: string
+          example: "14.14000000"
+        longitude:
+          type: string
+          example: "14.14000000"
+        work_start:
+          type: string
+          format: time
+          example: "08:00:00"
+        work_end:
+          type: string
+          format: time
+          example: "19:00:00"
+        status:
+          type: string
+          enum: [ AVAILABLE, UNAVAILABLE ]
+          example: AVAILABLE
+        storage:
+          type: array
+          items:
+            $ref: '#/components/schemas/StorageUnit'
+
+    StorageUnit:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        warehouse_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: IND-A2
+        storage_type:
+          type: string
+          enum: [ INDIVIDUAL, CLOUD ]
+          example: INDIVIDUAL
+        description:
+          type: string
+          example: des
+        image_url:
+          type: string
+          format: uri
+          example: https://image
+        height:
+          type: string
+          example: "3"
+        total_volume:
+          type: string
+          example: "25.00"
+        available_volume:
+          type: string
+          example: "25.00"
+        status:
+          type: string
+          enum: [ VACANT, OCCUPIED ]
+          example: VACANT
     Message:
       type: object
       properties:

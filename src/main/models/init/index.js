@@ -30,8 +30,8 @@ Notification.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Notification, { foreignKey: 'user_id' });
 
 // Storage - Warehouse
-Storage.belongsTo(Warehouse, { foreignKey: 'warehouse_id' });
-Warehouse.hasMany(Storage, { foreignKey: 'warehouse_id' });
+Warehouse.hasMany(Storage, { foreignKey: 'warehouse_id', as: 'storage' });
+Storage.belongsTo(Warehouse, { foreignKey: 'warehouse_id', as: 'warehouse' });
 
 // Order - OrderPayment
 Order.hasMany(OrderPayment, { foreignKey: 'order_id' });
