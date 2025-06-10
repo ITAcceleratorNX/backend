@@ -75,7 +75,7 @@ class MyWebSocketServer {
         }
 
         // Уведомляем всех менеджеров
-        const managers = await User.findAll({ where: { role: 'ADMIN' } });
+        const managers = await User.findAll({ where: { role: 'MANAGER' } });
         for (const manager of managers) {
             const managerWs = this.clients.get(String(manager.id));
             if (managerWs) {
