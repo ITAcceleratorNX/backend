@@ -9,8 +9,6 @@ import User from '../User.js';
 import Warehouse from '../Warehouse.js';
 import Chat from "../Chat.js";
 import Message from "../Message.js";
-import StorageCells from "../StorageCells.js";
-import OrderCells from "../OrderCell.js";
 import OrderPayment from "../OrderPayment.js";
 import PaymentTransaction from "../PaymentTransaction.js";
 
@@ -49,34 +47,10 @@ Chat.belongsTo(User, { foreignKey: 'user_id' });
 Chat.hasMany(Message, { foreignKey: 'chat_id' });
 Message.belongsTo(Chat, { foreignKey: 'chat_id' });
 
-// Storage - StorageCells
-Storage.hasMany(StorageCells, {
-    foreignKey: 'storage_id',
-    as: 'cells'
-});
-
-StorageCells.belongsTo(Storage, {
-    foreignKey: 'storage_id',
-    as: 'storage'
-});
-
-//Order - OrderCell
-Order.belongsToMany(StorageCells, {
-    through: OrderCells,
-    foreignKey: 'order_id',
-    otherKey: 'cell_id',
-});
-
-StorageCells.belongsToMany(Order, {
-    through: OrderCells,
-    foreignKey: 'cell_id',
-    otherKey: 'order_id',
-});
 
 export {
     Callback,
     Order,
-    OrderCells,
     FAQ,
     MovingOrder,
     Notification,
@@ -86,7 +60,6 @@ export {
     Warehouse,
     Chat,
     Message,
-    StorageCells,
     OrderPayment,
     PaymentTransaction
 };
