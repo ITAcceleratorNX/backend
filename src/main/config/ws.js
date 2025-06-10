@@ -23,7 +23,7 @@ class MyWebSocketServer {
 
     setup() {
         this.ws.on('connection', (ws, req) => {
-            const url = new URL(req.url, `http://${req.headers.host}`);
+            const url = new URL(req.url, `https://${req.headers.host}`);
             const userId = url.searchParams.get('userId');
 
             if (userId) {
