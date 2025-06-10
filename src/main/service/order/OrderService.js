@@ -1,22 +1,13 @@
-import {Order, StorageCells} from "../../models/init/index.js";
-import * as storageCellsService from "../storage/StorageCellsService.js";
+import {Order} from "../../models/init/index.js";
 import * as storageService from "../storage/StorageService.js";
 import {calculateDayRemainder, calculateMonthDiff} from "../../utils/date/DateCalculator.js";
 import * as priceService from "../price/PriceService.js";
-import {sequelize} from "../../config/database.js";
-import * as orderCellService from "./OrderCellService.js";
 
 export const getAll = async () => {
     return Order.findAll({
         include: [
             {
-                model: StorageCells,
-                include: [
-                    {
-                        association: 'storage'
-                    }
-                ],
-                through: { attributes: [] },
+                association: 'storage'
             }
         ]
     });
@@ -26,13 +17,7 @@ export const getById = async (id) => {
     return Order.findByPk(id, {
         include: [
             {
-                model: StorageCells,
-                include: [
-                    {
-                        association: 'storage'
-                    }
-                ],
-                through: { attributes: [] },
+                association: 'storage'
             }
         ]
     });
@@ -43,13 +28,7 @@ export const getByUserId = async (userId) => {
         where: { user_id: userId },
         include: [
             {
-                model: StorageCells,
-                include: [
-                    {
-                        association: 'storage'
-                    }
-                ],
-                through: { attributes: [] },
+                association: 'storage'
             }
         ]
     });
@@ -61,7 +40,7 @@ export const getByUserId = async (userId) => {
     return orders;
 };
 
-export const create = async (data, options) => {
+export const create = async (data, options = {}) => {
     return Order.create(data, options);
 };
 
@@ -74,34 +53,7 @@ export const deleteById = async (id) => {
 };
 
 export const createOrder = async (req) => {
-    const { cell_ids, ...data } = req.body;
-
-    const foundCells = await storageCellsService.findAll({
-        where: {
-            id: cell_ids
-        }
-    });
-
-    if (foundCells.length !== cell_ids.length) {
-        const foundIds = foundCells.map(c => c.id);
-        const missingIds = cell_ids.filter(id => !foundIds.includes(id));
-        const error = new Error('Some storage cells were not found');
-        error.status = 404;
-        error.missing_cell_ids = missingIds;
-        throw error;
-    }
-
-    const occupiedCells = foundCells.filter(c => c.is_occupied);
-    if (occupiedCells.length > 0) {
-        const error = new Error('Some storage cells are already occupied');
-        error.status = 400;
-        error.occupied_cell_ids = occupiedCells.map(c => c.id);
-        throw error;
-    }
-
-    const total_volume = cell_ids.length;
-
-    const storage = await storageService.getById(data.storage_id);
+    const storage = await storageService.getById(req.body.storage_id);
     if (!storage) {
         const error = new Error('Storage not found');
         error.status = 404;
@@ -110,9 +62,9 @@ export const createOrder = async (req) => {
 
     const calculateDto = {
         type: storage.storage_type,
-        area: total_volume,
-        month: calculateMonthDiff(data.start_date, data.end_date),
-        day: calculateDayRemainder(data.start_date, data.end_date)
+        area: req.body.total_volume,
+        month: calculateMonthDiff(req.body.start_date, req.body.end_date),
+        day: calculateDayRemainder(req.body.start_date, req.body.end_date)
     };
 
     const total_price = await priceService.calculate(calculateDto);
@@ -123,26 +75,11 @@ export const createOrder = async (req) => {
     }
 
     const orderData = {
-        ...data,
+        ...req.body,
         user_id: req.user.id,
-        total_volume,
         total_price,
         created_at: Date.now(),
     };
 
-    await sequelize.transaction(async (t) => {
-        const newOrder = await create(orderData, { transaction: t });
-
-        if (Array.isArray(cell_ids) && cell_ids.length > 0) {
-            const cells = cell_ids.map((cell_id) => ({
-                order_id: newOrder.id,
-                cell_id
-            }));
-
-            await storageCellsService.updateStorageCells(cell_ids, { is_occupied: true }, { transaction: t });
-            await orderCellService.createOrderCells(cells, { transaction: t });
-        }
-
-        return newOrder;
-    });
+    return await create(orderData);
 }
