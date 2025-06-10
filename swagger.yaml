@@ -82,9 +82,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
+                  error:
+                    type: string
+                    example: Validation error
                   message:
                     type: string
                     example: Email is required
@@ -120,10 +120,25 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  token:
-                    type: string
         '400':
           description: Ошибка валидации или неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [{
+                        "field": "password",
+                        "message": "Required"
+                      }]
+        '401':
+          description: Ошибка аутентификций
           content:
             application/json:
               schema:
@@ -132,11 +147,12 @@ paths:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
+                  details:
+                    type: array
                     example:
-                      email_error: Email is required
-                      password_error: Password is required
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
 
   /auth/register:
     post:
@@ -173,7 +189,24 @@ paths:
                   token:
                     type: string
         '400':
-          description: Ошибка валидации или недостающие поля
+          description: Ошибка валидации или неверные данные
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
+        '401':
+          description: Ошибка авторизаций
           content:
             application/json:
               schema:
@@ -182,12 +215,12 @@ paths:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
+                  details:
+                    type: array
                     example:
-                      email_error: Email is required
-                      unique_code_error: Unique code is required
-                      password_error: Password is required
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
   /chats/{chatId}/messages:
     get:
       tags:
@@ -300,12 +333,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: false
-                  message:
+                  error:
                     type: string
-                    example: "Email is required"
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
 
   /auth/restore-password:
     post:
@@ -349,13 +386,32 @@ paths:
               schema:
                 type: object
                 properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "password",
+                        "message": "Required"
+                      } ]
+        '401':
+          description: Ошибка аутентикаций
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   success:
                     type: boolean
                     example: false
-                  message:
-                    type: object
-                    additionalProperties:
-                      type: string
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "message": "Invalid email or password"
+                      } ]
         "500":
           description: Внутренняя ошибка сервера
           content:
@@ -402,6 +458,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FAQ'
+        "400":
+          description: Ошибка валидации тела запроса
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    example:
+                      [ {
+                        "field": "question",
+                        "message": "Question is required"
+                      } ]
         '403':
           description: Доступ запрещён
 
@@ -863,9 +936,9 @@ components:
     PriceType:
       type: string
       enum:
-        - INDIVIDUAL_STORAGE
-        - CLOUD_STORAGE
-        - RACK_STORAGE
+        - INDIVIDUAL
+        - CLOUD
+        - RACK
         - MOVING
 
     PriceDto:

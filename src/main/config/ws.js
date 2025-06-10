@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { Chat, User, Message } from '../models/init/index.js';
 import { URL } from 'url';
+import logger from "../utils/winston/logger.js";
 
 let wssInstance = null;
 
@@ -27,7 +28,7 @@ class MyWebSocketServer {
 
             if (userId) {
                 this.clients.set(userId, ws);
-                console.log(`Client connected: ${userId}`);
+                logger.info(`Client connected: ${userId}`);
             }
 
             ws.on('message', async (message) => {
@@ -35,13 +36,13 @@ class MyWebSocketServer {
                     const data = JSON.parse(message);
                     await this.handleMessage(data, ws);
                 } catch (error) {
-                    console.error('Invalid message:', error);
+                    logger.error('Invalid message:', error);
                 }
             });
 
             ws.on('close', () => {
                 this.clients.delete(userId);
-                console.log(`Client disconnected: ${userId}`);
+                logger.info(`Client disconnected: ${userId}`);
             });
         });
     }

@@ -1,43 +1,56 @@
-import { ChatService } from '../../service/chat/ChatService.js';
+import {ChatService} from '../../service/chat/ChatService.js';
+import {asyncHandler} from '../../utils/handler/asyncHandler.js';
+import logger from "../../utils/winston/logger.js";
 
 export const ChatController = {
-    async getMessages(req, res) {
-        try {
-            const { chatId } = req.params;
-            const { beforeId, limit } = req.query;
+    getMessages: asyncHandler(async (req, res) => {
+        const { chatId } = req.params;
+        const { beforeId, limit } = req.query;
 
-            const parsedLimit = parseInt(limit) || 50;
-            const beforeMessageId = beforeId ? parseInt(beforeId) : null;
+        const parsedLimit = parseInt(limit) || 50;
+        const beforeMessageId = beforeId ? parseInt(beforeId) : null;
 
-            const messages = await ChatService.getMessagesBefore(chatId, beforeMessageId, parsedLimit);
+        const messages = await ChatService.getMessagesBefore(chatId, beforeMessageId, parsedLimit);
 
-            res.json({
-                messages: messages.reverse(), // от старых к новым
-                hasMore: messages.length === parsedLimit // если меньше — сообщений больше нет
-            });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    },
+        logger.info('Fetched messages', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            requestId: req.id,
+            chatId,
+            beforeId: beforeId || null,
+            limit: parsedLimit,
+            returned: messages.length
+        });
 
-    async clearMessages(req, res) {
-        try {
-            const { chatId } = req.params;
-            await ChatService.clearMessages(chatId);
-            res.json({ message: 'Messages cleared successfully' });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    },
+        res.json({
+            messages: messages.reverse(), // от старых к новым
+            hasMore: messages.length === parsedLimit // если меньше — сообщений больше нет
+        });
+    }),
 
-    async changeManager(req, res) {
-        try {
-            const { chatId } = req.params;
-            const { newManagerId } = req.body;
-            const updatedChat = await ChatService.changeManager(chatId, newManagerId);
-            res.json(updatedChat);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
+    clearMessages: asyncHandler(async (req, res) => {
+        const { chatId } = req.params;
+        await ChatService.clearMessages(chatId);
+        logger.info('Cleared chat messages', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            requestId: req.id,
+            chatId
+        });
+        res.json({ message: 'Messages cleared successfully' });
+    }),
+
+    changeManager: asyncHandler(async (req, res) => {
+        const { chatId } = req.params;
+        const { newManagerId } = req.body;
+        const updatedChat = await ChatService.changeManager(chatId, newManagerId);
+        logger.info('Changed chat manager', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            requestId: req.id,
+            chatId,
+            newManagerId
+        });
+        res.json(updatedChat);
+    })
 };

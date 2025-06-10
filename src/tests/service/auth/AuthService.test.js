@@ -54,6 +54,40 @@ describe('Auth Controller', () => {
         });
     });
 
+    describe('checkEmailForRestorePassword', () => {
+        test('should send code if user exists', async () => {
+            User.findOne.mockResolvedValue({ _id: '123' });
+            cryptoUtils.generateSecureCode.mockReturnValue('restoreCode');
+
+            const req = { body: { email: 'restore@example.com' } };
+            const res = mockRes();
+
+            await AuthService.checkEmailForRestorePassword(req, res);
+
+            expect(sendGrid.sendVerificationCode).toHaveBeenCalledWith('restore@example.com', 'restoreCode');
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                user_exists: true,
+                email: 'restore@example.com'
+            });
+        });
+
+        test('should return user_exists = false if user not exists', async () => {
+            User.findOne.mockResolvedValue(null);
+
+            const req = { body: { email: 'noone@example.com' } };
+            const res = mockRes();
+
+            await AuthService.checkEmailForRestorePassword(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({
+                user_exists: false,
+                email: 'noone@example.com'
+            });
+        });
+    });
+
     describe('login', () => {
 
         test('should return error for invalid password', async () => {
@@ -65,41 +99,41 @@ describe('Auth Controller', () => {
 
             await AuthService.login(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({
                 success: false,
-                message: 'Invalid password'
+                details: [
+                    {message: "Invalid email or password"}
+                ]
             });
         });
     });
 
     describe('register', () => {
 
-
-        test('should return validation errors for invalid input', async () => {
+        test('should register user successfully', async () => {
             User.findOne.mockResolvedValue(null);
-            cryptoUtils.verifyCode.mockReturnValue(false);
+            cryptoUtils.verifyCode.mockReturnValue(true);
+            User.create.mockResolvedValue({
+                email: 'test@example.com',
+                password_hash: 'hashed',
+                role_code: 1,
+                last_login: Date.now()
+            });
 
             const req = {
                 body: {
-                    email: 'invalid',
-                    password: '123',
-                    unique_code: 'wrong'
+                    email: 'test@example.com',
+                    password: 'password',
+                    unique_code: '123456'
                 }
             };
             const res = mockRes();
 
             await AuthService.register(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({
-                success: false,
-                message: expect.objectContaining({
-                    email_error: expect.any(String),
-                    password_error: expect.any(String),
-                    unique_code_error: expect.any(String)
-                })
-            });
+            expect(res.status).toHaveBeenCalledWith(201);
+            expect(res.json).toHaveBeenCalledWith({ success: true });
         });
     });
 
@@ -119,10 +153,10 @@ describe('Auth Controller', () => {
 
             await AuthService.restorePassword(req, res);
 
-            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({
                 success: false,
-                message: 'User not found'
+                details: [{message: "Invalid email or password"}]
             });
         });
 
@@ -148,12 +182,36 @@ describe('Auth Controller', () => {
             expect(res.status).toHaveBeenCalledWith(400);
             expect(res.json).toHaveBeenCalledWith({
                 success: false,
-                message: expect.objectContaining({
-                    email_error: expect.any(String),
-                    password_error: expect.any(String),
-                    unique_code_error: expect.any(String)
-                })
+                details: [
+                    {message: "Invalid unique code"}
+                ]
             });
+        });
+
+        test('should restore password successfully', async () => {
+            const save = jest.fn();
+            const mockUser = {
+                email: 'test@example.com',
+                save,
+            };
+            User.findOne.mockResolvedValue(mockUser);
+            cryptoUtils.verifyCode.mockReturnValue(true);
+            bcryptService.getHashedPassword.mockResolvedValue('newHash');
+
+            const req = {
+                body: {
+                    email: 'test@example.com',
+                    password: 'newpass',
+                    unique_code: 'validcode'
+                }
+            };
+            const res = mockRes();
+
+            await AuthService.restorePassword(req, res);
+
+            expect(save).toHaveBeenCalled();
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalledWith({ success: true });
         });
     });
 });

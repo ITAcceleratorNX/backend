@@ -15,7 +15,7 @@ describe('🧪 UserService Тесттері', () => {
         const createdUser = { user_id: 1, ...input };
         User.create.mockResolvedValue(createdUser);
 
-        const result = await UserService.createUser(input);
+        const result = await UserService.create(input);
 
         expect(User.create).toHaveBeenCalledWith(input);
         expect(result).toEqual(createdUser);
@@ -25,7 +25,7 @@ describe('🧪 UserService Тесттері', () => {
         const mockUsers = [{ user_id: 1 }, { user_id: 2 }];
         User.findAll.mockResolvedValue(mockUsers);
 
-        const result = await UserService.getAllUsers();
+        const result = await UserService.getAll();
 
         expect(User.findAll).toHaveBeenCalled();
         expect(result).toEqual(mockUsers);
@@ -35,7 +35,7 @@ describe('🧪 UserService Тесттері', () => {
         const mockUser = { user_id: 1, name: 'Test User' };
         User.findByPk.mockResolvedValue(mockUser);
 
-        const result = await UserService.getUserById(1);
+        const result = await UserService.getById(1);
 
         expect(User.findByPk).toHaveBeenCalledWith(1);
         expect(result).toEqual(mockUser);
@@ -44,7 +44,7 @@ describe('🧪 UserService Тесттері', () => {
     test('updateUser дұрыс жұмыс істеу керек', async () => {
         User.update.mockResolvedValue([1]);
 
-        const result = await UserService.updateUser(1, { name: "Updated User" });
+        const result = await UserService.update(1, { name: "Updated User" });
 
         expect(User.update).toHaveBeenCalledWith({ name: "Updated User" }, { where: { user_id: 1 } });
         expect(result).toEqual([1]);
@@ -53,7 +53,7 @@ describe('🧪 UserService Тесттері', () => {
     test('deleteUser дұрыс жұмыс істеу керек', async () => {
         User.destroy.mockResolvedValue(1);
 
-        const result = await UserService.deleteUser(1);
+        const result = await UserService.deleteById(1);
 
         expect(User.destroy).toHaveBeenCalledWith({ where: { user_id: 1 } });
         expect(result).toBe(1);

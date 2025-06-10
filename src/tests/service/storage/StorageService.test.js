@@ -1,7 +1,21 @@
 import * as service from "../../../main/service/storage/StorageService.js";
 import {Storage} from "../../../main/models/init/index.js";
 
-jest.mock("../../../main/models/init/index.js");
+jest.mock("../../../main/models/init/index.js", () => ({
+    Storage: {
+        findAll: jest.fn(),
+        findByPk: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        destroy: jest.fn(),
+    },
+    sequelize: {
+        transaction: jest.fn(),
+    },
+}));
+jest.mock("../../../main/service/storage/StorageCellsService.js", () => ({
+    createCells: jest.fn(),
+}));
 
 describe("StorageService", () => {
     afterEach(() => {
@@ -61,5 +75,23 @@ describe("StorageService", () => {
             where: { id: 3 },
         });
         expect(result).toBe(1);
+    });
+
+    test("update should throw 404 error if nothing is updated", async () => {
+        Storage.update.mockResolvedValue(0);
+
+        await expect(service.update(99, { name: "X" })).rejects.toMatchObject({
+            message: "Not Found",
+            status: 404,
+        });
+    });
+
+    test("deleteById should throw 404 error if nothing is deleted", async () => {
+        Storage.destroy.mockResolvedValue(0);
+
+        await expect(service.deleteById(99)).rejects.toMatchObject({
+            message: "Not Found",
+            status: 404,
+        });
     });
 });

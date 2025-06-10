@@ -2,7 +2,7 @@ import { Warehouse} from '../../models/init/index.js';
 
 
 export class WarehouseService {
-    static async createWarehouse(data) {
+    static async create(data) {
         const warehouse = await Warehouse.create(data);
         return warehouse;
     }
