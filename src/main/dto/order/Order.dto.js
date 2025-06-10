@@ -7,7 +7,7 @@ export const OrderDto = z.object({
         required_error: 'storage_id is required',
         invalid_type_error: 'storage_id must be a number',
     }),
-    total_volume: z.number().gte(0),
+    total_volume: z.number().gt(0),
     start_date: z.coerce.date({
         required_error: 'start_date is required',
         invalid_type_error: 'start_date must be a valid date',

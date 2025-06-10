@@ -1,5 +1,5 @@
 import * as service from "../../../main/service/price/PriceService.js";
-import {Price} from "../../../main/models/init/index.js";
+import {Service} from "../../../main/models/init/index.js";
 
 jest.mock("../../../main/models/init/index.js");
 
@@ -10,63 +10,63 @@ describe("Price Service", () => {
 
     test("getAll should return all prices", async () => {
         const mockData = [{ id: 1 }, { id: 2 }];
-        Price.findAll.mockResolvedValue(mockData);
+        Service.findAll.mockResolvedValue(mockData);
 
         const result = await service.getAll();
 
-        expect(Price.findAll).toHaveBeenCalled();
+        expect(Service.findAll).toHaveBeenCalled();
         expect(result).toEqual(mockData);
     });
 
-    test("getById should return one price", async () => {
+    test("getById should return one serivce", async () => {
         const mockData = { id: 1 };
-        Price.findByPk.mockResolvedValue(mockData);
+        Service.findByPk.mockResolvedValue(mockData);
 
         const result = await service.getById(1);
 
-        expect(Price.findByPk).toHaveBeenCalledWith(1);
+        expect(Service.findByPk).toHaveBeenCalledWith(1);
         expect(result).toEqual(mockData);
     });
 
-    it('should create a new price if type does not exist', async () => {
+    it('should create a new serivce if type does not exist', async () => {
         const mockData = { type: 'rack', amount: 100 };
 
-        Price.findOne.mockResolvedValue(null);
-        Price.create.mockResolvedValue({ id: 1, ...mockData });
+        Service.findOne.mockResolvedValue(null);
+        Service.create.mockResolvedValue({ id: 1, ...mockData });
 
         const result = await service.create(mockData);
 
-        expect(Price.findOne).toHaveBeenCalledWith({ where: { type: 'rack' } });
-        expect(Price.create).toHaveBeenCalledWith(mockData);
+        expect(Service.findOne).toHaveBeenCalledWith({ where: { type: 'rack' } });
+        expect(Service.create).toHaveBeenCalledWith(mockData);
         expect(result).toEqual({ id: 1, ...mockData });
     });
 
     test("update should call update with correct params", async () => {
         const id = 5;
         const updateData = { name: "Updated" };
-        Price.update.mockResolvedValue([1]);
+        Service.update.mockResolvedValue([1]);
 
         const result = await service.update(id, updateData);
 
-        expect(Price.update).toHaveBeenCalledWith(updateData, {
+        expect(Service.update).toHaveBeenCalledWith(updateData, {
             where: { id: id },
         });
         expect(result).toEqual([1]);
     });
 
     test("deleteById should delete by id", async () => {
-        Price.destroy.mockResolvedValue(1);
+        Service.destroy.mockResolvedValue(1);
 
         const result = await service.deleteById(3);
 
-        expect(Price.destroy).toHaveBeenCalledWith({
+        expect(Service.destroy).toHaveBeenCalledWith({
             where: { id: 3 },
         });
         expect(result).toBe(1);
     });
 
-    test("calculate should return error if price not found", async () => {
-        Price.findOne.mockResolvedValue(null);
+    test("calculate should return error if serivce not found", async () => {
+        Service.findOne.mockResolvedValue(null);
 
         const mockData = {
             type: "UNKNOWN_TYPE",
@@ -107,9 +107,9 @@ describe("Price Service", () => {
         expect(result).toBeUndefined();
     });
 
-    test("calculate should return correct total price", async () => {
+    test("calculate should return correct total serivce", async () => {
         const mockPrice = { amount: 100 };
-        Price.findOne.mockResolvedValue(mockPrice);
+        Service.findOne.mockResolvedValue(mockPrice);
 
         const mockData = {
             type: "INDIVIDUAL",
@@ -130,6 +130,6 @@ describe("Price Service", () => {
         const expectedTotal = expectedMonthly + expectedDaily; // 300
 
         expect(result).toBe(expectedTotal);
-        expect(Price.findOne).toHaveBeenCalledWith({ where: { type: "INDIVIDUAL" } });
+        expect(Service.findOne).toHaveBeenCalledWith({ where: { type: "INDIVIDUAL" } });
     });
 });

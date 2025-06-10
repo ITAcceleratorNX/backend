@@ -3,7 +3,7 @@ import Order from '../Order.js';
 import FAQ from '../Faq.js';
 import MovingOrder from '../MovingOrder.js';
 import Notification from '../Notification.js';
-import Price from '../Price.js';
+import Service from '../Service.js';
 import Storage from '../Storage.js';
 import User from '../User.js';
 import Warehouse from '../Warehouse.js';
@@ -54,7 +54,7 @@ export {
     FAQ,
     MovingOrder,
     Notification,
-    Price,
+    Service,
     Storage,
     User,
     Warehouse,

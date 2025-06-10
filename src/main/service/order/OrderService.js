@@ -69,7 +69,7 @@ export const createOrder = async (req) => {
 
     const total_price = await priceService.calculate(calculateDto);
     if (!total_price) {
-        const error = new Error('Failed to calculate price');
+        const error = new Error('Failed to calculate serivce');
         error.status = 500;
         throw error;
     }

@@ -541,10 +541,10 @@ paths:
         '404':
           description: Не найден
 
-  /prices:
+  /services:
     get:
       tags:
-        - Price
+        - Service
       summary: Получить все цены
       responses:
         200:
@@ -554,10 +554,10 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Price'
+                  $ref: '#/components/schemas/Service'
     post:
       tags:
-        - Price
+        - Service
       summary: Создать новую цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -566,44 +566,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PriceDto'
+              $ref: '#/components/schemas/ServiceDto'
       responses:
         201:
           description: Успешное создание
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Price'
+                $ref: '#/components/schemas/Service'
         400:
           description: Неверные данные или цена уже существует
 
-  /prices/{type}:
+  /services/{type}:
     get:
       tags:
-        - Price
+        - Service
       summary: Получить цену по типу
       parameters:
         - in: path
           name: type
           required: true
           schema:
-            $ref: '#/components/schemas/PriceType'
+            $ref: '#/components/schemas/ServiceType'
       responses:
         200:
           description: Найденная цена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Price'
+                $ref: '#/components/schemas/Service'
         400:
           description: Неверный тип
         404:
           description: Цена не найдена
 
-  /prices/{id}:
+  /services/{id}:
     put:
       tags:
-        - Price
+        - Service
       summary: Обновить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -618,7 +618,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePriceDto'
+              $ref: '#/components/schemas/UpdateServiceDto'
       responses:
         200:
           description: Успешное обновление
@@ -636,7 +636,7 @@ paths:
 
     delete:
       tags:
-        - Price
+        - Service
       summary: Удалить цену (только для ADMIN и MANAGER)
       security:
         - cookieAuth: [ ]
@@ -933,7 +933,7 @@ components:
           type: string
           example: "general"
 
-    PriceType:
+    ServiceType:
       type: string
       enum:
         - INDIVIDUAL
@@ -941,36 +941,36 @@ components:
         - RACK
         - MOVING
 
-    PriceDto:
+    ServiceDto:
       type: object
       required:
         - type
         - amount
       properties:
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
           format: float
           minimum: 0.01
 
-    UpdatePriceDto:
+    UpdateServiceDto:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
           format: float
           minimum: 0.01
 
-    Price:
+    Service:
       type: object
       properties:
         id:
           type: integer
         type:
-          $ref: '#/components/schemas/PriceType'
+          $ref: '#/components/schemas/ServiceType'
         amount:
           type: number
 
