@@ -7,7 +7,10 @@ export const Chat = sequelize.define('Chat', {
             primaryKey: true,
             autoIncrement: true
         },
-    user_id: DataTypes.INTEGER,
+        user_id: {
+            type: DataTypes.INTEGER,
+            unique: true // Добавляем уникальность
+        },
     manager_id: DataTypes.INTEGER,
     status: DataTypes.STRING // 'PENDING', 'ACCEPTED', 'CLOSED'
 },
