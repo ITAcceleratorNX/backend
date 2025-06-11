@@ -1,8 +1,9 @@
 import express from 'express';
+import logger from "../../utils/winston/logger.js";
 
 const router = express.Router();
 router.get('/payment-callback', async (req, res) => {
-    console.log(req.body)
+    logger.info({message: req.body})
     res.status(200);
 }, );
 
