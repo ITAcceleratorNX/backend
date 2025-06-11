@@ -12,6 +12,5 @@ export const UpdateServiceDto = ServiceDto.partial();
 export const CalculatePriceDto = z.object({
     type: ServiceType,
     area: z.number().positive(),
-    month: z.number().positive(),
-    day: z.number().int().gt(-1).default(0)
+    month: z.number().positive()
 });

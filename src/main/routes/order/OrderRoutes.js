@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/", authenticateJWT, authorizeAdminOrManager, orderController.getAllOrders);
 router.get("/me", authenticateJWT, orderController.getMyOrders);
 router.get("/:id", authenticateJWT, orderController.getOrderById);
-router.post("/", authenticateJWT, authorizeAdminOrManager, validateBody(OrderDto), orderController.createOrder);
+router.post("/", authenticateJWT, validateBody(OrderDto), orderController.createOrder);
 router.put("/me", authenticateJWT, validateBody(OrderUpdateDto), orderController.updateOrder);
 router.delete("/:id", authenticateJWT, authorizeAdminOrManager, orderController.deleteOrder);
 
