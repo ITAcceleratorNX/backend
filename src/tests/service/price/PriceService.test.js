@@ -106,7 +106,7 @@ describe("Price Service", () => {
     });
 
     test("calculate should return correct total serivce", async () => {
-        const mockPrice = { amount: 100 };
+        const mockPrice = { price: 100 };
         Service.findOne.mockResolvedValue(mockPrice);
 
         const mockData = {
