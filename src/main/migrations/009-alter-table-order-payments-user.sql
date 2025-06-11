@@ -1,0 +1,5 @@
+ALTER TABLE order_payments
+    ADD COLUMN payment_id VARCHAR(255) DEFAULT NULL;
+
+ALTER TABLE users
+    ADD COLUMN recurrent_token VARCHAR(255) DEFAULT NULL;
