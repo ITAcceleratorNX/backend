@@ -8,7 +8,7 @@ export const Service = sequelize.define('Service', {
         autoIncrement: true
     },
     type: {
-        type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "MOVING"),
+        type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "MOVING", "DEPOSIT"),
         allowNull: false
     },
     price: {

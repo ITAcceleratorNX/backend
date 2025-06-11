@@ -71,8 +71,7 @@ describe("Price Service", () => {
         const mockData = {
             type: "UNKNOWN_TYPE",
             area: 2,
-            month: 1,
-            day: 0
+            month: 1
         };
 
         const mockRes = {
@@ -91,8 +90,7 @@ describe("Price Service", () => {
         const mockData = {
             type: 123, // wrong type
             area: "invalid", // wrong type
-            month: null,
-            day: null
+            month: null
         };
 
         const mockRes = {
@@ -114,8 +112,7 @@ describe("Price Service", () => {
         const mockData = {
             type: "INDIVIDUAL",
             area: 2,
-            month: 1,
-            day: 15
+            month: 1
         };
 
         const mockRes = {
@@ -125,9 +122,7 @@ describe("Price Service", () => {
 
         const result = await service.calculate(mockData, mockRes);
 
-        const expectedMonthly = 100 * 2 * 1; // 200
-        const expectedDaily = (100 * 2 / 30) * 15; // 100
-        const expectedTotal = expectedMonthly + expectedDaily; // 300
+        const expectedTotal = 100 * 2 * 1;
 
         expect(result).toBe(expectedTotal);
         expect(Service.findOne).toHaveBeenCalledWith({ where: { type: "INDIVIDUAL" } });

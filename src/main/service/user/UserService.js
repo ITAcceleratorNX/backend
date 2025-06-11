@@ -19,7 +19,7 @@ export const getById = async (id) => {
 };
 
 export const update = async (id, data) => {
-    const updated = await User.update(data, { where: { user_id: id } });
+    const updated = await User.update(data, { where: { id: id } });
     if (!updated) {
         const error = new Error('User not found');
         error.status = 404;
