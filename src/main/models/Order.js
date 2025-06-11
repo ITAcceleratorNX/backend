@@ -59,7 +59,7 @@ const Order = sequelize.define('Order', {
         allowNull: false,
         defaultValue: 0
     },
-    cargo_marks: {
+    cargo_mark: {
         type: DataTypes.ENUM("NO",'FRAGILE',"HEAVY"),
         allowNull: false,
         defaultValue: 'NO'

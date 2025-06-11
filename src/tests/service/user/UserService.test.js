@@ -46,7 +46,7 @@ describe('🧪 UserService Тесттері', () => {
 
         const result = await UserService.update(1, { name: "Updated User" });
 
-        expect(User.update).toHaveBeenCalledWith({ name: "Updated User" }, { where: { user_id: 1 } });
+        expect(User.update).toHaveBeenCalledWith({ name: "Updated User" }, { where: { id: 1 } });
         expect(result).toEqual([1]);
     });
 
