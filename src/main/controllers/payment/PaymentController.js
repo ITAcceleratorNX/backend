@@ -1,11 +1,13 @@
 import logger from "../../utils/winston/logger.js";
+import * as paymentService from "../../service/payment/PaymentService.js";
+import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
-export const createPayment = (req, res) => {
-    paymentService.create(req.body);
+export const createPayment = asyncHandler(async (req, res) => {
+    await paymentService.create(req.body);
     res.status(201).json();
-}
+});
 
-export const getMyPayments = async (req, res) => {
+export const getMyPayments = asyncHandler(async (req, res) => {
     const id = Number(req.user.id);
     const order_payments = await paymentService.getByUserId(id);
     logger.info('Fetched user order payments', {
@@ -14,9 +16,9 @@ export const getMyPayments = async (req, res) => {
         message: `Fetched user order payments`,
     });
     res.json(order_payments);
-};
+});
 
-export const getUserPayments = async (req, res) => {
+export const getUserPayments = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     if (isNaN(id)) {
         logger.warn('Invalid ID received', {
@@ -46,4 +48,4 @@ export const getUserPayments = async (req, res) => {
         resourceId: id
     });
     res.json(result);
-};
+});
