@@ -43,6 +43,10 @@ export const User = sequelize.define('User', {
         type: DataTypes.ENUM("ADMIN", "USER", "MANAGER"),
         allowNull: false,
         defaultValue: 'USER'
+    },
+    recurrent_token: {
+        type: DataTypes.STRING(255),
+        allowNull: true
     }
 }, {
     tableName: 'users',

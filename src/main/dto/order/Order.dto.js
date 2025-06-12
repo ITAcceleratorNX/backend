@@ -8,16 +8,9 @@ export const OrderDto = z.object({
         invalid_type_error: 'storage_id must be a number',
     }),
     total_volume: z.number().gt(0),
-    start_date: z.coerce.date({
-        required_error: 'start_date is required',
-        invalid_type_error: 'start_date must be a valid date',
-    }),
-    end_date: z.coerce.date({
-        required_error: 'end_date is required',
-        invalid_type_error: 'end_date must be a valid date',
-    }),
+    months: z.number().int().min(1),
     cargo_mark: CARGO_MARKS,
-    product_names: z.string().nonempty()
+    product_names: z.string().nonempty(),
 });
 
 export const OrderUpdateDto = OrderDto.partial();

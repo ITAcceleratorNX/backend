@@ -25,6 +25,7 @@ import successPaymentCallback from "./routes/callbacks/SuccessPaymentCallback.js
 import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
+
 export default async function appFactory() {
     await initDb();
     await sequelize.authenticate();

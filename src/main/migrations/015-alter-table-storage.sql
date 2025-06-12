@@ -1,0 +1,5 @@
+ALTER TABLE storages
+DROP COLUMN status;
+
+ALTER TABLE storages
+    ADD COLUMN status VARCHAR(10) DEFAULT 'VACANT' CHECK (status IN ('VACANT', 'OCCUPIED', 'PENDING'))

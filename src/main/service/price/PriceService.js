@@ -10,20 +10,18 @@ export const calculate = async (data, res) => {
         res.status(400).json({ error: "Invalid date" });
         return;
     }
-        const service = await getByType(dto.type);
+    const service = await getByType(dto.type);
 
-        if (!service) {
-            console.error(`Service not found for type ${dto.type}`);
-            res.status(400).json({error: `Service not found for type ${dto.type}`});
-            return
-        }
+    if (!service) {
+        console.error(`Service not found for type ${dto.type}`);
+        res.status(400).json({error: `Service not found for type ${dto.type}`});
+        return
+    }
 
-        const amount = service.amount;
-        const { area, month, day } = dto;
+    const price = service.price;
+    const { area, month } = dto;
 
-        const monthlyCost = amount * area * month;
-        const dailyCost = (amount * area / 30) * day;
-        return  monthlyCost + dailyCost;
+    return  price * area * month;
 }
 
 
@@ -56,7 +54,7 @@ export const deleteById = async (id) => {
 export const getByType = async (type) => {
     const price = await Service.findOne({ where: { type: type } });
     if (!price) {
-        const error = new Error('Not Found');
+        const error = new Error('service type not found');
         error.status = 404;
         throw error;
     }

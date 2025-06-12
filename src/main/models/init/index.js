@@ -17,9 +17,9 @@ import PaymentTransaction from "../PaymentTransaction.js";
 Order.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Order, { foreignKey: 'user_id' });
 
-// Contract - Storage
-Order.belongsTo(Storage, { foreignKey: 'storage_id' });
-Storage.hasMany(Order, { foreignKey: 'storage_id' });
+// Order - Storage
+Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );
+Order.belongsTo(Storage, { foreignKey: 'storage_id', as : 'storage' });
 
 // MovingOrder - Contract
 MovingOrder.belongsTo(Order, { foreignKey: 'contract_id' });
