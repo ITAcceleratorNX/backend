@@ -38,7 +38,7 @@ export async function runMonthlyPayments() {
         const payload = {
             token: user.recurrent_token,
             amount: Number(parseFloat(payment.amount).toFixed(2)),
-            order_id: String(payment.order_id),
+            order_id: String(payment.id),
             description: `Auto-payment for order ${payment.order_id}`
         };
         console.log(payload);
