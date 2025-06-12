@@ -59,6 +59,10 @@ export const createOrder = async (req) => {
         const storage = await Storage.findByPk(req.body.storage_id, { transaction });
         if (!storage) {
             throw Object.assign(new Error('Storage not found'), { status: 404 });
+        } else if(storage.status === 'OCCUPIED') {
+            throw Object.assign(new Error('Storage already occupied'), { status: 400 });
+        } else if(storage.available_volume < req.body.total_volume) {
+            throw Object.assign(new Error('Storage unavailable'), { status: 400 });
         }
 
         const start = DateTime.now();
