@@ -10,22 +10,22 @@ import {sequelize} from "../../config/database.js";
 
 
 const PAYMENT_CONSTANTS = {
-    currency: 'KZT',
-    success_url: 'https://frontend-6j9m.onrender.com/personal-account',
-    failure_url: 'https://frontend-6j9m.onrender.com/personal-account',
-    callback_url: 'https://extraspace-backend.onrender.com/callbacks/payment-callback',
-    merchant_term_url: 'https://frontend-6j9m.onrender.com',
-    payment_lifetime: 3600,
-    lang: 'ru',
-    merchant_id: '494407cd-25b7-40b9-916e-17293a705638',
-    service_id: '4ab57c07-f271-4a39-a654-c673bfcd09c9',
-    merchant_name: 'Extraspace',
-    name: 'storage',
-    secretKey: '4ec7fe887bb9e205164eb1be4c3b942eb6f752d7c02c6fb15de39bdce0310bda',
-    apiKey: 'cb91f50f-c520-4cd7-a846-7488e3294f18',
-    payment_type: 'pay',
-    payment_method: 'ecom',
-    payment_create_url: 'https://api.paysage.kz//payment/create'
+    currency: process.env.PAYMENT_CURRENCY,
+    success_url: process.env.PAYMENT_SUCCESS_URL,
+    failure_url: process.env.PAYMENT_FAILURE_URL,
+    callback_url: process.env.PAYMENT_CALLBACK_URL,
+    merchant_term_url: process.env.PAYMENT_MERCHANT_TERM_URL,
+    payment_lifetime: Number(process.env.PAYMENT_LIFETIME),
+    lang: process.env.PAYMENT_LANG,
+    merchant_id: process.env.PAYMENT_MERCHANT_ID,
+    service_id: process.env.PAYMENT_SERVICE_ID,
+    merchant_name: process.env.PAYMENT_MERCHANT_NAME,
+    name: process.env.PAYMENT_NAME,
+    secretKey: process.env.PAYMENT_SECRET_KEY,
+    apiKey: process.env.PAYMENT_API_KEY,
+    payment_type: process.env.PAYMENT_TYPE,
+    payment_method: process.env.PAYMENT_METHOD,
+    payment_create_url: process.env.PAYMENT_CREATE_URL
 };
 
 export const create = async (data) => {
