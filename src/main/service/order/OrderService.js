@@ -1,8 +1,7 @@
 import {Order, Storage} from "../../models/init/index.js";
-import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
-import { DateTime } from 'luxon';
+import {DateTime} from 'luxon';
 
 export const getAll = async () => {
     return Order.findAll({
@@ -58,18 +57,16 @@ export const createOrder = async (req) => {
     try {
         const storage = await Storage.findByPk(req.body.storage_id, { transaction });
         if (!storage) {
-            throw Object.assign(new Error('Storage not found'), { status: 404 });
-        } else if(storage.status === 'OCCUPIED') {
-            throw Object.assign(new Error('Storage already occupied'), { status: 400 });
+            throw Object.assign(new Error('storage not found'), { status: 200 });
+        } else if(storage.status === 'OCCUPIED' || storage.status === 'PENDING') {
+            throw Object.assign(new Error('unable to select this storage'), { status: 200 });
         } else if(storage.available_volume < req.body.total_volume) {
-            throw Object.assign(new Error('Storage unavailable'), { status: 400 });
+            throw Object.assign(new Error('storage unavailable'), { status: 200 });
         }
 
         const start = DateTime.now();
         const monthCount = req.body.months;
         const end = start.plus({ months: monthCount });
-
-        const totalDays = Math.round(end.diff(start, 'days').days);
 
         const calculateDto = {
             type: storage.storage_type,
@@ -95,40 +92,10 @@ export const createOrder = async (req) => {
 
         const order = await Order.create(orderData, { transaction });
 
-        const dailyAmount = total_price / totalDays;
-        const orderPayments = [];
-
-        let current = start;
-        let remaining = totalDays;
-        let isFirst = true;
-
-        while (remaining > 0) {
-            const daysInMonth = current.daysInMonth;
-            const startDay = current.day;
-            const daysThisMonth = daysInMonth - startDay + 1;
-
-            const daysToCharge = Math.min(remaining, daysThisMonth);
-            const amount = dailyAmount * daysToCharge;
-
-            orderPayments.push({
-                order_id: order.id,
-                month: current.month,
-                year: current.year,
-                amount: amount + (isFirst ? Number(deposit.price) : 0),
-                status: 'UNPAID',
-            });
-
-            isFirst = false;
-            remaining -= daysToCharge;
-            current = current.plus({ months: 1 }).set({ day: 1 });
-        }
-
-        await orderPaymentService.bulkCreate(orderPayments, { transaction });
-
         const newVolume = storage.available_volume - req.body.total_volume;
         const updatedStorageData = {
             available_volume: newVolume,
-            status: newVolume <= 0 ? 'OCCUPIED' : storage.status,
+            status: 'PENDING',
         };
 
         await Storage.update(updatedStorageData, {

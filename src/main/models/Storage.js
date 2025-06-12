@@ -43,7 +43,7 @@ const Storage = sequelize.define('Storage', {
         allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('OCCUPIED', 'VACANT'),
+        type: DataTypes.ENUM('OCCUPIED', 'VACANT', 'PENDING'),
         allowNull: false,
         defaultValue: "VACANT"
     }
