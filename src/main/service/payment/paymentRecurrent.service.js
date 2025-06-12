@@ -2,6 +2,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import { Order, OrderPayment, User } from '../../models/init/index.js';
 import dayjs from 'dayjs';
+import { Buffer } from 'buffer';
 
 const API_URL = 'https://api.paysage.kz/payment/recurrent';
 const API_KEY = 'cb91f50f-c520-4cd7-a846-7488e3294f18';

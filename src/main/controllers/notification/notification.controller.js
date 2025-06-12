@@ -1,6 +1,5 @@
 import { NotificationService } from '../../service/notification/notification.service.js';
 import { CreateNotificationDto } from '../../dto/notification/notification.dto.js';
-import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
 const service = new NotificationService();
 
