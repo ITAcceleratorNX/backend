@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import { Buffer } from 'buffer';
 
 const API_URL = 'https://api.paysage.kz/payment/recurrent';
-const API_KEY = 'cb91f50f-c520-4cd7-a846-7488e3294f18';
-const SECRET_KEY = '4ec7fe887bb9e205164eb1be4c3b942eb6f752d7c02c6fb15de39bdce0310bda';
+const API_KEY = process.env.API_KEY;
+const SECRET_KEY = process.env.SECRET_KEY;
 
 export async function runMonthlyPayments() {
     const now = dayjs();

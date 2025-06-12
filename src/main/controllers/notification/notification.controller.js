@@ -7,7 +7,7 @@ export class NotificationController {
     async create(req, res) {
         try {
             const parsed = CreateNotificationDto.parse(req.body);
-            const notification = await service.createNotification(parsed);
+            const notification = await service.sendNotification(parsed);
             res.status(201).json(notification);
         } catch (error) {
             res.status(400).json({ message: 'Невалидные данные', error: error.errors || error.message });
