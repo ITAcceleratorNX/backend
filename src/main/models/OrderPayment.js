@@ -35,6 +35,10 @@ const OrderPayment = sequelize.define('OrderPayment', {
     paid_at: {
         type: DataTypes.DATE,
         allowNull: true,
+    },
+    payment_id: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'order_payments',
