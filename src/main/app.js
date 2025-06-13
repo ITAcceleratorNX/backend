@@ -25,6 +25,7 @@ import successPaymentCallback from "./routes/callbacks/SuccessPaymentCallback.js
 import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
+import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 
 export default async function appFactory() {
     await initDb();
@@ -85,6 +86,7 @@ export default async function appFactory() {
     app.use('/orders', orderRoutes);
     app.use('/notifications', notificationRoutes);
     app.use('/callbacks', successPaymentCallback);
+    app.use('/payments', paymentRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });

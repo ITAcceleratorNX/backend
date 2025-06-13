@@ -15,11 +15,12 @@ const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
         winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+        winston.format.printf(({ timestamp, level, message, response, ...meta }) => {
             const log = {
                 timestamp,
                 level,
                 message,
+                response,
                 userId: meta.userId || null,
                 endpoint: meta.endpoint || null,
                 service: meta.service || 'backend',
