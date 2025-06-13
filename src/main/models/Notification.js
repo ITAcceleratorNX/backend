@@ -28,12 +28,20 @@ const Notification = sequelize.define('Notification', {
         defaultValue: DataTypes.NOW,
     },
     notification_type: {
-        type: DataTypes.ENUM('order', 'payment', 'contract', 'general'),
+        type: DataTypes.ENUM( 'payment', 'contract', 'general'),
         defaultValue: 'general',
     },
     related_order_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
+    },
+    is_email: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    is_sms: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
     },
 }, {
     tableName: 'notifications',
