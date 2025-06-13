@@ -21,7 +21,7 @@ import priceRoutes from "./routes/service/ServiceRoutes.js";
 import FAQRoutes from "./routes/faq/FAQRoutes.js";
 import {initDb, sequelize} from "./config/database.js";
 import orderRoutes from "./routes/order/OrderRoutes.js";
-import successPaymentCallback from "./routes/callbacks/SuccessPaymentCallback.js";
+import successPaymentCallback from "./routes/callbacks/PaymentCallback.router.js";
 import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
