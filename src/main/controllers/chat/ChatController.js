@@ -52,5 +52,16 @@ export const ChatController = {
             newManagerId
         });
         res.json(updatedChat);
+    }),
+
+    getManagerChats: asyncHandler(async (req, res) => {
+        const managerId = req.user.id;
+        const chats = await ChatService.getChats({where: {manager_id: managerId}});
+        logger.info('Fetched messages', {
+            userId: req.user?.id || null,
+            endpoint: req.originalUrl,
+            requestId: req.id,
+        });
+        res.json(chats);
     })
 };
