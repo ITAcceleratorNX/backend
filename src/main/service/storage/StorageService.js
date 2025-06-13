@@ -12,8 +12,8 @@ export const create = async (data, options) => {
     return Storage.create(data, options);
 };
 
-export const update = async (id, data) => {
-    const updatedCount = await Storage.update(data, { where: { id: id } });
+export const update = async (id, data, options = {}) => {
+    const updatedCount = await Storage.update(data, { where: { id: id } , ...options});
     if (updatedCount === 0) {
         const error = new Error('Not Found');
         error.status = 404;
