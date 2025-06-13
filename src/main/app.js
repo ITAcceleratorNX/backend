@@ -22,6 +22,9 @@ import FAQRoutes from "./routes/faq/FAQRoutes.js";
 import {initDb, sequelize} from "./config/database.js";
 import orderRoutes from "./routes/order/OrderRoutes.js";
 import successPaymentCallback from "./routes/callbacks/SuccessPaymentCallback.js";
+import notificationRoutes from "./routes/notification/notification.routes.js";
+import cron from 'node-cron';
+import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 
 export default async function appFactory() {
@@ -63,6 +66,12 @@ export default async function appFactory() {
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
 
+
+    cron.schedule('0 0 1 * *', () => {
+        console.log('⏰ Запуск автооплаты...');
+        runMonthlyPayments();
+    });
+
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
@@ -75,6 +84,7 @@ export default async function appFactory() {
     app.use('/prices', priceRoutes);
     app.use('/faq', FAQRoutes);
     app.use('/orders', orderRoutes);
+    app.use('/notifications', notificationRoutes);
     app.use('/callbacks', successPaymentCallback);
     app.use('/payments', paymentRoutes);
 
