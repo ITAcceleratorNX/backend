@@ -13,9 +13,9 @@ import OrderPayment from "../OrderPayment.js";
 import PaymentTransaction from "../PaymentTransaction.js";
 
 
-// Contract - User
-Order.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Order, { foreignKey: 'user_id' });
+// Order - User
+Order.belongsTo(User, { foreignKey: 'user_id' , as: 'user'});
+User.hasMany(Order, { foreignKey: 'user_id' , as: 'user'});
 
 // Order - Storage
 Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );

@@ -1,4 +1,4 @@
-import { Chat, Message } from '../../models/init/index.js';
+import {Chat, Message} from '../../models/init/index.js';
 
 export const ChatService = {
     async getMessagesBefore(chatId, beforeMessageId = null, limit = 50) {
@@ -28,5 +28,8 @@ export const ChatService = {
         await chat.save();
 
         return chat;
+    },
+    async getChats(options = {}) {
+        return await Chat.findAll(options);
     }
 };

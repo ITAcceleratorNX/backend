@@ -22,6 +22,7 @@ import FAQRoutes from "./routes/faq/FAQRoutes.js";
 import {initDb, sequelize} from "./config/database.js";
 import orderRoutes from "./routes/order/OrderRoutes.js";
 import successPaymentCallback from "./routes/callbacks/SuccessPaymentCallback.js";
+import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 
 export default async function appFactory() {
     await initDb();
@@ -75,6 +76,7 @@ export default async function appFactory() {
     app.use('/faq', FAQRoutes);
     app.use('/orders', orderRoutes);
     app.use('/callbacks', successPaymentCallback);
+    app.use('/payments', paymentRoutes);
 
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
