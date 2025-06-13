@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { Order, OrderPayment, User } from '../../models/init/index.js';
 import dayjs from 'dayjs';
 import { Buffer } from 'buffer';
+import {NotificationService} from "../notification/notification.service.js";
 
 const API_URL = 'https://api.paysage.kz/payment/recurrent';
 const API_KEY = process.env.API_KEY;
@@ -12,6 +13,7 @@ export async function runMonthlyPayments() {
     const now = dayjs();
     const currentMonth = now.month() + 1;
     const currentYear = now.year();
+    const notificationService = new NotificationService();
 
     const unpaidPayments = await OrderPayment.findAll({
         where: {
@@ -68,6 +70,27 @@ export async function runMonthlyPayments() {
                 console.log(`✅ Оплачено: order_id ${payment.order_id}`);
             } else {
                 console.log(`❌ Ошибка оплаты: ${resData.error_msg || resData.error_code}`);
+                if (resData.error_code === 'card_not_found') {
+                    await notificationService.sendNotification({
+                        user_id: user.id,
+                        title: 'Ошибка оплаты',
+                        message: 'Платёжная карта клиента не найдена. Проверьте реквизиты.',
+                        notification_type: 'payment',
+                        related_order_id: payment.order_id,
+                        is_email: true,
+                        is_sms: true
+                    });
+                }else {
+                    await notificationService.sendNotification({
+                        user_id: 1,
+                        title: 'Ошибка оплаты',
+                        message: 'Ошибка оплаты сервера',
+                        notification_type: 'payment',
+                        related_order_id: payment.order_id,
+                        is_email: true,
+                        is_sms: true
+                    });
+                }
             }
         } catch (err) {
             console.error(`❌ Ошибка запроса для order ${payment.order_id}:`, err.response?.data || err.message);
