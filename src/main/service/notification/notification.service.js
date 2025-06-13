@@ -22,7 +22,7 @@ export class NotificationService {
             is_sms = false,
         } = notificationData;
 
-        const notification = await Notification.create({
+        await Notification.create({
             user_id,
             title,
             message,
