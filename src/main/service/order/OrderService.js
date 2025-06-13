@@ -2,6 +2,8 @@ import {Order, Storage} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
+import * as storageService from "../storage/StorageService.js";
+import logger from "../../utils/winston/logger.js";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -49,7 +51,25 @@ export const update = async (id, data) => {
 };
 
 export const deleteById = async (id) => {
-    return Order.destroy({ where: { id: id } });
+    const transaction = await sequelize.transaction();
+    try {
+        const order = await getById(id);
+        if (!order) {
+            throw Object.assign(new Error('Not found'), { status: 400 });
+        }
+        let newVolume = Number(order.storage.available_volume) + Number(order.total_volume);
+        await storageService.update(order.storage_id, {
+            status: 'VACANT',
+            available_volume: newVolume
+        }, transaction);
+        await Order.destroy({ where: { id: id }, transaction });
+        await transaction.commit();
+        return {success: true};
+    } catch (err) {
+        await transaction.rollback()
+        logger.error(err);
+        throw err;
+    }
 };
 
 export const createOrder = async (req) => {
@@ -92,7 +112,10 @@ export const createOrder = async (req) => {
 
         const order = await Order.create(orderData, { transaction });
 
-        const newVolume = storage.available_volume - req.body.total_volume;
+        let newVolume = storage.available_volume;
+        if(storage.storage_type !== 'INDIVIDUAL') {
+            newVolume = storage.available_volume - req.body.total_volume;
+        }
         const updatedStorageData = {
             available_volume: newVolume,
             status: 'PENDING',

@@ -87,19 +87,12 @@ export const create = async (data) => {
             current = current.plus({ months: 1 }).set({ day: 1 });
         }
 
-        const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { paymentOrderTransaction });
-        const updatedStorageData = {
-            status: order.storage.available_volume <= 0 ? 'OCCUPIED' : 'VACANT',
-        };
-        await Storage.update(updatedStorageData, {
-            where: { id: order.id },
-            paymentOrderTransaction,
-        });
+        const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
-        await Order.update({status: 'PROCESSING'}, {
-            where: {id: order.id},
-            paymentOrderTransaction
-        })
+        await Order.update({ status: 'PROCESSING' }, {
+            where: { id: order.id },
+            transaction: paymentOrderTransaction,
+        });
 
         const dataObject = {
             amount: Number(orderPayments[0].amount),
@@ -115,6 +108,8 @@ export const create = async (data) => {
             merchant_term_url: PAYMENT_CONSTANTS.merchant_term_url,
             payment_lifetime: Number(PAYMENT_CONSTANTS.payment_lifetime),
             lang: PAYMENT_CONSTANTS.lang,
+            create_recurrent_profile: true,
+            recurrent_profile_lifetime: Number(totalDays),
             items: [
                 {
                     merchant_id: PAYMENT_CONSTANTS.merchant_id,
@@ -146,9 +141,9 @@ export const create = async (data) => {
             Authorization: 'Bearer ' + token,
             'Content-Type': 'application/json'
         };
-
+        let response;
         try {
-            const response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
+            response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
             logger.info('Payment API response', {
                 message: 'Payment API response',
                 endpoint: 'payment/create',
@@ -170,7 +165,7 @@ export const create = async (data) => {
         }
 
         await paymentOrderTransaction.commit();
-        return order;
+        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
     } catch (err) {
         await paymentOrderTransaction.rollback();
         throw err;
