@@ -58,12 +58,13 @@ const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_toke
                 model: Order,
                 as: 'order', // важно: alias должен совпадать с ассоциацией
             }
-        });        await Order.update({ payment_status: 'PAID' }, {
-            where: { id: order_id },
+        });
+        await Order.update({ payment_status: 'PAID' }, {
+            where: { id: orderPayment.order.id },
             transaction
         });
         await OrderPayment.update({ status: 'PAID', payment_id, paid_at: new Date(payment_date) }, {
-            where: { id: order_id },
+            where: { id: orderPayment.id },
             transaction
         });
         await User.update({ recurrent_token }, {
