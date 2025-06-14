@@ -138,7 +138,7 @@ async function calculateTotalPrice(type, area, month) {
 
 async function updateStorageVolume(storage, total_volume, transaction) {
     const isIndividual = storage.storage_type === 'INDIVIDUAL';
-    const newVolume = isIndividual ? storage.available_volume : storage.available_volume - total_volume;
+    const newVolume = isIndividual ? 0 : storage.available_volume - total_volume;
 
     await Storage.update(
         {

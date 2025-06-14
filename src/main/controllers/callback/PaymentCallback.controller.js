@@ -4,7 +4,7 @@ import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
 export const handlePaymentCallback = asyncHandler(async (req, res) => {
     try {
-        await handleCallbackData(req.body);
+        await handleCallbackData(req.body.data);
         res.sendStatus(200);
     } catch (err) {
         logger.error('Error in payment callback:', err);
