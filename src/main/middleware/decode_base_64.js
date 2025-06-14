@@ -3,7 +3,7 @@ import logger from "../utils/winston/logger.js";
 
 export const base64Decoder = (req, res, next) => {
     try {
-        logger.info(`Decoded payment callback`, {response: req});
+        logger.info(JSON.parse(Buffer.from(req.data.data, 'base64').toString('utf-8')));
         const decoded = JSON.parse(Buffer.from(req.body.data, 'base64').toString('utf-8'));
         logger.info(`Decoded payment callback`, decoded);
         req.body.data = decoded;
