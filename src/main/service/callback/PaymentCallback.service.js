@@ -26,6 +26,8 @@ export const handleCallbackData = async (data) => {
                 logger.warn(`Unknown operation_type: ${operation_type} for order_id: ${order_id}, data: ${data}`);
                 break;
         }
+    } else {
+        logger.warn(`Unknown operation_type: ${operation_type}`, data);
     }
 };
 
