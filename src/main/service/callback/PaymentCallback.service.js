@@ -53,7 +53,8 @@ const handleErrorStatus = async (order_id, error_code) => {
 const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_token }) => {
     const transaction = await sequelize.transaction();
     try {
-        const order = await Order.update({ payment_status: 'PAID' }, {
+        const order = await Order.findByPk(order_id);
+        await Order.update({ payment_status: 'PAID' }, {
             where: { id: order_id },
             transaction
         });
