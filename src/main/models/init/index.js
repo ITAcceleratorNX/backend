@@ -34,8 +34,8 @@ Warehouse.hasMany(Storage, { foreignKey: 'warehouse_id', as: 'storage' });
 Storage.belongsTo(Warehouse, { foreignKey: 'warehouse_id', as: 'warehouse' });
 
 // Order - OrderPayment
-Order.hasMany(OrderPayment, { foreignKey: 'order_id' });
-OrderPayment.belongsTo(Order, { foreignKey: 'order_id' });
+Order.hasMany(OrderPayment, { foreignKey: 'order_id' , as: 'order_payment'});
+OrderPayment.belongsTo(Order, { foreignKey: 'order_id' , as : 'order'});
 
 // OrderPayment - PaymentTransaction
 OrderPayment.hasMany(PaymentTransaction, { foreignKey: 'order_payment_id' });

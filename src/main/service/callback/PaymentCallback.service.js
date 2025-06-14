@@ -53,8 +53,12 @@ const handleErrorStatus = async (order_id, error_code) => {
 const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_token }) => {
     const transaction = await sequelize.transaction();
     try {
-        const order = await Order.findByPk(Number(order_id));
-        await Order.update({ payment_status: 'PAID' }, {
+        const orderPayment = await OrderPayment.findByPk(Number(order_id), {
+            include: {
+                model: Order,
+                as: 'order', // важно: alias должен совпадать с ассоциацией
+            }
+        });        await Order.update({ payment_status: 'PAID' }, {
             where: { id: order_id },
             transaction
         });
@@ -63,7 +67,7 @@ const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_toke
             transaction
         });
         await User.update({ recurrent_token }, {
-            where: { id: order.user_id },
+            where: { id: orderPayment.order.user_id },
             transaction
         });
         await transaction.commit();
