@@ -68,6 +68,6 @@ const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_toke
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
-        logger.error('Error creating payment transaction', { error: err });
+        logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
     }
 };
