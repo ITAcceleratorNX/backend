@@ -14,10 +14,6 @@ export const handleCallbackData = async (data) => {
         await handleErrorStatus(order_id, error_code);
     } else if (operation_status === 'success') {
         switch (operation_type) {
-            case 'create':
-                logger.info("create callback received")
-                await handleCreate(data);
-                break;
             case 'withdraw':
                 logger.info("withdraw callback received")
                 await handleCreate(data);
@@ -56,7 +52,7 @@ const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_toke
         const orderPayment = await OrderPayment.findByPk(Number(order_id), {
             include: {
                 model: Order,
-                as: 'order', // важно: alias должен совпадать с ассоциацией
+                as: 'order',
             }
         });
         await Order.update({ payment_status: 'PAID' }, {

@@ -174,5 +174,10 @@ export const create = async (data) => {
 };
 
 export const getByUserId = async (user_id) => {
-    return await OrderPayment.findAll({where: {user_id: user_id}});
+    return await Order.findAll({where: { user_id: user_id }}, {
+        include: {
+            model: OrderPayment,
+            as: 'order_payment',
+        }
+    });
 }
