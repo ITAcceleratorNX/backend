@@ -26,6 +26,8 @@ export const handleCallbackData = async (data) => {
                 logger.warn(`Unknown operation_type: ${operation_type} for order_id: ${order_id}, data: ${data}`);
                 break;
         }
+    } else {
+        logger.warn(`Unknown operation_type: ${operation_type}`, data);
     }
 };
 
@@ -51,21 +53,27 @@ const handleErrorStatus = async (order_id, error_code) => {
 const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_token }) => {
     const transaction = await sequelize.transaction();
     try {
-        const order = await Order.update({ payment_status: 'PAID' }, {
-            where: { id: order_id },
+        const orderPayment = await OrderPayment.findByPk(Number(order_id), {
+            include: {
+                model: Order,
+                as: 'order', // важно: alias должен совпадать с ассоциацией
+            }
+        });
+        await Order.update({ payment_status: 'PAID' }, {
+            where: { id: orderPayment.order.id },
             transaction
         });
         await OrderPayment.update({ status: 'PAID', payment_id, paid_at: new Date(payment_date) }, {
-            where: { id: order_id },
+            where: { id: orderPayment.id },
             transaction
         });
         await User.update({ recurrent_token }, {
-            where: { id: order.user_id },
+            where: { id: orderPayment.order.user_id },
             transaction
         });
         await transaction.commit();
     } catch (err) {
         await transaction.rollback();
-        logger.error('Error creating payment transaction', { error: err });
+        logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
     }
 };
