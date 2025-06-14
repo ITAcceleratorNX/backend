@@ -8,7 +8,6 @@ import * as priceService from "../price/PriceService.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
 
-
 const PAYMENT_CONSTANTS = {
     currency: process.env.PAYMENT_CURRENCY,
     success_url: process.env.PAYMENT_SUCCESS_URL,
@@ -28,22 +27,95 @@ const PAYMENT_CONSTANTS = {
     payment_create_url: process.env.PAYMENT_CREATE_URL
 };
 
+function generateOrderPayments(order, deposit) {
+    const start = DateTime.fromJSDate(order.start_date);
+    const end = DateTime.fromJSDate(order.end_date);
+    const totalDays = end.diff(start, 'days').days;
+    const dailyAmount = order.total_price / totalDays;
+
+    const orderPayments = [];
+    let current = start;
+    let remaining = totalDays;
+    let isFirst = true;
+
+    while (remaining > 0) {
+        const daysInMonth = current.daysInMonth;
+        const startDay = current.day;
+        const daysThisMonth = daysInMonth - startDay + 1;
+
+        const daysToCharge = Math.min(remaining, daysThisMonth);
+        const amount = dailyAmount * daysToCharge;
+
+        orderPayments.push({
+            order_id: order.id,
+            month: current.month,
+            year: current.year,
+            amount: amount + (isFirst ? Number(deposit.price) : 0),
+            status: 'UNPAID',
+        });
+
+        isFirst = false;
+        remaining -= daysToCharge;
+        current = current.plus({ months: 1 }).set({ day: 1 });
+    }
+
+    return { orderPayments, totalDays };
+}
+
+function buildPaymentRequest(order, amount, orderPaymentId, totalDays) {
+    const dataObject = {
+        amount: Number(amount),
+        currency: PAYMENT_CONSTANTS.currency,
+        order_id: String(orderPaymentId),
+        description: 'First payment for order',
+        payment_type: PAYMENT_CONSTANTS.payment_type,
+        payment_method: PAYMENT_CONSTANTS.payment_method,
+        email: order.user.email,
+        success_url: PAYMENT_CONSTANTS.success_url,
+        failure_url: PAYMENT_CONSTANTS.failure_url,
+        callback_url: PAYMENT_CONSTANTS.callback_url,
+        merchant_term_url: PAYMENT_CONSTANTS.merchant_term_url,
+        payment_lifetime: Number(PAYMENT_CONSTANTS.payment_lifetime),
+        lang: PAYMENT_CONSTANTS.lang,
+        create_recurrent_profile: true,
+        recurrent_profile_lifetime: Number(totalDays),
+        items: [
+            {
+                merchant_id: PAYMENT_CONSTANTS.merchant_id,
+                service_id: PAYMENT_CONSTANTS.service_id,
+                merchant_name: PAYMENT_CONSTANTS.merchant_name,
+                name: PAYMENT_CONSTANTS.name,
+                quantity: 1,
+                amount_one_pcs: Number(amount),
+                amount_sum: Number(amount),
+            }
+        ]
+    };
+
+    const dataJson = JSON.stringify(dataObject);
+    const dataBase64 = Buffer.from(dataJson).toString('base64');
+    const sign = crypto
+        .createHmac('sha512', PAYMENT_CONSTANTS.secretKey)
+        .update(dataBase64)
+        .digest('hex');
+    const token = Buffer.from(PAYMENT_CONSTANTS.apiKey).toString('base64');
+    const headers = {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+    };
+
+    return { requestBody: { data: dataBase64, sign }, headers };
+}
+
 export const create = async (data) => {
     const paymentOrderTransaction = await sequelize.transaction();
-    const orderPayments = [];
 
     try {
         const order = await Order.findOne({
             where: { id: data.order_id },
             include: [
-                {
-                    model: Storage,
-                    as: 'storage'
-                },
-                {
-                    model: User,
-                    as: 'user'
-                }
+                { model: Storage, as: 'storage' },
+                { model: User, as: 'user' }
             ]
         });
         if (!order) {
@@ -55,100 +127,24 @@ export const create = async (data) => {
             error.status = 409;
             throw error;
         }
-        const start = DateTime.fromJSDate(order.start_date);
-        const end = DateTime.fromJSDate(order.end_date);
-        const totalDays = end.diff(start, 'days').days;
-        const dailyAmount = order.total_price / totalDays;
-
-        let current = start;
-        let remaining = totalDays;
-        let isFirst = true;
-
         const deposit = await priceService.getByType('DEPOSIT');
+        const { orderPayments, totalDays } = generateOrderPayments(order, deposit);
+        const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
-        while (remaining > 0) {
-            const daysInMonth = current.daysInMonth;
-            const startDay = current.day;
-            const daysThisMonth = daysInMonth - startDay + 1;
-
-            const daysToCharge = Math.min(remaining, daysThisMonth);
-            const amount = dailyAmount * daysToCharge;
-
-            orderPayments.push({
-                order_id: order.id,
-                month: current.month,
-                year: current.year,
-                amount: amount + (isFirst ? Number(deposit.price) : 0),
-                status: 'UNPAID',
-            });
-
-            isFirst = false;
-            remaining -= daysToCharge;
-            current = current.plus({ months: 1 }).set({ day: 1 });
-        }
-
-        const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { paymentOrderTransaction });
-        const updatedStorageData = {
-            status: order.storage.available_volume <= 0 ? 'OCCUPIED' : 'VACANT',
-        };
-        await Storage.update(updatedStorageData, {
+        await Order.update({ status: 'PROCESSING' }, {
             where: { id: order.id },
-            paymentOrderTransaction,
+            transaction: paymentOrderTransaction,
         });
 
-        await Order.update({status: 'PROCESSING'}, {
-            where: {id: order.id},
-            paymentOrderTransaction
-        })
-
-        const dataObject = {
-            amount: Number(orderPayments[0].amount),
-            currency: PAYMENT_CONSTANTS.currency,
-            order_id: String(createdOrderPayments[0].id),
-            description: 'First payment for order',
-            payment_type: PAYMENT_CONSTANTS.payment_type,
-            payment_method: PAYMENT_CONSTANTS.payment_method,
-            email: order.user.email,
-            success_url: PAYMENT_CONSTANTS.success_url,
-            failure_url: PAYMENT_CONSTANTS.failure_url,
-            callback_url: PAYMENT_CONSTANTS.callback_url,
-            merchant_term_url: PAYMENT_CONSTANTS.merchant_term_url,
-            payment_lifetime: Number(PAYMENT_CONSTANTS.payment_lifetime),
-            lang: PAYMENT_CONSTANTS.lang,
-            items: [
-                {
-                    merchant_id: PAYMENT_CONSTANTS.merchant_id,
-                    service_id: PAYMENT_CONSTANTS.service_id,
-                    merchant_name: PAYMENT_CONSTANTS.merchant_name,
-                    name: PAYMENT_CONSTANTS.name,
-                    quantity: 1,
-                    amount_one_pcs: Number(orderPayments[0].amount),
-                    amount_sum: Number(orderPayments[0].amount),
-                }
-            ]
-        };
-
-        const dataJson = JSON.stringify(dataObject);
-        const dataBase64 = Buffer.from(dataJson).toString('base64');
-
-        const sign = crypto
-            .createHmac('sha512', PAYMENT_CONSTANTS.secretKey)
-            .update(dataBase64)
-            .digest('hex');
-
-        const requestBody = {
-            data: dataBase64,
-            sign: sign,
-        };
-
-        const token = Buffer.from(PAYMENT_CONSTANTS.apiKey).toString('base64');
-        const headers = {
-            Authorization: 'Bearer ' + token,
-            'Content-Type': 'application/json'
-        };
-
+        const { requestBody, headers } = buildPaymentRequest(
+            order,
+            orderPayments[0].amount,
+            createdOrderPayments[0].id,
+            totalDays
+        );
+        let response;
         try {
-            const response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
+            response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
             logger.info('Payment API response', {
                 message: 'Payment API response',
                 endpoint: 'payment/create',
@@ -170,7 +166,7 @@ export const create = async (data) => {
         }
 
         await paymentOrderTransaction.commit();
-        return order;
+        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
     } catch (err) {
         await paymentOrderTransaction.rollback();
         throw err;

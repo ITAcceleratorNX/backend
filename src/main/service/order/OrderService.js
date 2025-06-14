@@ -2,6 +2,8 @@ import {Order, Storage} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
+import * as storageService from "../storage/StorageService.js";
+import logger from "../../utils/winston/logger.js";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -49,59 +51,52 @@ export const update = async (id, data) => {
 };
 
 export const deleteById = async (id) => {
-    return Order.destroy({ where: { id: id } });
+    const transaction = await sequelize.transaction();
+    try {
+        const order = await getById(id);
+        if (!order) {
+            throw Object.assign(new Error('Not found'), { status: 400 });
+        }
+        let newVolume = Number(order.storage.available_volume) + Number(order.total_volume);
+        await storageService.update(order.storage_id, {
+            status: 'VACANT',
+            available_volume: newVolume
+        }, transaction);
+        await Order.destroy({ where: { id: id }, transaction });
+        await transaction.commit();
+        return {success: true};
+    } catch (err) {
+        await transaction.rollback()
+        logger.error(err);
+        throw err;
+    }
 };
 
 export const createOrder = async (req) => {
     const transaction = await sequelize.transaction();
     try {
-        const storage = await Storage.findByPk(req.body.storage_id, { transaction });
-        if (!storage) {
-            throw Object.assign(new Error('storage not found'), { status: 200 });
-        } else if(storage.status === 'OCCUPIED' || storage.status === 'PENDING') {
-            throw Object.assign(new Error('unable to select this storage'), { status: 200 });
-        } else if(storage.available_volume < req.body.total_volume) {
-            throw Object.assign(new Error('storage unavailable'), { status: 200 });
-        }
+        const { storage_id, total_volume, months } = req.body;
+        const { id: user_id } = req.user;
 
-        const start = DateTime.now();
-        const monthCount = req.body.months;
-        const end = start.plus({ months: monthCount });
+        const storage = await Storage.findByPk(storage_id, { transaction });
+        validateStorage(storage, total_volume);
 
-        const calculateDto = {
-            type: storage.storage_type,
-            area: req.body.total_volume,
-            month: monthCount
-        };
-
-        const total_price = await priceService.calculate(calculateDto);
-        if (!total_price) {
-            throw Object.assign(new Error('Failed to calculate service'), { status: 500 });
-        }
-
+        const { start_date, end_date } = calculateDates(months);
+        const total_price = await calculateTotalPrice(storage.storage_type, total_volume, months);
         const deposit = await priceService.getByType('DEPOSIT');
 
         const orderData = {
             ...req.body,
-            user_id: req.user.id,
-            start_date: start.toJSDate(),
-            end_date: end.toJSDate(),
+            user_id,
+            start_date,
+            end_date,
             total_price: total_price + Number(deposit.price),
             created_at: new Date(),
         };
 
         const order = await Order.create(orderData, { transaction });
 
-        const newVolume = storage.available_volume - req.body.total_volume;
-        const updatedStorageData = {
-            available_volume: newVolume,
-            status: 'PENDING',
-        };
-
-        await Storage.update(updatedStorageData, {
-            where: { id: storage.id },
-            transaction,
-        });
+        await updateStorageVolume(storage, total_volume, transaction);
 
         await transaction.commit();
         return order;
@@ -110,3 +105,49 @@ export const createOrder = async (req) => {
         throw error;
     }
 };
+
+function validateStorage(storage, total_volume) {
+    if (!storage) {
+        throw Object.assign(new Error('storage not found'), { status: 200 });
+    }
+    if (['OCCUPIED', 'PENDING'].includes(storage.status)) {
+        throw Object.assign(new Error('unable to select this storage'), { status: 200 });
+    }
+    if (storage.available_volume < total_volume) {
+        throw Object.assign(new Error('storage unavailable'), { status: 200 });
+    }
+}
+
+function calculateDates(months) {
+    const start = DateTime.now();
+    const end = start.plus({ months });
+    return {
+        start_date: start.toJSDate(),
+        end_date: end.toJSDate(),
+    };
+}
+
+async function calculateTotalPrice(type, area, month) {
+    const calculateDto = { type, area, month };
+    const price = await priceService.calculate(calculateDto);
+    if (!price) {
+        throw Object.assign(new Error('Failed to calculate service'), { status: 500 });
+    }
+    return price;
+}
+
+async function updateStorageVolume(storage, total_volume, transaction) {
+    const isIndividual = storage.storage_type === 'INDIVIDUAL';
+    const newVolume = isIndividual ? storage.available_volume : storage.available_volume - total_volume;
+
+    await Storage.update(
+        {
+            available_volume: newVolume,
+            status: 'PENDING',
+        },
+        {
+            where: { id: storage.id },
+            transaction,
+        }
+    );
+}

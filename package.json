@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "luxon": "^3.6.1",
     "morgan": "~1.9.1",
+    "node-cron": "^4.1.0",
     "node-pg-migrate": "^7.9.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
