@@ -83,14 +83,13 @@ export const createOrder = async (req) => {
 
         const { start_date, end_date } = calculateDates(months);
         const total_price = await calculateTotalPrice(storage.storage_type, total_volume, months);
-        const deposit = await priceService.getByType('DEPOSIT');
 
         const orderData = {
             ...req.body,
             user_id,
             start_date,
             end_date,
-            total_price: total_price + Number(deposit.price),
+            total_price: total_price,
             created_at: new Date(),
         };
 
@@ -138,7 +137,7 @@ async function calculateTotalPrice(type, area, month) {
 
 async function updateStorageVolume(storage, total_volume, transaction) {
     const isIndividual = storage.storage_type === 'INDIVIDUAL';
-    const newVolume = isIndividual ? storage.available_volume : storage.available_volume - total_volume;
+    const newVolume = isIndividual ? 0 : storage.available_volume - total_volume;
 
     await Storage.update(
         {
