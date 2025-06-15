@@ -48,9 +48,7 @@ const handleErrorStatus = async (order_id, error_code) => {
 };
 
 const handleWithdraw = async (data) => {
-    const transaction = await sequelize.transaction({
-        isolationLevel: sequelize.Transaction.ISOLATION_LEVELS.REPEATABLE_READ
-    });
+    const transaction = await sequelize.transaction();
     try {
         const transactionData = await Transaction.findByPk(String(data.order_id), {
             include: {
