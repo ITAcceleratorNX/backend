@@ -63,5 +63,13 @@ export const ChatController = {
             requestId: req.id,
         });
         res.json(chats);
+    }),
+    getPendingChats: asyncHandler(async (req, res) => {
+        const chats = await ChatService.getChats({where: {status: "PENDING"}});
+        logger.info('Fetched messages', {
+            endpoint: req.originalUrl,
+            requestId: req.id,
+        });
+        res.json(chats);
     })
 };
