@@ -28,7 +28,7 @@ const OrderPayment = sequelize.define('OrderPayment', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('PAID', 'UNPAID'),
+        type: DataTypes.ENUM('PAID', 'UNPAID','MANUAL'),
         allowNull: false,
         defaultValue: 'UNPAID',
     },
@@ -39,7 +39,13 @@ const OrderPayment = sequelize.define('OrderPayment', {
     payment_id: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    penalty_amount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0
     }
+
 }, {
     tableName: 'order_payments',
     timestamps: false,

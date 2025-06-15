@@ -11,6 +11,7 @@ import Chat from "../Chat.js";
 import Message from "../Message.js";
 import OrderPayment from "../OrderPayment.js";
 import PaymentTransaction from "../PaymentTransaction.js";
+import Transaction from "../Transactions.js";
 
 
 // Order - User
@@ -47,6 +48,8 @@ Chat.belongsTo(User, { foreignKey: 'user_id' });
 Chat.hasMany(Message, { foreignKey: 'chat_id' });
 Message.belongsTo(Chat, { foreignKey: 'chat_id' });
 
+OrderPayment.hasMany(Transaction, { foreignKey: 'order_payment_id', as: 'transactions' });
+Transaction.belongsTo(OrderPayment, { foreignKey: 'order_payment_id', as: 'order_payment' });
 
 export {
     Callback,
@@ -61,6 +64,7 @@ export {
     Chat,
     Message,
     OrderPayment,
-    PaymentTransaction
+    PaymentTransaction,
+    Transaction,
 };
 
