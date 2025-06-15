@@ -18,23 +18,23 @@ const Transaction = sequelize.define('Transaction', {
     },
     payment_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
     },
     operation_id: {
         type: DataTypes.BIGINT,
-        allowNull: false,
+        allowNull: true,
     },
     payment_type: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
     },
     operation_type: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
     },
     operation_status: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
     },
     error_code: {
         type: DataTypes.STRING(100),
@@ -50,11 +50,11 @@ const Transaction = sequelize.define('Transaction', {
     },
     created_date: {
         type: DataTypes.STRING(100),
-        allowNull: false,
+        allowNull: true,
     },
     payment_date: {
         type: DataTypes.STRING(100),
-        allowNull: false,
+        allowNull: true,
     },
     payer_info: {
         type: DataTypes.JSONB,

@@ -135,6 +135,7 @@ export const create = async (data) => {
 
         const createdTransaction = await Transaction.create({
             order_payment_id: firstOrderPayment.id,
+            amount: Number(orderPayments[0].amount),
         }, { transaction: paymentOrderTransaction });
 
         await Order.update({ status: 'PROCESSING' }, {
@@ -159,7 +160,6 @@ export const create = async (data) => {
                 userId: order.user.id,
                 response: response.data
             });
-            console.log("Payment API response", response)
         } catch (error) {
             logger.error('Payment API error', {
                 message: error.message,

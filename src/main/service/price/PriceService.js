@@ -20,7 +20,7 @@ export const calculate = async (data, res) => {
 
     const price = service.price;
     const { area, month } = dto;
-
+    console.log(price, area, month)
     return  price * area * month;
 }
 

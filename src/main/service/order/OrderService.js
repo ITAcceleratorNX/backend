@@ -83,14 +83,13 @@ export const createOrder = async (req) => {
 
         const { start_date, end_date } = calculateDates(months);
         const total_price = await calculateTotalPrice(storage.storage_type, total_volume, months);
-        const deposit = await priceService.getByType('DEPOSIT');
 
         const orderData = {
             ...req.body,
             user_id,
             start_date,
             end_date,
-            total_price: total_price + Number(deposit.price),
+            total_price: total_price,
             created_at: new Date(),
         };
 
