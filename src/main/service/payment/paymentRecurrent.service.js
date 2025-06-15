@@ -1,6 +1,6 @@
 import axios from 'axios';
 import crypto from 'crypto';
-import { Order, OrderPayment, User, Transaction, sequelize } from '../../models/init/index.js';
+import { Order, OrderPayment, User, Transaction } from '../../models/init/index.js';
 import dayjs from 'dayjs';
 import { Buffer } from 'buffer';
 import { NotificationService } from '../notification/notification.service.js';
