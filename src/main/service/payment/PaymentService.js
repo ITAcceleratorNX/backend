@@ -2,7 +2,7 @@ import axios from "axios";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from 'buffer';
 import crypto from "crypto";
-import {Order, OrderPayment, Storage, User} from "../../models/init/index.js";
+import {Order, OrderPayment, Storage, User, Transaction} from "../../models/init/index.js";
 import {DateTime} from "luxon";
 import * as priceService from "../price/PriceService.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
@@ -62,11 +62,11 @@ function generateOrderPayments(order, deposit) {
     return { orderPayments, totalDays };
 }
 
-function buildPaymentRequest(order, amount, orderPaymentId, totalDays) {
+function buildPaymentRequest(order, amount, transactionId, totalDays) {
     const dataObject = {
         amount: Number(amount),
         currency: PAYMENT_CONSTANTS.currency,
-        order_id: String(orderPaymentId),
+        order_id: String(transactionId),
         description: 'First payment for order',
         payment_type: PAYMENT_CONSTANTS.payment_type,
         payment_method: PAYMENT_CONSTANTS.payment_method,
@@ -131,6 +131,12 @@ export const create = async (data) => {
         const { orderPayments, totalDays } = generateOrderPayments(order, deposit);
         const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
+        const firstOrderPayment = createdOrderPayments[0];
+
+        const createdTransaction = await Transaction.create({
+            order_payment_id: firstOrderPayment.id,
+        }, { transaction: paymentOrderTransaction });
+
         await Order.update({ status: 'PROCESSING' }, {
             where: { id: order.id },
             transaction: paymentOrderTransaction,
@@ -139,7 +145,7 @@ export const create = async (data) => {
         const { requestBody, headers } = buildPaymentRequest(
             order,
             orderPayments[0].amount,
-            createdOrderPayments[0].id,
+            createdTransaction.id,
             totalDays
         );
         let response;
