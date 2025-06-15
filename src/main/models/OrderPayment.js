@@ -39,7 +39,13 @@ const OrderPayment = sequelize.define('OrderPayment', {
     payment_id: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    penalty_amount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        defaultValue: 0
     }
+
 }, {
     tableName: 'order_payments',
     timestamps: false,

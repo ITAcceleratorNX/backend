@@ -64,6 +64,7 @@ export {
     Chat,
     Message,
     OrderPayment,
-    PaymentTransaction
+    PaymentTransaction,
+    Transaction
 };
 
