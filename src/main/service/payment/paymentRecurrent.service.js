@@ -4,6 +4,7 @@ import { Order, OrderPayment, User, Transaction } from '../../models/init/index.
 import dayjs from 'dayjs';
 import { Buffer } from 'buffer';
 import { NotificationService } from '../notification/notification.service.js';
+import {sequelize} from '../../config/database.js';
 
 const API_URL = process.env.ONE_VISION_API_URL;
 const API_KEY = process.env.API_KEY;
