@@ -26,6 +26,7 @@ import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
+import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
 
 export default async function appFactory() {
     await initDb();
@@ -67,11 +68,18 @@ export default async function appFactory() {
     });
 
 
-    cron.schedule('* * * * *', () => {
+    cron.schedule('0 0 1 * *', () => {
         console.log('⏰ Запуск автооплаты...');
         runMonthlyPayments();
     });
-
+    cron.schedule('0 10 * * *', () => {
+        console.log('🔔 Проверка MANUAL оплат старше 10 дней...');
+        notifyManualPaymentsAfter10Days();
+    });
+    cron.schedule('0 9 * * *', () => {
+        console.log('🚨 Проверка просроченных оплат и штрафов...');
+        handleLateManualPayments();
+    });
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
