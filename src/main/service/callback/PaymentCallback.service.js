@@ -40,6 +40,7 @@ const handleErrorStatus = async (order_id, error_code) => {
             break;
         case 'ov_payment_expired':
             logger.error(`Order ${order_id}: Payment expired. error_code: ${error_code}`);
+            await handlePaymentExpired(order_id);
             break;
         default:
             logger.error(`Order ${order_id}: Unknown error code received - ${error_code}.`);
@@ -73,3 +74,9 @@ const handleCreate = async ({ order_id, payment_id, payment_date, recurrent_toke
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
     }
 };
+
+const handlePaymentExpired = async (order_id) => {
+    await OrderPayment.update({ status: 'MANUAL'}, {
+        where: { id: Number(order_id) }
+    })
+}
