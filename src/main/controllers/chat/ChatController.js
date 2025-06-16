@@ -1,7 +1,6 @@
 import {ChatService} from '../../service/chat/ChatService.js';
 import {asyncHandler} from '../../utils/handler/asyncHandler.js';
 import logger from "../../utils/winston/logger.js";
-import {Chat} from "../../models/init/index.js"
 
 export const ChatController = {
     getMessages: asyncHandler(async (req, res) => {
