@@ -29,23 +29,23 @@ export const handleCallbackData = async (data) => {
     }
 };
 
-const handleErrorStatus = async ({order_id, error_code, ...data}) => {
-    switch (error_code) {
+const handleErrorStatus = async (data) => {
+    switch (data.error_code) {
         case 'provider_common_error':
-            logger.error(`Order ${order_id}: Common provider error occurred. error_code: ${error_code}`);
+            logger.error(`Order ${data.order_id}: Common provider error occurred. error_code: ${data.error_code}`);
             break;
         case 'ov_server_error':
-            logger.error(`Order ${order_id}: OneVision server error. error_code: ${error_code}`);
+            logger.error(`Order ${data.order_id}: OneVision server error. error_code: ${data.error_code}`);
             break;
         case 'ov_card_incorrect_data':
-            logger.error(`Order ${order_id}: Incorrect card data provided. error_code: ${error_code}`);
+            logger.error(`Order ${data.order_id}: Incorrect card data provided. error_code: ${data.error_code}`);
             break;
         case 'ov_payment_expired':
-            logger.error(`Order ${order_id}: Payment expired. error_code: ${error_code}`);
+            logger.error(`Order ${data.order_id}: Payment expired. error_code: ${data.error_code}`);
             await handlePaymentExpired(data);
             break;
         default:
-            logger.error(`Order ${order_id}: Unknown error code received - ${error_code}.`);
+            logger.error(`Order ${data.order_id}: Unknown error code received - ${data.error_code}.`);
     }
 };
 
@@ -125,7 +125,7 @@ const handlePaymentExpired = async (data) => {
             payer_info: data.payer_info
         }
         await Transaction.update(transactionUpdateData, {
-            where: { id: data.order_id },
+            where: { id: String(data.order_id) },
             transaction
         });
         await OrderPayment.update({ status: 'MANUAL'}, {
