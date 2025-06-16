@@ -48,7 +48,7 @@ export async function runMonthlyPayments() {
             const transaction = await Transaction.create({
                 order_payment_id: payment.id,
                 payment_type: 'pay',
-                amount: payment.amount,
+                amount: payment.amount + payment.penalty_amount,
                 recurrent_token: user.recurrent_token,
                 created_date: new Date().toISOString()
             }, { transaction: t });
