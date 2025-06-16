@@ -32,20 +32,25 @@ export const handleCallbackData = async (data) => {
 const handleErrorStatus = async (data) => {
     switch (data.error_code) {
         case 'provider_common_error':
-            logger.error(`Order ${data.order_id}: Common provider error occurred. error_code: ${data.error_code}`);
+            logger.warn(`Order ${data.order_id}: Common provider error occurred. error_code: ${data.error_code}`);
+            await handleProviderCommonError(data);
             break;
         case 'ov_server_error':
-            logger.error(`Order ${data.order_id}: OneVision server error. error_code: ${data.error_code}`);
+            logger.warn(`Order ${data.order_id}: OneVision server error. error_code: ${data.error_code}`);
+            await handleServerError(data);
+
             break;
         case 'ov_card_incorrect_data':
-            logger.error(`Order ${data.order_id}: Incorrect card data provided. error_code: ${data.error_code}`);
+            logger.warn(`Order ${data.order_id}: Incorrect card data provided. error_code: ${data.error_code}`);
+            await handlePaymentCardIncorrect(data);
             break;
         case 'ov_payment_expired':
-            logger.error(`Order ${data.order_id}: Payment expired. error_code: ${data.error_code}`);
+            logger.warn(`Order ${data.order_id}: Payment expired. error_code: ${data.error_code}`);
             await handlePaymentExpired(data);
             break;
         default:
-            logger.error(`Order ${data.order_id}: Unknown error code received - ${data.error_code}.`);
+            logger.warn(`Order ${data.order_id}: Unknown error code received - ${data.error_code}.`);
+            await handleUnknownError(data);
     }
 };
 
@@ -99,46 +104,93 @@ const handleWithdraw = async (data) => {
 };
 
 const handlePaymentExpired = async (data) => {
+    await processManualErrorAndNotify(
+        data,
+        'Напоминание об оплате',
+        `Платёж по заказу #ORDER_ID# не был завершён вовремя и истёк. Пожалуйста повторите попытку оплаты.`
+    );
+};
+
+const handleProviderCommonError = async (data) => {
+    await processManualErrorAndNotify(
+        data,
+        'Ошибка провайдера оплаты',
+        `К сожалению, произошла ошибка со стороны провайдера при оплате заказа #ORDER_ID#. Пожалуйста, попробуйте снова.`
+    );
+};
+
+const handleServerError = async (data) => {
+    await processManualErrorAndNotify(
+        data,
+        'Ошибка на стороне сервера',
+        `При обработке платежа по заказу #ORDER_ID# произошла ошибка сервера. Повторите попытку позже.`
+    );
+};
+
+const handlePaymentCardIncorrect = async (data) => {
+    await processManualErrorAndNotify(
+        data,
+        'Ошибка данных карты',
+        `Платёж по заказу #ORDER_ID# не прошёл из-за неверных данных карты. Пожалуйста, проверьте информацию и повторите попытку.`
+    );
+};
+
+const handleUnknownError = async (data) => {
+    await processManualErrorAndNotify(
+        data,
+        'Ошибка на стороне сервера',
+        `При обработке платежа по заказу #ORDER_ID# произошла ошибка сервера. Повторите попытку позже.`
+    );
+};
+
+const updateTransactionData = (data) => ({
+    payment_id: data.payment_id,
+    operation_id: data.operation_id,
+    payment_type: data.payment_type,
+    operation_type: data.operation_type,
+    operation_status: data.operation_status,
+    error_code: data.error_code,
+    recurrent_token: data.recurrent_token,
+    amount: data.amount,
+    created_date: data.created_date,
+    payment_date: data.payment_date,
+    payer_info: data.payer_info
+});
+
+const fetchTransactionDataWithRelations = async (orderId) => {
+    return Transaction.findByPk(String(orderId), {
+        include: {
+            model: OrderPayment,
+            as: 'order_payment',
+            include: {
+                model: Order,
+                as: 'order'
+            }
+        }
+    });
+};
+
+const processManualErrorAndNotify = async (data, title, message) => {
     const transaction = await sequelize.transaction();
     try {
-        const transactionData = await Transaction.findByPk(String(data.order_id), {
-            include: {
-                model: OrderPayment,
-                as: 'order_payment',
-                include: {
-                    model: Order,
-                    as: 'order'
-                }
-            }
-        });
-        const transactionUpdateData = {
-            payment_id: data.payment_id,
-            operation_id: data.operation_id,
-            payment_type: data.payment_type,
-            operation_type: data.operation_type,
-            operation_status: data.operation_status,
-            error_code: data.error_code,
-            recurrent_token: data.recurrent_token,
-            amount: data.amount,
-            created_date: data.created_date,
-            payment_date: data.payment_date,
-            payer_info: data.payer_info
-        }
-        await Transaction.update(transactionUpdateData, {
+        const transactionData = await fetchTransactionDataWithRelations(data.order_id);
+        const updateData = updateTransactionData(data);
+
+        await Transaction.update(updateData, {
             where: { id: String(data.order_id) },
             transaction
         });
-        await OrderPayment.update({ status: 'MANUAL'}, {
+        await OrderPayment.update({ status: 'MANUAL' }, {
             where: { id: Number(transactionData.order_payment_id) },
             transaction
         });
 
-        transaction.commit();
+        await transaction.commit();
 
         notificationService.sendNotification({
             user_id: transactionData.order_payment.order.user_id,
-            title: 'Напоминание об оплате',
-            message: `Платёж по заказу #${transactionData.order_payment.order.id} не был завершён вовремя и истёк. Пожалуйста повторите попытку оплаты.`,
+            title,
+            message: message.replace('#ORDER_ID#', transactionData.order_payment.order.id),
             notification_type: 'payment',
             related_order_id: transactionData.order_payment.order.id,
             is_email: true,
@@ -148,4 +200,4 @@ const handlePaymentExpired = async (data) => {
         await transaction.rollback();
         throw err;
     }
-}
+};
