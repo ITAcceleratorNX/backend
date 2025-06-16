@@ -1,7 +1,6 @@
 import {ChatService} from '../../service/chat/ChatService.js';
 import {asyncHandler} from '../../utils/handler/asyncHandler.js';
 import logger from "../../utils/winston/logger.js";
-import {Chat} from "../../models/init/index.js"
 
 export const ChatController = {
     getMessages: asyncHandler(async (req, res) => {
@@ -28,35 +27,33 @@ export const ChatController = {
             hasMore: messages.length === parsedLimit // если меньше — сообщений больше нет
         });
     }),
-    getUserMessages: asyncHandler(async (req, res) => {
-        const { userId } = req.params;
-        const { beforeId, limit } = req.query;
+    getUserChat: asyncHandler(async (req, res) => {
+        const userId = req.user.id;
 
-        const parsedLimit = parseInt(limit) || 50;
-        const beforeMessageId = beforeId ? parseInt(beforeId) : null;
+        const chat = await ChatService.getChats({
+            where: {
+                user_id: userId,
+                status: ['PENDING', 'ACCEPTED']
+            }
+        });
 
-        const chat = await Chat.findOne({ where: { user_id: userId } });
-        if (!chat) {
-            return res.status(404).json({ message: 'Chat not found for this user' });
+        if (chat && chat.length > 0) {
+            logger.info('Fetched user chat', {
+                userId: req.user?.id || null,
+                endpoint: req.originalUrl,
+                requestId: req.id,
+                chatId: chat[0].id,
+                status: chat[0].status
+            });
+            res.json(chat[0]);
+        } else {
+            logger.info('No active chat found for user', {
+                userId: req.user?.id || null,
+                endpoint: req.originalUrl,
+                requestId: req.id,
+            });
+            res.status(404).json({ message: 'No active chat found' });
         }
-
-        const messages = await ChatService.getMessagesBefore(chat.id, beforeMessageId, parsedLimit);
-
-        logger.info('Fetched user messages', {
-            userId: req.user?.id || null,
-            endpoint: req.originalUrl,
-            requestId: req.id,
-            targetUserId: userId,
-            chatId: chat.id,
-            beforeId: beforeId || null,
-            limit: parsedLimit,
-            returned: messages.length
-        });
-
-        res.json({
-            messages: messages.reverse(), // от старых к новым
-            hasMore: messages.length === parsedLimit
-        });
     }),
 
 
