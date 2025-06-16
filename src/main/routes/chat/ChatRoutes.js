@@ -8,6 +8,7 @@ router.get('/manager', authorizeAdminOrManager, ChatController.getManagerChats);
 router.get('/:chatId/messages', ChatController.getMessages);
 router.get("/pending-chats",authorizeAdminOrManager,ChatController.getPendingChats)
 router.delete('/:chatId/messages', ChatController.clearMessages);
+router.get('/user/:userId/messages', ChatController.getUserMessages);
 
 router.put('/:chatId/manager', ChatController.changeManager);
 

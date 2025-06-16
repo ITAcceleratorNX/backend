@@ -85,7 +85,7 @@ export async function runMonthlyPayments() {
                     const decodedData = JSON.parse(Buffer.from(resData.data, 'base64').toString());
 
                     transaction.operation_status = 'success';
-                    transaction.payment_id = decodedData.payment_id || null;
+                    t2ransaction.payment_id = decodedData.payment_id || null;
                     transaction.payment_date = decodedData.created_date || new Date().toISOString();
                     transaction.recurrent_token = decodedData.recurrent_token || transaction.recurrent_token;
                     transaction.payer_info = JSON.stringify(decodedData.payer_info || {});
