@@ -17,6 +17,7 @@ export async function notifyManualPaymentsAfter10Days() {
         include: [
             {
                 model: Order,
+                as: 'order',
                 include: [
                     {
                         model: User,
@@ -28,7 +29,7 @@ export async function notifyManualPaymentsAfter10Days() {
     });
 
     for (const payment of manualPayments) {
-        const user = payment.Order?.user;
+        const user = payment.order?.user;
         if (!user) continue;
 
         await notificationService.sendNotification({
@@ -53,6 +54,7 @@ export async function handleLateManualPayments() {
         include: [
             {
                 model: Order,
+                as: 'order',
                 include: [
                     {
                         model: User,
@@ -64,8 +66,8 @@ export async function handleLateManualPayments() {
     });
 
     for (const payment of manualPayments) {
-        const user = payment.Order?.user;
-        const order = payment.Order;
+        const user = payment.order?.user;
+        const order = payment.order;
 
         if (!user || !payment.paid_at) continue;
 
