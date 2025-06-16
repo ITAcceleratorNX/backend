@@ -40,7 +40,7 @@ export async function runMonthlyPayments() {
         const user = payment.order?.user;
         console.log('user', user);
         if (!user || !user.recurrent_token) {
-            console.log(`⚠️ Пропущено: нет токена для user_id ${payment.user_id}`);
+            console.log(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
             continue;
         }
 
@@ -49,7 +49,7 @@ export async function runMonthlyPayments() {
             const transaction = await Transaction.create({
                 order_payment_id: payment.id,
                 payment_type: 'pay',
-                amount: payment.amount + payment.penalty_amount,
+                amount: Number(parseFloat(payment.amount + payment.penalty_amount).toFixed(2)),
                 recurrent_token: user.recurrent_token,
                 created_date: new Date().toISOString()
             }, { transaction: t });
