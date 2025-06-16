@@ -10,5 +10,6 @@ router.get("/", authenticateJWT, authorizeAdminOrManager, UserController.getAllU
 router.get("/me", authenticateJWT, UserController.getUserById);
 router.put("/me", authenticateJWT, validateBody(UpdateUserDto), UserController.updateUser);
 router.delete("/me", authenticateJWT, UserController.deleteUser);
+router.get("/manager", authenticateJWT, UserController.getManagers);
 
 export default router;

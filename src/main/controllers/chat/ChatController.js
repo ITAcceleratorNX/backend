@@ -85,7 +85,10 @@ export const ChatController = {
 
     getManagerChats: asyncHandler(async (req, res) => {
         const managerId = req.user.id;
-        const chats = await ChatService.getChats({where: {manager_id: managerId}});
+        const chats = await ChatService.getChats({
+            where: { manager_id: managerId },
+            include: [{ association: 'user', attributes: ['name'] }]
+        });
         logger.info('Fetched messages', {
             userId: req.user?.id || null,
             endpoint: req.originalUrl,

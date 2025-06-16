@@ -38,3 +38,8 @@ export const deleteUser = asyncHandler(async (req, res) => {
     });
     res.json({ deleted });
 });
+
+export const getManagers = asyncHandler(async (req, res) => {
+    const response = await UserService.getManagers();
+    res.json(response);
+})

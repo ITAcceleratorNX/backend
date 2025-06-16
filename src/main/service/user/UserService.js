@@ -1,4 +1,5 @@
 import User from "../../models/User.js";
+import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
 export const create = async (data) => {
     return await User.create(data);
@@ -37,3 +38,7 @@ export const deleteById = async (id) => {
     }
     return deleted;
 };
+
+export const getManagers = async () => {
+    return await User.findAll({where: { role: 'MANAGER' }});
+}
