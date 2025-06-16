@@ -31,6 +31,12 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         type: DataTypes.ENUM('SMALL', 'MEDIUM', 'LARGE'),
         allowNull: false,
     },
+    status: {
+        type: DataTypes.ENUM('PENDING', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED'),
+        allowNull: false,
+        defaultValue: 'PENDING'
+    }
+
 }, {
     tableName: 'moving_orders',
     timestamps: false
