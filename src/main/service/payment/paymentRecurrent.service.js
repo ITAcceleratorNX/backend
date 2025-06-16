@@ -25,6 +25,7 @@ export async function runMonthlyPayments() {
         include: [
             {
                 model: Order,
+                as: 'order',
                 include: [
                     {
                         model: User,
