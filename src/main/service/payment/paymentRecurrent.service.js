@@ -37,7 +37,7 @@ export async function runMonthlyPayments() {
     });
 
     for (const payment of unpaidPayments) {
-        const user = payment.Order?.user;
+        const user = payment.order?.user;
 
         if (!user || !user.recurrent_token) {
             console.log(`⚠️ Пропущено: нет токена для user_id ${payment.user_id}`);
