@@ -16,7 +16,7 @@ import Transaction from "../Transactions.js";
 
 // Order - User
 Order.belongsTo(User, { foreignKey: 'user_id' , as: 'user'});
-User.hasMany(Order, { foreignKey: 'user_id' , as: 'user'});
+User.hasMany(Order, { foreignKey: 'user_id' , as: 'order'});
 
 // Order - Storage
 Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );

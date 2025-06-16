@@ -184,10 +184,90 @@ export const create = async (data, userId) => {
 };
 
 export const getByUserId = async (user_id) => {
-    return await Order.findAll({where: { user_id: user_id }}, {
+    return await Order.findAll({
+        where: { user_id },
         include: {
             model: OrderPayment,
             as: 'order_payment',
         }
     });
+};
+
+export const createManual = async (data, userId) => {
+    const orderPayment = await OrderPayment.findByPk(data.order_payment_id, {
+        include: {
+            model: Order,
+            as: 'order',
+            include: {
+                model: User,
+                as: 'user'
+            }
+        }
+    });
+
+    if (!orderPayment) {
+        const error = new Error('order payment not found');
+        error.status = 404;
+        throw error;
+    } else if(orderPayment.status !== 'MANUAL') {
+        const error = new Error('order payment cannot payed manually');
+        error.status = 404;
+        throw error;
+    } else if (orderPayment.order.user.id !== userId) {
+        const error = new Error('Payment forbidden');
+        error.status = 403;
+        throw error;
+    }
+
+    const start = DateTime.fromJSDate(orderPayment.order.start_date);
+    const end = DateTime.fromJSDate(orderPayment.order.end_date);
+    const totalDays = end.diff(start, 'days').days;
+
+    const paymentOrderTransaction = await sequelize.transaction();
+    try {
+        const createdTransaction = await Transaction.create({
+            order_payment_id: orderPayment.id,
+            amount: Number(orderPayment.amount),
+        }, { transaction: paymentOrderTransaction });
+
+        const { requestBody, headers } = buildPaymentRequest(
+            orderPayment.order,
+            orderPayment.amount,
+            createdTransaction.id,
+            totalDays
+        );
+        let response;
+        try {
+            response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
+            logger.info('Payment API response', {
+                message: 'Payment API response',
+                endpoint: 'payment/create',
+                service: 'PaymentService',
+                requestId: data?.requestId,
+                userId: orderPayment.order.user.id,
+                response: response.data
+            });
+        } catch (error) {
+            logger.error('Payment API error', {
+                message: error.message,
+                endpoint: 'payment/create',
+                service: 'PaymentService',
+                requestId: data?.requestId,
+                userId: orderPayment.order?.user?.id || null
+            });
+            throw error;
+        }
+        await paymentOrderTransaction.commit();
+        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
+    } catch (error) {
+        await paymentOrderTransaction.rollback();
+        logger.error('Manual payment error', {
+            message: error.message,
+            endpoint: 'payment/create',
+            service: 'PaymentService',
+            requestId: data?.requestId,
+            userId: orderPayment.order?.user?.id || null
+        })
+        throw error;
+    }
 }
