@@ -57,7 +57,7 @@ export const deleteById = async (id) => {
         if (!order) {
             throw Object.assign(new Error('Not found'), { status: 400 });
         }
-        let newVolume = Number(order.storage.available_volume) + Number(order.total_volume);
+        let newVolume = Number(order.available_volume) + (Number(order.total_volume) - Number(order.storage.available_volume));
         await storageService.update(order.storage_id, {
             status: 'VACANT',
             available_volume: newVolume
