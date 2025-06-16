@@ -6,9 +6,9 @@ import {Buffer} from 'buffer';
 import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
 
-const API_URL = process.env.ONE_VISION_API_URL;
-const API_KEY = process.env.API_KEY;
-const SECRET_KEY = process.env.SECRET_KEY;
+const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
+const API_KEY = process.env.PAYMENT_API_KEY;
+const SECRET_KEY = process.env.PAYMENT_SECRET_KEY;
 
 export async function runMonthlyPayments() {
     const now = dayjs();
