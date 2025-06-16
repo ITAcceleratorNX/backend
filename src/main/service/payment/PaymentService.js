@@ -27,6 +27,39 @@ const PAYMENT_CONSTANTS = {
     payment_create_url: process.env.PAYMENT_CREATE_URL
 };
 
+async function createTransaction(orderPaymentId, amount, transaction) {
+    return await Transaction.create({
+        order_payment_id: orderPaymentId,
+        amount: Number(amount),
+    }, { transaction });
+}
+
+async function sendPaymentRequestToOneVision(order, amount, transactionId, totalDays, requestId, userId) {
+    const { requestBody, headers } = buildPaymentRequest(order, amount, transactionId, totalDays);
+
+    try {
+        const response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
+        logger.info('Payment API response', {
+            message: 'Payment API response',
+            endpoint: 'payment/create',
+            service: 'PaymentService',
+            requestId,
+            userId,
+            response: response.data
+        });
+        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
+    } catch (error) {
+        logger.error('Payment API error', {
+            message: error.message,
+            endpoint: 'payment/create',
+            service: 'PaymentService',
+            requestId,
+            userId
+        });
+        throw error;
+    }
+}
+
 function generateOrderPayments(order, deposit) {
     const start = DateTime.fromJSDate(order.start_date);
     const end = DateTime.fromJSDate(order.end_date);
@@ -137,46 +170,24 @@ export const create = async (data, userId) => {
 
         const firstOrderPayment = createdOrderPayments[0];
 
-        const createdTransaction = await Transaction.create({
-            order_payment_id: firstOrderPayment.id,
-            amount: Number(orderPayments[0].amount),
-        }, { transaction: paymentOrderTransaction });
+        const createdTransaction = await createTransaction(firstOrderPayment.id, orderPayments[0].amount, paymentOrderTransaction);
 
         await Order.update({ status: 'PROCESSING' }, {
             where: { id: order.id },
             transaction: paymentOrderTransaction,
         });
 
-        const { requestBody, headers } = buildPaymentRequest(
+        const responseData = await sendPaymentRequestToOneVision(
             order,
             orderPayments[0].amount,
             createdTransaction.id,
-            totalDays
+            totalDays,
+            data?.requestId,
+            order.user.id
         );
-        let response;
-        try {
-            response = await axios.post(PAYMENT_CONSTANTS.payment_create_url, requestBody, { headers });
-            logger.info('Payment API response', {
-                message: 'Payment API response',
-                endpoint: 'payment/create',
-                service: 'PaymentService',
-                requestId: data?.requestId,
-                userId: order.user.id,
-                response: response.data
-            });
-        } catch (error) {
-            logger.error('Payment API error', {
-                message: error.message,
-                endpoint: 'payment/create',
-                service: 'PaymentService',
-                requestId: data?.requestId,
-                userId: order?.user?.id || null
-            });
-            throw error;
-        }
 
         await paymentOrderTransaction.commit();
-        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
+        return responseData;
     } catch (err) {
         await paymentOrderTransaction.rollback();
         throw err;
@@ -184,10 +195,75 @@ export const create = async (data, userId) => {
 };
 
 export const getByUserId = async (user_id) => {
-    return await Order.findAll({where: { user_id: user_id }}, {
+    return await Order.findAll({
+        where: { user_id },
         include: {
             model: OrderPayment,
             as: 'order_payment',
         }
     });
+};
+
+export const createManual = async (data, userId) => {
+    const orderPayment = await OrderPayment.findByPk(data.order_payment_id, {
+        include: {
+            model: Order,
+            as: 'order',
+            include: {
+                model: User,
+                as: 'user'
+            }
+        }
+    });
+
+    if (!orderPayment) {
+        const error = new Error('Order payment not found');
+        error.status = 404;
+        throw error;
+    }
+
+    if (orderPayment.status !== 'MANUAL') {
+        const error = new Error('Order payment cannot be paid manually');
+        error.status = 400;
+        throw error;
+    }
+
+    const ownerId = orderPayment.order.user.id;
+    if (ownerId !== userId) {
+        const error = new Error('Payment forbidden');
+        error.status = 403;
+        throw error;
+    }
+
+    const calculateTotalDays = (startDate, endDate) =>
+        DateTime.fromJSDate(endDate).diff(DateTime.fromJSDate(startDate), 'days').days;
+
+    const totalDays = calculateTotalDays(orderPayment.order.start_date, orderPayment.order.end_date);
+
+    const paymentOrderTransaction = await sequelize.transaction();
+
+    try {
+        const createdTransaction = await createTransaction(orderPayment.id, orderPayment.amount, paymentOrderTransaction);
+        const responseData = await sendPaymentRequestToOneVision(
+            orderPayment.order,
+            orderPayment.amount,
+            createdTransaction.id,
+            totalDays,
+            data?.requestId,
+            ownerId
+        );
+
+        await paymentOrderTransaction.commit();
+        return responseData;
+    } catch (error) {
+        await paymentOrderTransaction.rollback();
+        logger.error('Manual payment error', {
+            message: error.message,
+            endpoint: 'payment/create',
+            service: 'PaymentService',
+            requestId: data?.requestId,
+            userId: ownerId
+        })
+        throw error;
+    }
 }
