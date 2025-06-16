@@ -107,7 +107,7 @@ function buildPaymentRequest(order, amount, transactionId, totalDays) {
     return { requestBody: { data: dataBase64, sign }, headers };
 }
 
-export const create = async (data) => {
+export const create = async (data, userId) => {
     const paymentOrderTransaction = await sequelize.transaction();
 
     try {
@@ -125,6 +125,10 @@ export const create = async (data) => {
         } else if(order.status !== 'APPROVED') {
             const error = new Error('payment cannot start without approval');
             error.status = 409;
+            throw error;
+        } else if (order.user.id !== userId) {
+            const error = new Error('Payment forbidden');
+            error.status = 403;
             throw error;
         }
         const deposit = await priceService.getByType('DEPOSIT');

@@ -63,6 +63,7 @@ class MyWebSocketServer {
     }
 
     async startChat({ userId }) {
+        console.log(`Starting chat:${userId}`);
         const chat = await Chat.create({ user_id: userId, status: 'PENDING' });
 
         // Отправляем пользователю уведомление "Ожидайте"
