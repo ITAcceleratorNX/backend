@@ -27,6 +27,35 @@ export const ChatController = {
             hasMore: messages.length === parsedLimit // если меньше — сообщений больше нет
         });
     }),
+    getUserChat: asyncHandler(async (req, res) => {
+        const userId = req.user.id;
+
+        const chat = await ChatService.getChats({
+            where: {
+                user_id: userId,
+                status: ['PENDING', 'ACCEPTED']
+            }
+        });
+
+        if (chat && chat.length > 0) {
+            logger.info('Fetched user chat', {
+                userId: req.user?.id || null,
+                endpoint: req.originalUrl,
+                requestId: req.id,
+                chatId: chat[0].id,
+                status: chat[0].status
+            });
+            res.json(chat[0]);
+        } else {
+            logger.info('No active chat found for user', {
+                userId: req.user?.id || null,
+                endpoint: req.originalUrl,
+                requestId: req.id,
+            });
+            res.status(404).json({ message: 'No active chat found' });
+        }
+    }),
+
 
     clearMessages: asyncHandler(async (req, res) => {
         const { chatId } = req.params;
