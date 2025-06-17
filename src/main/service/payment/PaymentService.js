@@ -7,7 +7,6 @@ import {DateTime} from "luxon";
 import * as priceService from "../price/PriceService.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
-import {toFloat} from "validator";
 
 const PAYMENT_CONSTANTS = {
     currency: process.env.PAYMENT_CURRENCY,
@@ -244,7 +243,7 @@ export const createManual = async (data, userId) => {
     const paymentOrderTransaction = await sequelize.transaction();
 
     try {
-        const totalAmount = Number(toFloat(orderPayment.amount + orderPayment.penalty_amount).toFixed(2));
+        const totalAmount = Number(parseFloat(orderPayment.amount + orderPayment.penalty_amount).toFixed(2));
         const createdTransaction = await createTransaction(orderPayment.id, totalAmount, paymentOrderTransaction);
         const responseData = await sendPaymentRequestToOneVision(
             orderPayment.order,
