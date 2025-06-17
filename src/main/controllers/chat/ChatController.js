@@ -31,7 +31,6 @@ export const ChatController = {
 
     getUserChat: asyncHandler(async (req, res) => {
         const userId = req.user.id;
-        const user = await getById(userId);
 
         const chat = await ChatService.getChats({
             where: {
@@ -39,6 +38,7 @@ export const ChatController = {
                 status: ['PENDING', 'ACCEPTED']
             }
         });
+        const user = await getById(chat.managerId);
 
         if (chat && chat.length > 0) {
             logger.info('Fetched user chat', {
@@ -124,8 +124,7 @@ export const ChatController = {
 
         res.json(
             chats.map(chat => ({
-                ...chat.toJSON?.() || chat
-            }))
+                ...chat.toJSON?.() || chat}))
         );
     })
 };
