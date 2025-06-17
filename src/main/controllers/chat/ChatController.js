@@ -106,8 +106,7 @@ export const ChatController = {
 
         res.json(
             chats.map(chat => ({
-                ...chat.toJSON?.() || chat,
-                userName: chat.user?.name || null
+                ...chat.toJSON?.() || chat
             }))
         );
     }),
@@ -125,8 +124,7 @@ export const ChatController = {
 
         res.json(
             chats.map(chat => ({
-                ...chat.toJSON?.() || chat,
-                userName: chat.user?.name || null
+                ...chat.toJSON?.() || chat
             }))
         );
     })
