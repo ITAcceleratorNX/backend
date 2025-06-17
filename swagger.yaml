@@ -974,6 +974,95 @@ paths:
                   response:
                     type: object
 
+  /payments/me:
+    get:
+      summary: Получить все оплаты текущего пользователя
+      tags: [ Payment ]
+      security:
+        - cookieAuth: [ ]
+      responses:
+        '200':
+          description: Список заказов и платежей пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderWithPayments'
+
+  /users/{id}:
+    get:
+      summary: Получить все оплаты по пользователю (admin/manager)
+      tags: [ Payment ]
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список заказов с платежами
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderWithPayments'
+        '400':
+          description: Неверный ID
+
+  /payments:
+    post:
+      summary: Создать оплату по заказу
+      tags: [ Payment ]
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentDto'
+      responses:
+        '201':
+          description: Успешное создание оплаты
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '409':
+          description: Заказ не подтвержден / другой конфликт
+
+  /payments/manual:
+    post:
+      summary: Создать ручную оплату
+      tags: [ Payment ]
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPaymentDto'
+      responses:
+        '200':
+          description: Успешная ручная оплата
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Ошибка валидации или состояния оплаты
+        '403':
+          description: Нет доступа
+        '404':
+          description: Оплата не найдена
+
+
 security:
   - cookieAuth: []
 # --- WebSocket documentation section (non-standard) ---
@@ -984,6 +1073,113 @@ components:
       in: cookie
       name: token
   schemas:
+    PaymentResponse:
+      type: object
+      properties:
+        payment_id:
+          type: integer
+        order_id:
+          type: string
+        payment_type:
+          type: string
+        payment_method:
+          type: string
+        payment_status:
+          type: string
+        recurrent_token:
+          type: string
+        amount:
+          type: number
+        amount_initial:
+          type: number
+        currency:
+          type: string
+        captured_details:
+          type: object
+        cancel_details:
+          type: object
+        created_date:
+          type: string
+        payer_info:
+          type: object
+          properties:
+            email:
+              type: string
+        payment_page_url:
+          type: string
+        wallet_identifier:
+          type: object
+
+    PaymentDto:
+      type: object
+      required: [ order_id ]
+      properties:
+        order_id:
+          type: integer
+          minimum: 1
+
+    OrderPaymentDto:
+      type: object
+      required: [ order_payment_id ]
+      properties:
+        order_payment_id:
+          type: integer
+          minimum: 1
+
+    OrderWithPayments:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        storage_id:
+          type: integer
+        total_volume:
+          type: integer
+        total_price:
+          type: integer
+        start_date:
+          format: date-time
+        end_date:
+          format: date-time
+        contract_status:
+          enum: [ UNSIGNED, SIGNED ]
+        payment_status:
+          enum: [ UNPAID, PAID ]
+        status:
+          enum: [ INACTIVE, APPROVED, PROCESSING, ACTIVE ]
+        box_amount:
+          type: integer
+        cargo_mark:
+          enum: [ NO, HEAVY, FRAGILE ]
+        product_names:
+          type: string
+        created_at:
+          format: date-time
+        order_payment:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              order_id:
+                type: integer
+              month:
+                type: integer
+              year:
+                type: integer
+              amount:
+                type: number
+              status:
+                enum: [ PAID, UNPAID, MANUAL ]
+              paid_at:
+                format: date-time
+              payment_id:
+                type: string
+              penalty_amount:
+                type: integer
     Order:
       type: object
       properties:
