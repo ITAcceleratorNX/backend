@@ -40,6 +40,7 @@ export const ChatController = {
         });
 
         if (chat && chat.length > 0) {
+            console.log(chat[0])
             console.log(chat[0].managerId)
             const user = await getById(chat[0].managerId);
             logger.info('Fetched user chat', {
