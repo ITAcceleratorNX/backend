@@ -38,9 +38,10 @@ export const ChatController = {
                 status: ['PENDING', 'ACCEPTED']
             }
         });
-        const user = await getById(chat[0].managerId);
 
         if (chat && chat.length > 0) {
+            console.log(chat[0].managerId)
+            const user = await getById(chat[0].managerId);
             logger.info('Fetched user chat', {
                 userId,
                 userName: user.name,
@@ -57,11 +58,10 @@ export const ChatController = {
         } else {
             logger.info('No active chat found for user', {
                 userId,
-                userName: user.name,
                 endpoint: req.originalUrl,
                 requestId: req.id,
             });
-            res.status(404).json({ message: 'No active chat found', userName: user.name });
+            res.status(404).json({ message: 'No active chat found'});
         }
     }),
 
