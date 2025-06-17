@@ -1,4 +1,5 @@
 import {Chat, Message} from '../../models/init/index.js';
+import dayjs from "dayjs";
 
 export const ChatService = {
     async getMessagesBefore(chatId, beforeMessageId = null, limit = 50) {
@@ -12,6 +13,10 @@ export const ChatService = {
             order: [['id', 'DESC']],
             limit
         });
+
+        messages.forEach((message) => {
+            message.create_at = dayjs(message.created_at).format('YYYY/MM/DD HH:mm');
+        })
 
         return messages;
     },
