@@ -40,12 +40,11 @@ export const ChatController = {
         });
 
         if (chat && chat.length > 0) {
-            console.log(chat[0])
-            console.log(chat[0].managerId)
-            const user = await getById(chat[0].managerId);
+            const manager = await getById(chat[0].manager_id);
+
             logger.info('Fetched user chat', {
                 userId,
-                userName: user.name,
+                managerName: manager.name,
                 endpoint: req.originalUrl,
                 requestId: req.id,
                 chatId: chat[0].id,
@@ -54,7 +53,7 @@ export const ChatController = {
 
             res.json({
                 ...chat[0].toJSON?.() || chat[0],
-                userName: user.name
+                managerName: manager.name
             });
         } else {
             logger.info('No active chat found for user', {
@@ -62,9 +61,10 @@ export const ChatController = {
                 endpoint: req.originalUrl,
                 requestId: req.id,
             });
-            res.status(404).json({ message: 'No active chat found'});
+            res.status(404).json({ message: 'No active chat found' });
         }
     }),
+
 
     clearMessages: asyncHandler(async (req, res) => {
         const { chatId } = req.params;
