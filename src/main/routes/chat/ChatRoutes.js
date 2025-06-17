@@ -1,6 +1,6 @@
 import express from 'express';
 import { ChatController } from '../../controllers/chat/ChatController.js';
-import {authenticateJWT, authorizeAdminOrManager} from "../../middleware/jwt.js";
+import {authorizeAdminOrManager} from "../../middleware/jwt.js";
 
 const router = express.Router();
 
