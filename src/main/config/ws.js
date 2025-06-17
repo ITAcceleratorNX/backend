@@ -127,6 +127,10 @@ class MyWebSocketServer {
     async sendMessage({ chatId, senderId, message, isFromUser }) {
         const chat = await Chat.findByPk(chatId);
         if (!chat) return;
+        if (chat.status !== 'ACCEPTED') {
+            console.log('Chat not active:', chatId);
+            return;
+        }
 
         const newMessage = await Message.create({
             chat_id: chatId,
@@ -145,4 +149,5 @@ class MyWebSocketServer {
             }));
         }
     }
+
 }

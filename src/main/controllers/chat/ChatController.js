@@ -1,6 +1,7 @@
-import {ChatService} from '../../service/chat/ChatService.js';
-import {asyncHandler} from '../../utils/handler/asyncHandler.js';
+import { ChatService } from '../../service/chat/ChatService.js';
+import { asyncHandler } from '../../utils/handler/asyncHandler.js';
 import logger from "../../utils/winston/logger.js";
+import { getById } from '../../service/user/UserService.js'; // путь подкорректируй по проекту
 
 export const ChatController = {
     getMessages: asyncHandler(async (req, res) => {
@@ -27,8 +28,10 @@ export const ChatController = {
             hasMore: messages.length === parsedLimit // если меньше — сообщений больше нет
         });
     }),
+
     getUserChat: asyncHandler(async (req, res) => {
         const userId = req.user.id;
+        const user = await getById(userId);
 
         const chat = await ChatService.getChats({
             where: {
@@ -39,23 +42,28 @@ export const ChatController = {
 
         if (chat && chat.length > 0) {
             logger.info('Fetched user chat', {
-                userId: req.user?.id || null,
+                userId,
+                userName: user.name,
                 endpoint: req.originalUrl,
                 requestId: req.id,
                 chatId: chat[0].id,
                 status: chat[0].status
             });
-            res.json(chat[0]);
+
+            res.json({
+                ...chat[0].toJSON?.() || chat[0],
+                userName: user.name
+            });
         } else {
             logger.info('No active chat found for user', {
-                userId: req.user?.id || null,
+                userId,
+                userName: user.name,
                 endpoint: req.originalUrl,
                 requestId: req.id,
             });
-            res.status(404).json({ message: 'No active chat found' });
+            res.status(404).json({ message: 'No active chat found', userName: user.name });
         }
     }),
-
 
     clearMessages: asyncHandler(async (req, res) => {
         const { chatId } = req.params;
@@ -89,19 +97,37 @@ export const ChatController = {
             where: { manager_id: managerId },
             include: [{ association: 'user', attributes: ['name'] }]
         });
-        logger.info('Fetched messages', {
+
+        logger.info('Fetched manager chats', {
             userId: req.user?.id || null,
             endpoint: req.originalUrl,
             requestId: req.id,
         });
-        res.json(chats);
+
+        res.json(
+            chats.map(chat => ({
+                ...chat.toJSON?.() || chat,
+                userName: chat.user?.name || null
+            }))
+        );
     }),
+
     getPendingChats: asyncHandler(async (req, res) => {
-        const chats = await ChatService.getChats({where: {status: "PENDING"}});
-        logger.info('Fetched messages', {
+        const chats = await ChatService.getChats({
+            where: { status: "PENDING" },
+            include: [{ association: 'user', attributes: ['name'] }]
+        });
+
+        logger.info('Fetched pending chats', {
             endpoint: req.originalUrl,
             requestId: req.id,
         });
-        res.json(chats);
+
+        res.json(
+            chats.map(chat => ({
+                ...chat.toJSON?.() || chat,
+                userName: chat.user?.name || null
+            }))
+        );
     })
 };
