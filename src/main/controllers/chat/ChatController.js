@@ -38,7 +38,7 @@ export const ChatController = {
                 status: ['PENDING', 'ACCEPTED']
             }
         });
-        const user = await getById(chat.managerId);
+        const user = await getById(chat[0].managerId);
 
         if (chat && chat.length > 0) {
             logger.info('Fetched user chat', {
