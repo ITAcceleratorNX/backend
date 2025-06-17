@@ -830,11 +830,215 @@ paths:
           description: Unauthorized (no token)
         403:
           description: Forbidden (only for Admin)
+  /orders:
+    get:
+      summary: Получить все заказы
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
 
+    post:
+      summary: Создать новый заказ
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderDto'
+      responses:
+        '201':
+          description: Заказ успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
 
+  /orders/me:
+    get:
+      summary: Получить заказы текущего пользователя
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+
+    put:
+      summary: Обновить заказ текущего пользователя
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderDto'
+      responses:
+        '200':
+          description: Заказ обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+
+  /orders/{id}:
+    get:
+      summary: Получить заказ по ID
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о заказе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+
+    delete:
+      summary: Удалить заказ
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешное удаление
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+
+  /{id}/status:
+    put:
+      summary: Обновить статус заказа
+      tags: [ Order ]
+      security:
+        - cookieAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatusDto'
+      responses:
+        '200':
+          description: Статус успешно обновлён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: object
+
+security:
+  - cookieAuth: []
 # --- WebSocket documentation section (non-standard) ---
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
   schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        storage_id:
+          type: integer
+        total_volume:
+          type: number
+        months:
+          type: integer
+        cargo_mark:
+          type: string
+          enum: [ NO, FRAGILE, HEAVY ]
+        product_names:
+          type: string
+        total_price:
+          type: number
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+
+    CreateOrderDto:
+      type: object
+      required: [ storage_id, total_volume, months, cargo_mark, product_names ]
+      properties:
+        storage_id:
+          type: integer
+        total_volume:
+          type: number
+        months:
+          type: integer
+        cargo_mark:
+          type: string
+          enum: [ NO, FRAGILE, HEAVY ]
+        product_names:
+          type: string
+
+    UpdateOrderDto:
+      allOf:
+        - $ref: '#/components/schemas/CreateOrderDto'
+      description: Частичное обновление разрешено
+
+    UpdateOrderStatusDto:
+      type: object
+      required: [ status ]
+      properties:
+        status:
+          type: string
+          enum: [ INACTIVE, APPROVED, ACTIVE ]
     WarehouseWithStorage:
       type: object
       properties:
