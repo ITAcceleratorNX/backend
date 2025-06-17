@@ -6,9 +6,9 @@ import {Buffer} from 'buffer';
 import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
 
-const API_URL = process.env.ONE_VISION_API_URL;
-const API_KEY = process.env.API_KEY;
-const SECRET_KEY = process.env.SECRET_KEY;
+const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
+const API_KEY = process.env.PAYMENT_API_KEY;
+const SECRET_KEY = process.env.PAYMENT_SECRET_KEY;
 
 export async function runMonthlyPayments() {
     const now = dayjs();
@@ -25,6 +25,7 @@ export async function runMonthlyPayments() {
         include: [
             {
                 model: Order,
+                as: 'order',
                 include: [
                     {
                         model: User,
@@ -36,10 +37,9 @@ export async function runMonthlyPayments() {
     });
 
     for (const payment of unpaidPayments) {
-        const user = payment.Order?.user;
-
+        const user = payment.order?.user;
         if (!user || !user.recurrent_token) {
-            console.log(`⚠️ Пропущено: нет токена для user_id ${payment.user_id}`);
+            console.log(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
             continue;
         }
 
@@ -48,7 +48,7 @@ export async function runMonthlyPayments() {
             const transaction = await Transaction.create({
                 order_payment_id: payment.id,
                 payment_type: 'pay',
-                amount: payment.amount,
+                amount: Number(parseFloat(payment.amount + payment.penalty_amount).toFixed(2)),
                 recurrent_token: user.recurrent_token,
                 created_date: new Date().toISOString()
             }, { transaction: t });

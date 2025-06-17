@@ -37,3 +37,7 @@ export const deleteById = async (id) => {
     }
     return deleted;
 };
+
+export const getManagers = async () => {
+    return await User.findAll({where: { role: 'MANAGER' }});
+}
