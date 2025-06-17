@@ -42,8 +42,8 @@ OrderPayment.belongsTo(Order, { foreignKey: 'order_id' , as : 'order'});
 OrderPayment.hasMany(PaymentTransaction, { foreignKey: 'order_payment_id' });
 PaymentTransaction.belongsTo(OrderPayment, { foreignKey: 'order_payment_id' });
 
-User.hasMany(Chat, { foreignKey: 'user_id' });
-Chat.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Chat, { foreignKey: 'user_id', as: 'chat' });
+Chat.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 Chat.hasMany(Message, { foreignKey: 'chat_id' });
 Message.belongsTo(Chat, { foreignKey: 'chat_id' });
