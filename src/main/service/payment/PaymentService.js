@@ -155,6 +155,10 @@ export const create = async (data, userId) => {
             const error = new Error('order not found');
             error.status = 200;
             throw error;
+        } else if(order.status === 'PROCESSING') {
+            const error = new Error('payment already processed');
+            error.status = 409;
+            throw error;
         } else if(order.status !== 'APPROVED') {
             const error = new Error('payment cannot start without approval');
             error.status = 409;
