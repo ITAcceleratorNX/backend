@@ -92,7 +92,7 @@ export default async function appFactory() {
     app.use('/prices', priceRoutes);
     app.use('/faq', FAQRoutes);
     app.use('/orders', orderRoutes);
-    app.use('/notifications', notificationRoutes);
+    app.use('/notifications',authenticateJWT, notificationRoutes);
     app.use('/callbacks', successPaymentCallback);
     app.use('/payments', paymentRoutes);
 
