@@ -31,6 +31,7 @@ async function createTransaction(orderPaymentId, amount, transaction) {
     return await Transaction.create({
         order_payment_id: orderPaymentId,
         amount: Number(amount),
+        created_date: new Date(Date.now() + 10_000),
     }, { transaction });
 }
 

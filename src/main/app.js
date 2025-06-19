@@ -27,6 +27,7 @@ import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
+import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
 
 export default async function appFactory() {
     await initDb();
@@ -80,6 +81,12 @@ export default async function appFactory() {
         console.log('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
+    cron.schedule('* * * * *', () => {
+        console.log('🕒 Cron, проверка истехших оплат');
+        processCronJobForExpiredTransactions()
+    });
+
+
     app.get('/protected', authenticateJWT, (req, res) => {
         res.json({ message: 'Этот маршрут защищён!', user: req.user });
     });
