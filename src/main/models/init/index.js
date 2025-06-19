@@ -1,3 +1,4 @@
+import { OrderItem } from "../OrderItem.js";
 import Callback from '../Callback.js';
 import Order from '../Order.js';
 import FAQ from '../Faq.js';
@@ -10,7 +11,6 @@ import Warehouse from '../Warehouse.js';
 import Chat from "../Chat.js";
 import Message from "../Message.js";
 import OrderPayment from "../OrderPayment.js";
-import PaymentTransaction from "../PaymentTransaction.js";
 import Transaction from "../Transactions.js";
 
 
@@ -26,6 +26,10 @@ Order.belongsTo(Storage, { foreignKey: 'storage_id', as : 'storage' });
 MovingOrder.belongsTo(Order, { foreignKey: 'contract_id' });
 Order.hasMany(MovingOrder, { foreignKey: 'contract_id' });
 
+// Order - OrderItem
+Order.hasMany(OrderItem, { foreignKey: 'order_id', as: 'items' });
+OrderItem.belongsTo(Order, { foreignKey: 'order_id', as: 'order' });
+
 // Notification - User
 Notification.belongsTo(User, { foreignKey: 'user_id' });
 User.hasMany(Notification, { foreignKey: 'user_id' });
@@ -37,10 +41,6 @@ Storage.belongsTo(Warehouse, { foreignKey: 'warehouse_id', as: 'warehouse' });
 // Order - OrderPayment
 Order.hasMany(OrderPayment, { foreignKey: 'order_id' , as: 'order_payment'});
 OrderPayment.belongsTo(Order, { foreignKey: 'order_id' , as : 'order'});
-
-// OrderPayment - PaymentTransaction
-OrderPayment.hasMany(PaymentTransaction, { foreignKey: 'order_payment_id' });
-PaymentTransaction.belongsTo(OrderPayment, { foreignKey: 'order_payment_id' });
 
 User.hasMany(Chat, { foreignKey: 'user_id', as: 'chat' });
 Chat.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -64,7 +64,7 @@ export {
     Chat,
     Message,
     OrderPayment,
-    PaymentTransaction,
     Transaction,
+    OrderItem,
 };
 

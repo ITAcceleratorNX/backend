@@ -1,4 +1,4 @@
-import {Order, Storage} from "../../models/init/index.js";
+import {Order, OrderItem, Storage} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
@@ -10,6 +10,9 @@ export const getAll = async () => {
         include: [
             {
                 association: 'storage'
+            },
+            {
+                association: 'items'
             }
         ]
     });
@@ -20,6 +23,9 @@ export const getById = async (id) => {
         include: [
             {
                 association: 'storage'
+            },
+            {
+                association: 'items'
             }
         ]
     });
@@ -31,6 +37,9 @@ export const getByUserId = async (userId) => {
         include: [
             {
                 association: 'storage'
+            },
+            {
+                association: 'items'
             }
         ]
     });
@@ -75,25 +84,38 @@ export const deleteById = async (id) => {
 export const createOrder = async (req) => {
     const transaction = await sequelize.transaction();
     try {
-        const { storage_id, total_volume, months } = req.body;
+        const { storage_id, order_items, months } = req.body;
         const { id: user_id } = req.user;
 
         const storage = await Storage.findByPk(storage_id, { transaction });
+        const total_volume = getTotalVolumeFromItems(order_items);
         validateStorage(storage, total_volume);
 
         const { start_date, end_date } = calculateDates(months);
-        const total_price = await calculateTotalPrice(storage.storage_type, total_volume, months);
+        const total_price = await calculateTotalPrice(
+            storage.storage_type,
+            storage.storage_type === 'INDIVIDUAL' ? Number(storage.total_volume) : Number(total_volume),
+            months
+        );
 
         const orderData = {
             ...req.body,
             user_id,
             start_date,
             end_date,
+            total_volume: storage.storage_type === 'INDIVIDUAL' ? Number(storage.total_volume) : Number(total_volume),
             total_price: total_price,
             created_at: new Date(),
         };
 
         const order = await Order.create(orderData, { transaction });
+
+        const itemsToCreate = order_items.map(item => ({
+            ...item,
+            order_id: order.id
+        }));
+
+        await OrderItem.bulkCreate(itemsToCreate, { transaction });
 
         await updateStorageVolume(storage, total_volume, transaction);
 
@@ -149,4 +171,8 @@ async function updateStorageVolume(storage, total_volume, transaction) {
             transaction,
         }
     );
+}
+
+function getTotalVolumeFromItems(items) {
+    return items.reduce((total, item) => total + item.volume, 0);
 }
