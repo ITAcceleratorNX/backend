@@ -8,8 +8,12 @@ export const Service = sequelize.define('Service', {
         autoIncrement: true
     },
     type: {
-        type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "MOVING", "DEPOSIT"),
+        type: DataTypes.ENUM("INDIVIDUAL", "CLOUD", "RACK", "LIGHT", "STANDART", "HARD", "DEPOSIT"),
         allowNull: false
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     price: {
         type: DataTypes.DECIMAL(10, 2),

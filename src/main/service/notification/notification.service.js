@@ -51,6 +51,58 @@ export class NotificationService {
 
         console.log(`✅ Уведомление отправлено: user_id=${user_id}, type=${notification_type}`);
     }
+    async sendBulkNotification({
+                                   user_ids = [],       // массив id пользователей
+                                   isToAll = false,     // если true — отправка всем
+                                   title,
+                                   message,
+                                   notification_type,
+                                   is_email = false,
+                                   is_sms = false,
+                                   related_order_id = null
+                               }) {
+        let users;
+
+        if (isToAll) {
+            users = await User.findAll(); // отправить всем
+        } else {
+            users = await User.findAll({ where: { id: user_ids } }); // только выбранным
+        }
+
+        if (!users || users.length === 0) {
+            console.warn('❗ Нет пользователей для уведомления');
+            return;
+        }
+
+        const notifications = users.map(user => ({
+            user_id: user.id,
+            title,
+            message,
+            notification_type,
+            related_order_id,
+            is_email,
+            is_sms
+        }));
+
+        // массовое создание записей в Notification
+        await Notification.bulkCreate(notifications);
+
+        // рассылка email / sms
+        for (const user of users) {
+            const shouldSendEmail = ['payment', 'contract'].includes(notification_type) || is_email;
+            const shouldSendSms = ['payment', 'contract'].includes(notification_type) || is_sms;
+
+            if (shouldSendEmail && user.email) {
+                await this.sendEmail(user.email, title, message);
+            }
+
+            if (shouldSendSms && user.phone) {
+                await this.sendSms(user.phone, message);
+            }
+
+            console.log(`📤 Уведомление отправлено user_id=${user.id}`);
+        }
+    }
 
     async sendEmail(to, subject, text) {
         const msg = {
