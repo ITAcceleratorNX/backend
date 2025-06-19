@@ -1185,43 +1185,132 @@ components:
       properties:
         id:
           type: integer
-        user_id:
-          type: integer
+          example: 29
         storage_id:
           type: integer
-        total_volume:
-          type: number
-        months:
+          example: 12
+        user_id:
           type: integer
-        cargo_mark:
+          example: 2
+        total_volume:
           type: string
-          enum: [ NO, FRAGILE, HEAVY ]
-        product_names:
-          type: string
+          example: "5"
         total_price:
-          type: number
+          type: string
+          example: "500.00"
         start_date:
           type: string
           format: date-time
+          example: "2025-06-19T12:19:33.670Z"
         end_date:
           type: string
           format: date-time
+          example: "2025-07-19T12:19:33.670Z"
+        contract_status:
+          type: string
+          enum: [ SIGNED, UNSIGNED ]
+          example: "UNSIGNED"
+        payment_status:
+          type: string
+          enum: [ PAID, UNPAID ]
+          example: "UNPAID"
+        status:
+          type: string
+          enum: [ ACTIVE, INACTIVE, APPROVED ]
+          example: "INACTIVE"
+        created_at:
+          type: string
+          format: date
+          example: "2025-06-19"
+        storage:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 12
+            warehouse_id:
+              type: integer
+              example: 2
+            name:
+              type: string
+              example: "11A"
+            storage_type:
+              type: string
+              enum: [ INDIVIDUAL, RACK, CLOUD ]
+              example: "INDIVIDUAL"
+            description:
+              type: string
+              example: "individual storage"
+            image_url:
+              type: string
+              format: uri
+              example: "https://"
+            height:
+              type: string
+              example: "3"
+            total_volume:
+              type: string
+              example: "5.00"
+            available_volume:
+              type: string
+              example: "0.00"
+            status:
+              type: string
+              enum: [ AVAILABLE, OCCUPIED, PENDING ]
+              example: "PENDING"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 4
+              order_id:
+                type: integer
+                example: 29
+              name:
+                type: string
+                example: "Wooden Crate"
+              volume:
+                type: string
+                example: "1.00"
+              cargo_mark:
+                type: string
+                enum: [ NO, HEAVY, FRAGILE ]
+                example: "HEAVY"
 
     CreateOrderDto:
       type: object
-      required: [ storage_id, total_volume, months, cargo_mark, product_names ]
+      required:
+        - storage_id
+        - months
+        - order_items
       properties:
         storage_id:
           type: integer
-        total_volume:
-          type: number
         months:
           type: integer
-        cargo_mark:
-          type: string
-          enum: [ NO, FRAGILE, HEAVY ]
-        product_names:
-          type: string
+          minimum: 1
+        order_items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - name
+              - volume
+              - cargo_mark
+            properties:
+              name:
+                type: string
+                minLength: 1
+              volume:
+                type: number
+                exclusiveMinimum: 0
+              cargo_mark:
+                type: string
+                enum: [ NO, HEAVY, FRAGILE ]
 
     UpdateOrderDto:
       allOf:
