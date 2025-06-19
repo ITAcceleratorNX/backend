@@ -13,6 +13,39 @@ export class NotificationController {
             res.status(400).json({ message: 'Невалидные данные', error: error.errors || error.message });
         }
     }
+    async sendBulk(req, res) {
+        try {
+            const {
+                user_ids = [],
+                isToAll = false,
+                title,
+                message,
+                notification_type,
+                is_email = false,
+                is_sms = false,
+                related_order_id = null
+            } = req.body;
+
+            if (!title || !message || !notification_type) {
+                return res.status(400).json({ message: 'title, message и notification_type обязательны' });
+            }
+
+            await service.sendBulkNotification({
+                user_ids,
+                isToAll,
+                title,
+                message,
+                notification_type,
+                is_email,
+                is_sms,
+                related_order_id
+            });
+
+            res.status(201).json({ message: 'Массовое уведомление отправлено' });
+        } catch (error) {
+            res.status(400).json({ message: 'Ошибка отправки уведомлений', error: error.message });
+        }
+    }
 
     async getAll(req, res) {
         const list = await service.getAllNotifications();
@@ -20,20 +53,20 @@ export class NotificationController {
     }
 
     async getById(req, res) {
-        const id = +req.params.id;
+        const id = req.user.id;
         const notif = await service.getNotificationById(id);
         if (notif) return res.json(notif);
         res.status(404).json({ message: 'Уведомление не найдено' });
     }
 
     async markRead(req, res) {
-        const id = +req.params.id;
+        const id = req.user.id;
         const updated = await service.markAsRead(id);
         res.json(updated);
     }
 
     async delete(req, res) {
-        const id = +req.params.id;
+        const id = req.user.id;
         await service.deleteNotification(id);
         res.status(204).send();
     }

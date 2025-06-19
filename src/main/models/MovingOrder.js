@@ -7,19 +7,15 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         primaryKey: true,
         autoIncrement: true
     },
-    contract_id: {
+    order_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'contracts',
+            model: 'orders',
             key: 'id',
         }
     },
-    address_from: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    address_to: {
+    address: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -32,9 +28,9 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('PENDING', 'IN_PROGRESS', 'DELIVERED', 'CANCELLED'),
+        type: DataTypes.ENUM('PENDING_FROM', 'PENDING_TO','IN_PROGRESS', 'DELIVERED', 'CANCELLED'),
         allowNull: false,
-        defaultValue: 'PENDING'
+        defaultValue: 'PENDING_FROM'
     }
 
 }, {
