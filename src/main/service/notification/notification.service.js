@@ -136,8 +136,11 @@ export class NotificationService {
     }
 
     async getNotificationById(id) {
-        return Notification.findByPk(id);
+        return Notification.findAll({
+            where: { user_id: id }
+        });
     }
+
 
     async markAsRead(id) {
         await Notification.update({ is_read: true }, { where: { notification_id: id } });
