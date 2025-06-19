@@ -7,9 +7,10 @@ const controller = new NotificationController();
 
 router.post('/', controller.create);
 router.get('/', controller.getAll);
-router.get('/:id', controller.getById);
-router.patch('/:id/read', controller.markRead);
-router.delete('/:id', controller.delete);
+router.get('/user', controller.getById);
+router.patch('/read', controller.markRead);
+router.delete('/delete', controller.delete);
+router.post('/bulk', controller.sendBulk);
 
 export default router;
 
