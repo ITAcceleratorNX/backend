@@ -2,7 +2,7 @@ import {sequelize} from "../../config/database.js";
 import logger from "../../utils/winston/logger.js";
 import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js";
 import {NotificationService} from "../notification/notification.service.js";
-import { Op } from "sequelize";
+import {Op, literal, where} from "sequelize";
 
 const notificationService = new NotificationService();
 
@@ -152,7 +152,7 @@ const updateTransactionData = (data) => {
         } else if (value instanceof Date) {
             return value.toISOString();
         }
-        return null;
+        return value;
     };
 
     return {
@@ -217,14 +217,17 @@ const processManualErrorAndNotify = async (data, title, message) => {
 
 export const processCronJobForExpiredTransactions = async () => {
     const PAYMENT_LIFETIME = Number(process.env.PAYMENT_LIFETIME);
-    const oneMinuteAgo = new Date(Date.now() - PAYMENT_LIFETIME * 1000);
 
     const expiredTransactions = await Transaction.findAll({
         where: {
-            created_date: {
-                [Op.lt]: oneMinuteAgo
-            },
-            operation_status: null
+            operation_status: null,
+            [Op.and]: [
+                where(
+                    literal(`NOW()`),
+                    Op.gt,
+                    literal(`"Transaction"."created_date" + interval '${PAYMENT_LIFETIME} second'`)
+                )
+            ]
         }
     });
 
