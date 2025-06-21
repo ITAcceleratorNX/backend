@@ -2,6 +2,7 @@ import {sequelize} from "../../config/database.js";
 import logger from "../../utils/winston/logger.js";
 import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js";
 import {NotificationService} from "../notification/notification.service.js";
+import { Op } from "sequelize";
 
 const notificationService = new NotificationService();
 
@@ -88,7 +89,7 @@ const handleWithdraw = async (data) => {
             error_code: data.error_code,
             recurrent_token: data.recurrent_token,
             amount: data.amount,
-            created_date: data.created_date,
+            created_date: isNaN(new Date(data.created_date).getTime()) ? null : new Date(data.created_date).toISOString(),
             payment_date: data.payment_date,
             payer_info: data.payer_info
         }
@@ -143,19 +144,26 @@ const handleUnknownError = async (data) => {
     );
 };
 
-const updateTransactionData = (data) => ({
-    payment_id: data.payment_id,
-    operation_id: data.operation_id,
-    payment_type: data.payment_type,
-    operation_type: data.operation_type,
-    operation_status: data.operation_status,
-    error_code: data.error_code,
-    recurrent_token: data.recurrent_token,
-    amount: data.amount,
-    created_date: data.created_date,
-    payment_date: data.payment_date,
-    payer_info: data.payer_info
-});
+const updateTransactionData = (data) => {
+    const parseDate = (value) => {
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? null : date.toISOString();
+    };
+
+    return {
+        payment_id: data.payment_id,
+        operation_id: data.operation_id,
+        payment_type: data.payment_type,
+        operation_type: data.operation_type,
+        operation_status: data.operation_status,
+        error_code: data.error_code,
+        recurrent_token: data.recurrent_token,
+        amount: data.amount,
+        created_date: parseDate(data.created_date),
+        payment_date: data.payment_date,
+        payer_info: data.payer_info
+    };
+};
 
 const fetchTransactionDataWithRelations = async (orderId) => {
     return Transaction.findByPk(String(orderId), {
@@ -201,3 +209,32 @@ const processManualErrorAndNotify = async (data, title, message) => {
         throw err;
     }
 };
+
+export const processCronJobForExpiredTransactions = async () => {
+    const PAYMENT_LIFETIME = Number(process.env.PAYMENT_LIFETIME);
+    const oneMinuteAgo = new Date(Date.now() - PAYMENT_LIFETIME * 1000);
+
+    const expiredTransactions = await Transaction.findAll({
+        where: {
+            created_date: {
+                [Op.lt]: oneMinuteAgo
+            }
+        }
+    });
+
+    logger.info(
+        `Found ${expiredTransactions.length} expired transactions older than 1 minute. 
+                Transactions:${expiredTransactions.length}`
+    );
+
+    const datasToProcessing = expiredTransactions
+        .map(tx => ({
+            order_id: tx.id,
+            operation_status: 'error',
+            error_code: 'ov_payment_expired',
+        }));
+
+    for (const data of datasToProcessing) {
+        handleCallbackData(data);
+    }
+}

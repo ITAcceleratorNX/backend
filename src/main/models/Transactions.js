@@ -49,7 +49,7 @@ const Transaction = sequelize.define('Transaction', {
         allowNull: false,
     },
     created_date: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.TIME,
         allowNull: true,
     },
     payment_date: {

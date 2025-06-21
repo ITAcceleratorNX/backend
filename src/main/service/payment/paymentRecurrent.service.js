@@ -50,7 +50,7 @@ export async function runMonthlyPayments() {
                 payment_type: 'pay',
                 amount: Number(parseFloat(payment.amount + payment.penalty_amount).toFixed(2)),
                 recurrent_token: user.recurrent_token,
-                created_date: new Date().toISOString()
+                created_date: new Date()
             }, { transaction: t });
 
             const payload = {
