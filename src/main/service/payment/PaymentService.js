@@ -28,6 +28,7 @@ const PAYMENT_CONSTANTS = {
 };
 
 async function createTransaction(orderPaymentId, amount, transaction) {
+    console.log("payment created_date: ", new Date());
     return await Transaction.create({
         order_payment_id: orderPaymentId,
         amount: Number(amount),
