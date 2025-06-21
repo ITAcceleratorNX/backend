@@ -2,7 +2,7 @@ import {sequelize} from "../../config/database.js";
 import logger from "../../utils/winston/logger.js";
 import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js";
 import {NotificationService} from "../notification/notification.service.js";
-import {Op, literal, where} from "sequelize";
+import {Op} from "sequelize";
 
 const notificationService = new NotificationService();
 
