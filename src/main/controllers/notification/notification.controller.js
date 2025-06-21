@@ -60,7 +60,7 @@ export class NotificationController {
     }
 
     async markRead(req, res) {
-        const id = req.user.id;
+        const id = req.params.id;
         const updated = await service.markAsRead(id);
         res.json(updated);
     }
