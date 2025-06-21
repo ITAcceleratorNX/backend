@@ -131,7 +131,7 @@ function validateStorage(storage, total_volume) {
     if (!storage) {
         throw Object.assign(new Error('storage not found'), { status: 200 });
     }
-    if (['OCCUPIED', 'PENDING'].includes(storage.status)) {
+    if (['OCCUPIED', 'PENDING', 'PROCESSING'].includes(storage.status)) {
         throw Object.assign(new Error('unable to select this storage'), { status: 200 });
     }
     if (storage.available_volume < total_volume) {
