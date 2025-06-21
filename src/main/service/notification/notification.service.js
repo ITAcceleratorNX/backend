@@ -131,13 +131,32 @@ export class NotificationService {
         }
     }
 
-    async getAllNotifications() {
-        return Notification.findAll();
+    async getAllNotifications(page = 1, limit = 10) {
+        const offset = (page - 1) * limit;
+
+        const { count, rows } = await Notification.findAndCountAll({
+            offset,
+            limit,
+            order: [['created_at', 'DESC']], // <--- исправлено
+        });
+
+        return {
+            notifications: rows,
+            total: count,
+            page,
+            limit,
+            totalPages: Math.ceil(count / limit),
+        };
     }
 
+
+
     async getNotificationById(id) {
-        return Notification.findByPk(id);
+        return Notification.findAll({
+            where: { user_id: id }
+        });
     }
+
 
     async markAsRead(id) {
         await Notification.update({ is_read: true }, { where: { notification_id: id } });
