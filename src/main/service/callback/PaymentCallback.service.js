@@ -146,8 +146,13 @@ const handleUnknownError = async (data) => {
 
 const updateTransactionData = (data) => {
     const parseDate = (value) => {
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? null : date.toISOString();
+        if (typeof value === 'string') {
+            const date = new Date(value);
+            return isNaN(date.getTime()) ? null : date.toISOString();
+        } else if (value instanceof Date) {
+            return value.toISOString();
+        }
+        return null;
     };
 
     return {
@@ -218,7 +223,8 @@ export const processCronJobForExpiredTransactions = async () => {
         where: {
             created_date: {
                 [Op.lt]: oneMinuteAgo
-            }
+            },
+            operation_status: null
         }
     });
 
