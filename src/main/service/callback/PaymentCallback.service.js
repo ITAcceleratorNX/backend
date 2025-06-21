@@ -223,9 +223,9 @@ export const processCronJobForExpiredTransactions = async () => {
             operation_status: null,
             [Op.and]: [
                 where(
-                    literal(`NOW()`),
+                    literal('NOW()'),
                     Op.gt,
-                    literal(`"Transaction"."created_date" + interval '${PAYMENT_LIFETIME} second'`)
+                    literal(`"created_date" + interval '${PAYMENT_LIFETIME} second'`)
                 )
             ]
         }
