@@ -217,17 +217,12 @@ const processManualErrorAndNotify = async (data, title, message) => {
 
 export const processCronJobForExpiredTransactions = async () => {
     const PAYMENT_LIFETIME = Number(process.env.PAYMENT_LIFETIME);
+    const expirationCutoff = new Date(Date.now() - PAYMENT_LIFETIME * 1000);
 
     const expiredTransactions = await Transaction.findAll({
         where: {
             operation_status: null,
-            [Op.and]: [
-                where(
-                    literal('NOW()'),
-                    Op.gt,
-                    literal(`"created_date" + interval '${PAYMENT_LIFETIME} second'`)
-                )
-            ]
+            created_date: { [Op.lt]: expirationCutoff }
         }
     });
 
