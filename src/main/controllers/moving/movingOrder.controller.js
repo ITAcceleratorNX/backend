@@ -27,7 +27,15 @@ export const getOrderById = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-
+export const getOrderByStatus = async (req, res) => {
+    try {
+        const order = await orderService.getOrdersByStatus(req.params.status);
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.json(order);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 export const updateOrder = async (req, res) => {
     try {
         const order = await orderService.updateOrder(req.params.id, req.body);

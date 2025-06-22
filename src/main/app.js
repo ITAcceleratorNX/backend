@@ -27,7 +27,7 @@ import cron from 'node-cron';
 import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
-import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
+import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 
 export default async function appFactory() {
     await initDb();
@@ -81,10 +81,10 @@ export default async function appFactory() {
         console.log('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
-    cron.schedule('* * * * *', () => {
-        console.log('🕒 Cron, проверка истехших оплат');
-        processCronJobForExpiredTransactions()
-    });
+    // cron.schedule('* * * * *', () => {
+    //     console.log('🕒 Cron, проверка истехших оплат');
+    //     processCronJobForExpiredTransactions()
+    // });
 
 
     app.get('/protected', authenticateJWT, (req, res) => {
@@ -102,7 +102,7 @@ export default async function appFactory() {
     app.use('/notifications',authenticateJWT, notificationRoutes);
     app.use('/callbacks', successPaymentCallback);
     app.use('/payments', paymentRoutes);
-
+    app.use('/moving',authenticateJWT, movingOrderRoutes)
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
