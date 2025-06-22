@@ -15,10 +15,6 @@ export const MovingOrder = sequelize.define('MovingOrder', {
             key: 'id',
         }
     },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     moving_date: {
         type: DataTypes.DATE,
         allowNull: true,
