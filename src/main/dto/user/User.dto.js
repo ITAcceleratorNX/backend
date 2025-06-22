@@ -4,7 +4,8 @@ export const UserDto = z.object({
     name: z.string().min(1),
     email: z.string().min(1),
     phone: z.string().min(1),
-    iin: z.string().min(12).max(12)
+    iin: z.string().min(12).max(12),
+    address: z.string().min(1),
 });
 
 export const UserEmailDto = z.object({
