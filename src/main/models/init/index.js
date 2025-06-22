@@ -12,6 +12,7 @@ import Chat from "../Chat.js";
 import Message from "../Message.js";
 import OrderPayment from "../OrderPayment.js";
 import Transaction from "../Transactions.js";
+import OrderService from "../OrderService.js";
 
 
 // Order - User
@@ -23,8 +24,8 @@ Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );
 Order.belongsTo(Storage, { foreignKey: 'storage_id', as : 'storage' });
 
 // MovingOrder - Contract
-MovingOrder.belongsTo(Order, { foreignKey: 'contract_id' });
-Order.hasMany(MovingOrder, { foreignKey: 'contract_id' });
+MovingOrder.belongsTo(Order, { foreignKey: 'order_id' });
+Order.hasMany(MovingOrder, { foreignKey: 'order_id' });
 
 // Order - OrderItem
 Order.hasMany(OrderItem, { foreignKey: 'order_id', as: 'items' });
@@ -51,6 +52,21 @@ Message.belongsTo(Chat, { foreignKey: 'chat_id' });
 OrderPayment.hasMany(Transaction, { foreignKey: 'order_payment_id', as: 'transactions' });
 Transaction.belongsTo(OrderPayment, { foreignKey: 'order_payment_id', as: 'order_payment' });
 
+Order.belongsToMany(Service, {
+    through: OrderService,
+    foreignKey: 'order_id',
+    otherKey: 'service_id',
+    as: 'services' // ← вот это важно
+});
+
+Service.belongsToMany(Order, {
+    through: OrderService,
+    foreignKey: 'service_id',
+    otherKey: 'order_id',
+    as: 'orders' // опционально
+});
+
+
 export {
     Callback,
     Order,
@@ -66,5 +82,6 @@ export {
     OrderPayment,
     Transaction,
     OrderItem,
+    OrderService
 };
 
