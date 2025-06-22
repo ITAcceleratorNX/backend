@@ -11,7 +11,62 @@ export const getAllOrders = async () => {
 };
 
 export const getOrderById = async (id) => {
-    return await MovingOrder.findByPk(id);
+
+    const movingOrder=await MovingOrder.findByPk(id);
+    const order = await Order.findByPk(movingOrder.order_id, {
+        include: [
+            {
+                model: Storage,
+                as: 'storage',
+                include: [
+                    {
+                        model: Warehouse,
+                        as: 'warehouse',
+                        attributes: ['address']
+                    }
+                ],
+                attributes: ['name']
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['address']
+            },
+            {
+                model: Service,
+                as: 'services',
+                where: {
+                    type: ['LIGHT', 'STANDARD', 'HARD']
+                },
+                attributes: ['description', 'type'],
+                through: { attributes: [] },
+                required: true
+            },
+            {
+                model: OrderItem,
+                as: 'items',
+                attributes: ['id', 'name', 'volume', 'cargo_mark'],
+            }
+
+        ]
+    });
+
+
+    const serviceDescriptions = order?.services?.map(s => s.description) || [];
+
+    const results={
+        movingOrderId: movingOrder.id,
+        status: movingOrder.status,
+        warehouseAddress: order?.storage?.warehouse?.address || null,
+        storageName: order?.storage?.name || null,
+        userAddress: order?.user?.address || null,
+        serviceDescriptions,
+        items: order?.items || []
+    };
+
+
+return results;
+
 };
 
 export const updateOrder = async (id, data) => {
