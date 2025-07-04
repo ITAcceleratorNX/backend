@@ -17,7 +17,7 @@ import OrderService from "../OrderService.js";
 
 // Order - User
 Order.belongsTo(User, { foreignKey: 'user_id' , as: 'user'});
-User.hasMany(Order, { foreignKey: 'user_id' , as: 'order'});
+User.hasMany(Order, { foreignKey: 'user_id' , as: 'orders'});
 
 // Order - Storage
 Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );

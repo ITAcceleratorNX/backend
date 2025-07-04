@@ -19,3 +19,11 @@ export const OrderStatusDto = z.object({
 })
 
 export const OrderUpdateDto = OrderDto.partial();
+//
+// export const ExtendedOrderDto = z.object({
+//     storage_id: z.number({
+//         required_error: 'storage_id is required',
+//         invalid_type_error: 'storage_id must be a number',
+//     }),
+//     months: z.number().int().min(1),
+// });

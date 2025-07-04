@@ -1,4 +1,4 @@
-import {Order, OrderItem, Storage} from "../../models/init/index.js";
+import {Order, OrderItem, Storage, User} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
@@ -13,7 +13,12 @@ export const getAll = async () => {
             },
             {
                 association: 'items'
-            }
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['name', 'phone', 'email'],
+            },
         ]
     });
 };
@@ -176,3 +181,17 @@ async function updateStorageVolume(storage, total_volume, transaction) {
 function getTotalVolumeFromItems(items) {
     return items.reduce((total, item) => total + item.volume, 0);
 }
+//
+// export const extendOrder = async(data, user_id) => {
+//     const order = await Order.findByPk(data.id);
+//     if (!order) {
+//         throw Object.assign(new Error('Order not found'), { status: 200 });
+//     } else if (order.payment_status !== 'PAID') {
+//         throw Object.assign(new Error('Order cant extend. Cause not paid for last month'), { status: 200 });
+//     } else if (order.user_id === user_id) {
+//         throw Object.assign(new Error('Forbidden'), { status: 403 });
+//     }
+//
+//
+//
+// }
