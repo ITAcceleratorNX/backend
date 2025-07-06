@@ -11,6 +11,6 @@ router.get("/me", authenticateJWT, UserController.getUserById);
 router.put("/me", authenticateJWT, validateBody(UpdateUserDto), UserController.updateUser);
 router.delete("/me", authenticateJWT, UserController.deleteUser);
 router.get("/manager", authenticateJWT, UserController.getManagers);
-router.patch("/role", authenticateJWT, authorizeAdminOrManager, validateBody(UpdateRoleDto), UserController.updateUser)
+router.patch("/{userId}/role", authenticateJWT, authorizeAdminOrManager, validateBody(UpdateRoleDto), UserController.updateUserRole)
 
 export default router;
