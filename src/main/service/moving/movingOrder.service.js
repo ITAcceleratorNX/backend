@@ -106,6 +106,7 @@ export const getOrdersByStatus = async (status) => {
             storageName: order?.storage?.name || null,
             userAddress: order?.user?.address || null,
             serviceDescriptions,
+            availability: item.availability || null,
             items: order?.items || []
         });
     }

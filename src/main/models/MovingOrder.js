@@ -27,6 +27,11 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         type: DataTypes.ENUM('PENDING_FROM', 'PENDING_TO','IN_PROGRESS', 'DELIVERED', 'CANCELLED'),
         allowNull: false,
         defaultValue: 'PENDING_FROM'
+    },
+    availability: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'NOT_AVAILABLE'
     }
 
 }, {
