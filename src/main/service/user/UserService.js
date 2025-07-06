@@ -29,7 +29,7 @@ export const update = async (id, data) => {
 };
 
 export const deleteById = async (id) => {
-    const deleted = await User.destroy({ where: { user_id: id } });
+    const deleted = await User.destroy({ where: { id: id } });
     if (!deleted) {
         const error = new Error('User not found');
         error.status = 404;
