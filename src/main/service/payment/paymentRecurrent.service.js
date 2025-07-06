@@ -180,6 +180,15 @@ export async function runMonthlyPayments() {
                 is_email: true,
                 is_sms: false
             });
+            await notificationService.sendNotification({
+                user_id: user.id,
+                title: 'Ошибка оплаты',
+                message: 'Не удалось выполнить автоматическую оплату.',
+                notification_type: 'payment',
+                related_order_id: payment.id,
+                is_email: true,
+                is_sms: true
+            });
             if (err.transaction?.id) {
                 err.transaction.operation_status = 'error';
                 err.transaction.error_code = err.message;
