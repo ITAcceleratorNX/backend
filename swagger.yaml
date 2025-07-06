@@ -744,7 +744,87 @@ paths:
           description: User not found
         401:
           description: Unauthorized
-
+  /users/role:
+    patch:
+      summary: Обновление роли текущего пользователя
+      tags:
+        - User
+      security:
+        - cookieAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                  enum: [ ADMIN, USER, MANAGER, COURIER ]
+              required:
+                - role
+      responses:
+        '200':
+          description: Роль успешно обновлена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: boolean
+                    example: true
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Validation error
+                  details:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: role
+                        message:
+                          type: string
+                          example: Invalid enum value
+        '401':
+          description: Нет токена авторизации или токен неверный
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Неверный токен.
+        '403':
+          description: Доступ запрещён. Только для Admin и MANAGER.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Доступ запрещён. Только для Admin и MANAGER.
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
   /warehouses:
     post:
       tags:
@@ -1585,6 +1665,14 @@ components:
             - AVAILABLE
             - UNAVAILABLE
           example: "UNAVAILABLE"
+        work_start:
+          type: string
+          format: time
+          example: "10:00"
+        work_end:
+          type: string
+          format: time
+          example: "19:00"
 x-websocket:
   url: ws://localhost:3000?userId={userId}
   description: |

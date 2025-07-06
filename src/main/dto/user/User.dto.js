@@ -24,3 +24,7 @@ export const RegisterDto = z.object({
 })
 
 export const UpdateUserDto = UserDto.partial();
+
+export const UpdateRoleDto = z.object({
+    role: z.enum(["ADMIN", "USER", "MANAGER","COURIER"])
+});
