@@ -50,6 +50,16 @@ export const deleteUser = asyncHandler(async (req, res) => {
     res.json({ deleted });
 });
 
+export const deleteUserById = asyncHandler(async (req, res) => {
+    const deleted = await UserService.deleteById(req.params.id);
+    logger.info('Deleted user', {
+        userId: req.user?.id || null,
+        endpoint: req.originalUrl,
+        requestId: req.id
+    });
+    res.json({ deleted });
+});
+
 export const getManagers = asyncHandler(async (req, res) => {
     const response = await UserService.getManagers();
     res.json(response);
