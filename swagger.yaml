@@ -744,9 +744,9 @@ paths:
           description: User not found
         401:
           description: Unauthorized
-  /users/role:
+  /users/{userId}/role:
     patch:
-      summary: Обновление роли текущего пользователя
+      summary: Обновление роли по userId
       tags:
         - User
       security:
