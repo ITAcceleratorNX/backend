@@ -68,8 +68,8 @@ export function createBaseController(service, options = {}) {
                 return res.status(400).json({ error: 'Invalid ID' });
             }
 
-            const [updatedCount] = await service.update(id, req.body);
-            if (updatedCount === 0) {
+            const updated = await service.update(id, req.body);
+            if (!updated) {
                 logger.info('Resource to update not found', {
                     userId: req.user?.id || null,
                     endpoint: req.originalUrl,
@@ -86,7 +86,7 @@ export function createBaseController(service, options = {}) {
                 resourceId: id,
                 updates: req.body
             });
-            res.json({ updated: updatedCount });
+            res.json({ updated });
         }),
 
         delete: asyncHandler(async (req, res) => {
