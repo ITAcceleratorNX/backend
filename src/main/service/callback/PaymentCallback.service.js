@@ -2,7 +2,7 @@ import {sequelize} from "../../config/database.js";
 import logger from "../../utils/winston/logger.js";
 import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js";
 import {NotificationService} from "../notification/notification.service.js";
-import { Op } from "sequelize";
+import {Op} from "sequelize";
 
 const notificationService = new NotificationService();
 
@@ -146,8 +146,13 @@ const handleUnknownError = async (data) => {
 
 const updateTransactionData = (data) => {
     const parseDate = (value) => {
-        const date = new Date(value);
-        return isNaN(date.getTime()) ? null : date.toISOString();
+        if (typeof value === 'string') {
+            const date = new Date(value);
+            return isNaN(date.getTime()) ? null : date.toISOString();
+        } else if (value instanceof Date) {
+            return value.toISOString();
+        }
+        return value;
     };
 
     return {
@@ -212,13 +217,13 @@ const processManualErrorAndNotify = async (data, title, message) => {
 
 export const processCronJobForExpiredTransactions = async () => {
     const PAYMENT_LIFETIME = Number(process.env.PAYMENT_LIFETIME);
-    const oneMinuteAgo = new Date(Date.now() - PAYMENT_LIFETIME * 1000);
-
+    console.log("PAYMENT_LIFETIME: ", PAYMENT_LIFETIME);
+    const expirationCutoff = new Date(Date.now() - PAYMENT_LIFETIME * 1000);
+    console.log("expirationCutoff: ", expirationCutoff);
     const expiredTransactions = await Transaction.findAll({
         where: {
-            created_date: {
-                [Op.lt]: oneMinuteAgo
-            }
+            operation_status: null,
+            created_date: { [Op.lt]: expirationCutoff }
         }
     });
 

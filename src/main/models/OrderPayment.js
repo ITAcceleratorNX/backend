@@ -28,7 +28,7 @@ const OrderPayment = sequelize.define('OrderPayment', {
         allowNull: false,
     },
     status: {
-        type: DataTypes.ENUM('PAID', 'UNPAID','MANUAL'),
+        type: DataTypes.ENUM('PAID', 'UNPAID','MANUAL', 'CANCELED'),
         allowNull: false,
         defaultValue: 'UNPAID',
     },

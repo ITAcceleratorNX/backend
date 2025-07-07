@@ -13,5 +13,6 @@ router.post("/", authenticateJWT, validateBody(OrderDto), orderController.create
 router.put("/me", authenticateJWT, validateBody(OrderUpdateDto), orderController.updateOrder);
 router.put("/:id/status", authenticateJWT, authorizeAdminOrManager, validateBody(OrderStatusDto), orderController.updateOrderStatus);
 router.delete("/:id", authenticateJWT, authorizeAdminOrManager, orderController.deleteOrder);
+router.put("/:id/cancel", authenticateJWT, orderController.cancelOrder);
 
 export default router;

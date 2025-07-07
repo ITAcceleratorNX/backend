@@ -50,7 +50,7 @@ export const getUserPayments = asyncHandler(async (req, res) => {
     res.json(result);
 });
 
-export const manualPayment = async (req, res) => {
+export const manualPayment = asyncHandler(async (req, res) => {
     const response = await paymentService.createManual(req.body, req.user.id);
     res.status(200).json(response);
-}
+});
