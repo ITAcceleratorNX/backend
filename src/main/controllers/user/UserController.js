@@ -29,12 +29,33 @@ export const updateUser = asyncHandler(async (req, res) => {
     res.json({ updated });
 });
 
+export const updateUserRole = asyncHandler(async (req, res) => {
+    const [updated] = await UserService.update(req.params.userId, req.body);
+    logger.info('Updated user', {
+        userId: req.user?.id || null,
+        endpoint: req.originalUrl,
+        requestId: req.id,
+        updates: req.body
+    });
+    res.json({ updated });
+});
+
 export const deleteUser = asyncHandler(async (req, res) => {
     const deleted = await UserService.deleteById(req.user.id);
     logger.info('Deleted user', {
       userId: req.user?.id || null,
       endpoint: req.originalUrl,
       requestId: req.id
+    });
+    res.json({ deleted });
+});
+
+export const deleteUserById = asyncHandler(async (req, res) => {
+    const deleted = await UserService.deleteById(req.params.id);
+    logger.info('Deleted user', {
+        userId: req.user?.id || null,
+        endpoint: req.originalUrl,
+        requestId: req.id
     });
     res.json({ deleted });
 });
