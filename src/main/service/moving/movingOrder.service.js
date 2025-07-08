@@ -1,4 +1,12 @@
-import {MovingOrder, Order, Service, User, Warehouse, Storage, OrderItem} from '../../models/init/index.js';
+import {
+    MovingOrder,
+    Order,
+    Service,
+    User,
+    Warehouse,
+    Storage,
+    OrderItem
+} from '../../models/init/index.js';
 import {NotificationService} from "../notification/notification.service.js";
 const notificationService = new NotificationService();
 
@@ -6,6 +14,9 @@ export const createOrder = async (data) => {
     return await MovingOrder.create(data);
 };
 
+export const bulkCreate = async (data, options = {}) => {
+    return MovingOrder.bulkCreate(data, options);
+};
 export const getAllOrders = async () => {
     return await MovingOrder.findAll();
 };

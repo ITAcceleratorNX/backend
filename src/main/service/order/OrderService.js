@@ -1,9 +1,12 @@
-import {Order, OrderItem, Storage} from "../../models/init/index.js";
+import {Order, OrderItem, OrderService, Service, Storage} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
+import * as movingOrderService from "../moving/movingOrder.service.js";
+import {options} from "axios";
+import movingOrder from "../../models/MovingOrder.js";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -13,6 +16,9 @@ export const getAll = async () => {
             },
             {
                 association: 'items'
+            },
+            {
+                association: 'services'
             }
         ]
     });
@@ -55,9 +61,42 @@ export const create = async (data, options = {}) => {
     return Order.create(data, options);
 };
 
-export const update = async (id, data) => {
-    return Order.update(data, { where: { id: id } });
+export const update = async (id, data, options = {}) => {
+    return Order.update(data, {
+        where: { id },
+        ...options,
+    });
 };
+
+export const approveOrder = async (id, data) => {
+    const tx = await sequelize.transaction();
+    try {
+        const updatedOrder = await update(id, data, { transaction: tx });
+
+        if (data.is_selected_moving) {
+            const enrichedMovingOrders = data.moving_orders.map(movingOrder => ({
+                ...movingOrder,
+                order_id: id,
+                vehicle_type: 'LARGE',
+                availability: 'NOT_AVAILABLE',
+            }));
+
+            await movingOrderService.bulkCreate(enrichedMovingOrders, { transaction: tx });
+            await validateServiceIds(data?.services, tx);
+            const enrichedOrderServices = data.services.map(service => ({
+                ...service,
+                order_id: id,
+            }))
+            await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
+        }
+
+        await tx.commit();
+        return updatedOrder;
+    } catch (error) {
+        await tx.rollback();
+        throw error;
+    }
+}
 
 export const deleteById = async (id) => {
     const transaction = await sequelize.transaction();
@@ -155,6 +194,23 @@ async function calculateTotalPrice(type, area, month) {
         throw Object.assign(new Error('Failed to calculate service'), { status: 500 });
     }
     return price;
+}
+
+async function validateServiceIds(services, transaction) {
+    if (!services || services?.length === 0){
+        throw Object.assign(new Error('Выбран доставка но не выбраны сервисы'), { status: 400 });
+    }
+
+    const serviceIds = services.map(s => s.id);
+
+    const existingServices = await Service.findAll({
+        where: { id: serviceIds },
+        transaction
+    });
+
+    if (existingServices.length !== serviceIds.length) {
+        throw Object.assign(new Error('Некоторые services не найдены'), { status: 400 });
+    }
 }
 
 async function updateStorageVolume(storage, total_volume, transaction) {
