@@ -36,6 +36,7 @@ export const getOrderByStatus = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
 export const updateOrder = async (req, res) => {
     try {
         const order = await orderService.updateOrder(req.params.id, req.body);
