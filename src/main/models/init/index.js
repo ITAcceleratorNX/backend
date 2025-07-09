@@ -66,6 +66,9 @@ Service.belongsToMany(Order, {
     as: 'orders' // опционально
 });
 
+OrderService.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
+Service.hasMany(OrderService, { foreignKey: 'service_id', as: 'order_services' });
+
 
 export {
     Callback,

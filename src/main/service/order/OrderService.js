@@ -1,9 +1,11 @@
-import {Order, OrderItem, Storage, User} from "../../models/init/index.js";
+import {Order, OrderItem, Storage, User, OrderService, Service} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
+import * as movingOrderService from "../moving/movingOrder.service.js";
+import {fn, literal} from "sequelize";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -19,6 +21,10 @@ export const getAll = async () => {
                 as: 'user',
                 attributes: ['name', 'phone', 'email'],
             },
+            {
+                model: Service,
+                as: 'services',
+            }
         ]
     });
 };
@@ -31,6 +37,15 @@ export const getById = async (id) => {
             },
             {
                 association: 'items'
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['name', 'phone', 'email'],
+            },
+            {
+                model: Service,
+                as: 'services',
             }
         ]
     });
@@ -45,6 +60,10 @@ export const getByUserId = async (userId) => {
             },
             {
                 association: 'items'
+            },
+            {
+                model: Service,
+                as: 'services',
             }
         ]
     });
@@ -60,9 +79,49 @@ export const create = async (data, options = {}) => {
     return Order.create(data, options);
 };
 
-export const update = async (id, data) => {
-    return Order.update(data, { where: { id: id } });
+export const update = async (id, data, options = {}) => {
+    return Order.update(data, {
+        where: { id },
+        ...options,
+    });
 };
+
+export const approveOrder = async (id, data) => {
+    const tx = await sequelize.transaction();
+    try {
+        const updatingOrder = await getById(id)
+        if (!updatingOrder) {
+            throw Object.assign(new Error('Not found'), { status: 400 });
+        } else if (updatingOrder.status !== 'INACTIVE') {
+            throw Object.assign(new Error('Approve only for inactive orders'), { status: 400 });
+        }
+        const updatedOrder = await update(id, data, { transaction: tx });
+
+        if (data.is_selected_moving) {
+            const enrichedMovingOrders = data.moving_orders.map(movingOrder => ({
+                ...movingOrder,
+                order_id: id,
+                vehicle_type: 'LARGE',
+                availability: 'NOT_AVAILABLE',
+            }));
+
+            await movingOrderService.bulkCreate(enrichedMovingOrders, { transaction: tx });
+            await validateServiceIds(data?.services, tx);
+            const enrichedOrderServices = data.services.map(service => ({
+                ...service,
+                order_id: id,
+                count: service.count
+            }))
+            await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
+        }
+
+        await tx.commit();
+        return updatedOrder;
+    } catch (error) {
+        await tx.rollback();
+        throw error;
+    }
+}
 
 export const deleteById = async (id) => {
     const transaction = await sequelize.transaction();
@@ -71,7 +130,7 @@ export const deleteById = async (id) => {
         if (!order) {
             throw Object.assign(new Error('Not found'), { status: 400 });
         }
-        let newVolume = Number(order.available_volume) + (Number(order.total_volume) - Number(order.storage.available_volume));
+        let newVolume = Number(order.storage.available_volume) + (Number(order.total_volume) - Number(order.storage.available_volume));
         await storageService.update(order.storage_id, {
             status: 'VACANT',
             available_volume: newVolume
@@ -162,6 +221,23 @@ async function calculateTotalPrice(type, area, month) {
     return price;
 }
 
+async function validateServiceIds(services, transaction) {
+    if (!services || services?.length === 0){
+        throw Object.assign(new Error('Выбран доставка но не выбраны сервисы'), { status: 400 });
+    }
+
+    const serviceIds = services.map(s => s.service_id);
+
+    const existingServices = await Service.findAll({
+        where: { id: serviceIds },
+        transaction
+    });
+
+    if (existingServices.length !== serviceIds.length) {
+        throw Object.assign(new Error('Некоторые services не найдены'), { status: 400 });
+    }
+}
+
 async function updateStorageVolume(storage, total_volume, transaction) {
     const isIndividual = storage.storage_type === 'INDIVIDUAL';
     const newVolume = isIndividual ? 0 : storage.available_volume - total_volume;
@@ -181,17 +257,22 @@ async function updateStorageVolume(storage, total_volume, transaction) {
 function getTotalVolumeFromItems(items) {
     return items.reduce((total, item) => total + item.volume, 0);
 }
-//
-// export const extendOrder = async(data, user_id) => {
-//     const order = await Order.findByPk(data.id);
-//     if (!order) {
-//         throw Object.assign(new Error('Order not found'), { status: 200 });
-//     } else if (order.payment_status !== 'PAID') {
-//         throw Object.assign(new Error('Order cant extend. Cause not paid for last month'), { status: 200 });
-//     } else if (order.user_id === user_id) {
-//         throw Object.assign(new Error('Forbidden'), { status: 403 });
-//     }
-//
-//
-//
-// }
+
+export const getTotalServicePriceByOrderId = async (orderId) => {
+    const result = await OrderService.findOne({
+        where: { order_id: orderId },
+        include: [
+            {
+                model: Service,
+                as: 'service',
+                attributes: []
+            }
+        ],
+        attributes: [
+            [fn('SUM', literal('"OrderService"."count" * "service"."price"')), 'total_services_price']
+        ],
+        raw: true
+    });
+
+    return Number(result?.total_services_price) || 0;
+};

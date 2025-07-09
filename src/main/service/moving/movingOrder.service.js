@@ -6,6 +6,9 @@ export const createOrder = async (data) => {
     return await MovingOrder.create(data);
 };
 
+export const bulkCreate = async (data, options = {}) => {
+    return MovingOrder.bulkCreate(data, options);
+};
 export const getAllOrders = async () => {
     return await MovingOrder.findAll();
 };
@@ -37,9 +40,6 @@ export const getOrderById = async (id) => {
             {
                 model: Service,
                 as: 'services',
-                where: {
-                    type: ['LIGHT', 'STANDARD', 'HARD']
-                },
                 attributes: ['description', 'type'],
                 through: { attributes: [] },
                 required: true
@@ -137,9 +137,6 @@ export const getDeliveredOrdersPaginated = async (page = 1, limit = 10) => {
                 {
                     model: Service,
                     as: 'services',
-                    where: {
-                        type: ['LIGHT', 'STANDARD', 'HARD']
-                    },
                     attributes: ['description', 'type'],
                     through: { attributes: [] },
                     required: true
@@ -202,9 +199,6 @@ export const getOrdersByStatus = async (status) => {
                 {
                     model: Service,
                     as: 'services',
-                    where: {
-                        type: ['LIGHT', 'STANDARD', 'HARD']
-                    },
                     attributes: ['description', 'type'],
                     through: { attributes: [] },
                     required: true

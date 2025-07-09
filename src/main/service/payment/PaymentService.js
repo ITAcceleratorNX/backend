@@ -4,9 +4,9 @@ import {Buffer} from 'buffer';
 import crypto from "crypto";
 import {Order, OrderPayment, Storage, User, Transaction} from "../../models/init/index.js";
 import {DateTime} from "luxon";
-import * as priceService from "../price/PriceService.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
+import {getTotalServicePriceByOrderId} from "../order/OrderService.js";
 
 const PAYMENT_CONSTANTS = {
     currency: process.env.PAYMENT_CURRENCY,
@@ -62,7 +62,7 @@ async function sendPaymentRequestToOneVision(order, amount, transactionId, total
     }
 }
 
-function generateOrderPayments(order, deposit) {
+function generateOrderPayments(order, extraServicesAmount) {
     const start = DateTime.fromJSDate(order.start_date);
     const end = DateTime.fromJSDate(order.end_date);
     const totalDays = end.diff(start, 'days').days;
@@ -85,7 +85,7 @@ function generateOrderPayments(order, deposit) {
             order_id: order.id,
             month: current.month,
             year: current.year,
-            amount: amount + (isFirst ? Number(deposit.price) : 0),
+            amount: amount + (isFirst ? Number(extraServicesAmount) : 0),
             status: 'UNPAID',
         });
 
@@ -170,8 +170,8 @@ export const create = async (data, userId) => {
             error.status = 403;
             throw error;
         }
-        const deposit = await priceService.getByType('DEPOSIT');
-        const { orderPayments, totalDays } = generateOrderPayments(order, deposit);
+        const extraServicesAmount = await getTotalServicePriceByOrderId(order.id);
+        const { orderPayments, totalDays } = generateOrderPayments(order, extraServicesAmount);
         const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
         const firstOrderPayment = createdOrderPayments[0];
