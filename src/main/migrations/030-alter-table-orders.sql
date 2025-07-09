@@ -20,7 +20,8 @@ ALTER TABLE services
                         'FURNITURE_SPECIALIST', -- мебельщик
                         'GAZELLE', -- газель
                         'STRETCH_FILM', -- стрейч-пленка
-                        'BUBBLE_WRAP', -- воздушно-пузырчатая пленка
+                        'BUBBLE_WRAP_1', -- воздушно-пузырчатая пленка
+                        'BUBBLE_WRAP_2', -- воздушно-пузырчатая пленка
                         'BOX_SIZE', -- коробка (размер)
                         'MARKER', -- маркер
                         'UTILITY_KNIFE' -- канцелярский нож

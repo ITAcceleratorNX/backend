@@ -1,12 +1,11 @@
-import {Order, OrderItem, OrderService, Service, Storage} from "../../models/init/index.js";
+import {Order, OrderItem, Storage, User, OrderService, Service} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
-import {options} from "axios";
-import movingOrder from "../../models/MovingOrder.js";
+import {fn, literal} from "sequelize";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -18,7 +17,13 @@ export const getAll = async () => {
                 association: 'items'
             },
             {
-                association: 'services'
+                model: User,
+                as: 'user',
+                attributes: ['name', 'phone', 'email'],
+            },
+            {
+                model: Service,
+                as: 'services',
             }
         ]
     });
@@ -32,6 +37,15 @@ export const getById = async (id) => {
             },
             {
                 association: 'items'
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['name', 'phone', 'email'],
+            },
+            {
+                model: Service,
+                as: 'services',
             }
         ]
     });
@@ -46,6 +60,10 @@ export const getByUserId = async (userId) => {
             },
             {
                 association: 'items'
+            },
+            {
+                model: Service,
+                as: 'services',
             }
         ]
     });
@@ -71,6 +89,12 @@ export const update = async (id, data, options = {}) => {
 export const approveOrder = async (id, data) => {
     const tx = await sequelize.transaction();
     try {
+        const updatingOrder = await getById(id)
+        if (!updatingOrder) {
+            throw Object.assign(new Error('Not found'), { status: 400 });
+        } else if (updatingOrder.status !== 'INACTIVE') {
+            throw Object.assign(new Error('Approve only for inactive orders'), { status: 400 });
+        }
         const updatedOrder = await update(id, data, { transaction: tx });
 
         if (data.is_selected_moving) {
@@ -86,6 +110,7 @@ export const approveOrder = async (id, data) => {
             const enrichedOrderServices = data.services.map(service => ({
                 ...service,
                 order_id: id,
+                count: service.count
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
         }
@@ -105,7 +130,7 @@ export const deleteById = async (id) => {
         if (!order) {
             throw Object.assign(new Error('Not found'), { status: 400 });
         }
-        let newVolume = Number(order.available_volume) + (Number(order.total_volume) - Number(order.storage.available_volume));
+        let newVolume = Number(order.storage.available_volume) + (Number(order.total_volume) - Number(order.storage.available_volume));
         await storageService.update(order.storage_id, {
             status: 'VACANT',
             available_volume: newVolume
@@ -201,7 +226,7 @@ async function validateServiceIds(services, transaction) {
         throw Object.assign(new Error('Выбран доставка но не выбраны сервисы'), { status: 400 });
     }
 
-    const serviceIds = services.map(s => s.id);
+    const serviceIds = services.map(s => s.service_id);
 
     const existingServices = await Service.findAll({
         where: { id: serviceIds },
@@ -232,3 +257,22 @@ async function updateStorageVolume(storage, total_volume, transaction) {
 function getTotalVolumeFromItems(items) {
     return items.reduce((total, item) => total + item.volume, 0);
 }
+
+export const getTotalServicePriceByOrderId = async (orderId) => {
+    const result = await OrderService.findOne({
+        where: { order_id: orderId },
+        include: [
+            {
+                model: Service,
+                as: 'service',
+                attributes: []
+            }
+        ],
+        attributes: [
+            [fn('SUM', literal('"OrderService"."count" * "service"."price"')), 'total_services_price']
+        ],
+        raw: true
+    });
+
+    return Number(result?.total_services_price) || 0;
+};
