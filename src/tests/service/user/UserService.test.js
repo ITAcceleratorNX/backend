@@ -55,7 +55,7 @@ describe('🧪 UserService Тесттері', () => {
 
         const result = await UserService.deleteById(1);
 
-        expect(User.destroy).toHaveBeenCalledWith({ where: { user_id: 1 } });
+        expect(User.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
         expect(result).toBe(1);
     });
 });
