@@ -1,4 +1,5 @@
 import * as orderService from '../../service/moving/movingOrder.service.js';
+import {getDeliveredOrdersPaginated} from "../../service/moving/movingOrder.service.js";
 
 export const createOrder = async (req, res) => {
     try {
@@ -34,6 +35,19 @@ export const getOrderByStatus = async (req, res) => {
         res.json(order);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+};
+export const getDeliveredOrders = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await getDeliveredOrdersPaginated(page, limit);
+
+        res.json(result);
+    } catch (error) {
+        console.error('Error in getDeliveredOrders:', error);
+        res.status(500).json({ error: 'Server Error' });
     }
 };
 export const updateOrder = async (req, res) => {

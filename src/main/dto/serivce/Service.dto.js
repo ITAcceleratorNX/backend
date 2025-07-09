@@ -14,3 +14,8 @@ export const CalculatePriceDto = z.object({
     area: z.number().positive(),
     month: z.number().positive()
 });
+
+export const OrderServiceDto = z.object({
+    service_id: z.number().int(),
+    count: z.number().int().positive().gt(0),
+})

@@ -57,6 +57,16 @@ const Order = sequelize.define('Order', {
     created_at: {
         type: DataTypes.DATEONLY,
         allowNull: false,
+    },
+    is_selected_moving: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
+    is_selected_package: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
     }
 }, {
     tableName: 'orders',
