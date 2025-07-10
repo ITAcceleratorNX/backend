@@ -35,7 +35,7 @@ export class WarehouseService {
 
         return warehouses.map(w => {
             return {
-                ...w,
+                ...w.toJSON(),
                 work_start: this.formatTime(w.work_start),
                 work_end: this.formatTime(w.work_end),
             };
