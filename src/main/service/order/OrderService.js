@@ -102,7 +102,7 @@ export const approveOrder = async (id, data) => {
                 ...movingOrder,
                 order_id: id,
                 vehicle_type: 'LARGE',
-                availability: 'AVAILABLE',
+                availability: movingOrder.status === 'PENDING_FROM' ? 'AVAILABLE': 'NOT_AVAILABLE',
             }));
 
             await movingOrderService.bulkCreate(enrichedMovingOrders, { transaction: tx });

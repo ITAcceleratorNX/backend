@@ -29,6 +29,7 @@ import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
 import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 import orderServiceRoutes from "./routes/order_service/orderService.routes.js";
+import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
 
 export default async function appFactory() {
     await initDb();
@@ -82,10 +83,10 @@ export default async function appFactory() {
         console.log('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
-    // cron.schedule('* * * * *', () => {
-    //     console.log('🕒 Cron, проверка истехших оплат');
-    //     processCronJobForExpiredTransactions()
-    // });
+    cron.schedule('*/10 * * * *', () => {
+        console.log('🕒 Cron, проверка истекших оплат');
+        processCronJobForExpiredTransactions();
+    });
 
 
     app.get('/protected', authenticateJWT, (req, res) => {
