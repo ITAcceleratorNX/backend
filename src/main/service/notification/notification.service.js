@@ -166,17 +166,24 @@ export class NotificationService {
 
 
     async getNotificationsByUserId(user_id) {
-        return UserNotification.findAll({
+        const records = await UserNotification.findAll({
             where: { user_id },
             include: [
                 {
                     model: Notification,
-                    required: true, // только если уведомление существует
+                    required: true,
                 }
             ],
             order: [['id', 'DESC']],
         });
+
+        return records.map(record => ({
+            id: record.notification_id,
+            is_read: record.is_read,
+            ...record.Notification.get()
+        }));
     }
+
 
     async markAsRead(user_id, notification_id) {
         await UserNotification.update(
