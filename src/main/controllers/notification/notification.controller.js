@@ -54,14 +54,15 @@ export class NotificationController {
 
     async getById(req, res) {
         const id = req.user.id;
-        const notif = await service.getNotificationById(id);
+        const notif = await service.getNotificationsByUserId(id);
         if (notif) return res.json(notif);
         res.status(404).json({ message: 'Уведомление не найдено' });
     }
 
     async markRead(req, res) {
         const id = req.params.id;
-        const updated = await service.markAsRead(id);
+        const user_id = req.user.id;
+        const updated = await service.markAsRead(user_id,id);
         res.json(updated);
     }
 

@@ -165,17 +165,32 @@ export class NotificationService {
 
 
 
-    async getNotificationById(id) {
-        return Notification.findAll({
-            where: { user_id: id }
+    async getNotificationsByUserId(user_id) {
+        return UserNotification.findAll({
+            where: { user_id },
+            include: [
+                {
+                    model: Notification,
+                    required: true, // только если уведомление существует
+                }
+            ],
+            order: [['id', 'DESC']],
         });
     }
 
-
-    async markAsRead(id) {
-        await Notification.update({ is_read: true }, { where: { notification_id: id } });
-        return this.getNotificationById(id);
+    async markAsRead(user_id, notification_id) {
+        await UserNotification.update(
+            { is_read: true },
+            {
+                where: {
+                    user_id,
+                    notification_id,
+                },
+            }
+        );
+        return this.getNotificationsByUserId(user_id);
     }
+
 
     async deleteNotification(id) {
         return Notification.destroy({ where: { notification_id: id } });
