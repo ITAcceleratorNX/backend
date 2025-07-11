@@ -3,6 +3,7 @@ import User from '../../models/User.js';
 import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 import MobizonApi from "../../utils/mobizon/Mobizon.js";
+import {UserNotification} from "../../models/init/index.js";
 
 dotenv.config();
 
@@ -22,22 +23,31 @@ export class NotificationService {
             is_sms = false,
         } = notificationData;
 
-        await Notification.create({
-            user_id,
-            title,
-            message,
-            notification_type,
-            related_order_id,
-            is_email,
-            is_sms,
-        });
-
         const user = await User.findByPk(user_id);
         if (!user) {
             console.log(`❌ Пользователь с id=${user_id} не найден`);
             return;
         }
 
+        // Шаг 1: создаём уведомление (общее)
+        const notification = await Notification.create({
+            title,
+            message,
+            notification_type,
+            related_order_id,
+            is_email,
+            is_sms,
+            for_all: false,
+        });
+
+        // Шаг 2: создаём связь user_notification
+        await UserNotification.create({
+            user_id: user.id,
+            notification_id: notification.notification_id,
+            is_read: false,
+        });
+
+        // Шаг 3: отправляем email и/или sms
         const shouldSendEmail = ['payment', 'contract'].includes(notification_type) || is_email;
         const shouldSendSms = ['payment', 'contract'].includes(notification_type) || is_sms;
 
@@ -51,9 +61,10 @@ export class NotificationService {
 
         console.log(`✅ Уведомление отправлено: user_id=${user_id}, type=${notification_type}`);
     }
+
     async sendBulkNotification({
-                                   user_ids = [],       // массив id пользователей
-                                   isToAll = false,     // если true — отправка всем
+                                   user_ids = [],
+                                   isToAll = false,
                                    title,
                                    message,
                                    notification_type,
@@ -64,9 +75,9 @@ export class NotificationService {
         let users;
 
         if (isToAll) {
-            users = await User.findAll(); // отправить всем
+            users = await User.findAll(); // всем
         } else {
-            users = await User.findAll({ where: { id: user_ids } }); // только выбранным
+            users = await User.findAll({ where: { id: user_ids } });
         }
 
         if (!users || users.length === 0) {
@@ -74,20 +85,22 @@ export class NotificationService {
             return;
         }
 
-        const notifications = users.map(user => ({
-            user_id: user.id,
+        const notification = await Notification.create({
             title,
             message,
             notification_type,
             related_order_id,
             is_email,
-            is_sms
+            is_sms,
+            for_all: isToAll,
+        });
+
+        const userNotifications = users.map(user => ({
+            user_id: user.id,
+            notification_id: notification.notification_id,
         }));
+        await UserNotification.bulkCreate(userNotifications);
 
-        // массовое создание записей в Notification
-        await Notification.bulkCreate(notifications);
-
-        // рассылка email / sms
         for (const user of users) {
             const shouldSendEmail = ['payment', 'contract'].includes(notification_type) || is_email;
             const shouldSendSms = ['payment', 'contract'].includes(notification_type) || is_sms;
@@ -103,6 +116,7 @@ export class NotificationService {
             console.log(`📤 Уведомление отправлено user_id=${user.id}`);
         }
     }
+
 
     async sendEmail(to, subject, text) {
         const msg = {
