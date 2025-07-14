@@ -83,7 +83,7 @@ export default async function appFactory() {
         console.log('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
-    cron.schedule('*/10 * * * *', () => {
+    cron.schedule('*/5 * * * *', () => {
         console.log('🕒 Cron, проверка истекших оплат');
         processCronJobForExpiredTransactions();
     });
