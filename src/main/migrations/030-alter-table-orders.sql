@@ -26,3 +26,9 @@ ALTER TABLE services
                         'MARKER', -- маркер
                         'UTILITY_KNIFE' -- канцелярский нож
             ));
+
+
+
+UPDATE moving_orders
+SET availability = 'AVAILABLE'::availability_status
+WHERE id = 15;

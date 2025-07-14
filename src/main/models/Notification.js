@@ -7,10 +7,6 @@ const Notification = sequelize.define('Notification', {
         primaryKey: true,
         autoIncrement: true,
     },
-    user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
     title: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -18,10 +14,6 @@ const Notification = sequelize.define('Notification', {
     message: {
         type: DataTypes.TEXT,
         allowNull: false,
-    },
-    is_read: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
     },
     created_at: {
         type: DataTypes.DATE,
@@ -40,6 +32,10 @@ const Notification = sequelize.define('Notification', {
         defaultValue: false,
     },
     is_sms: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+    },
+    for_all: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
