@@ -54,3 +54,13 @@ export const manualPayment = asyncHandler(async (req, res) => {
     const response = await paymentService.createManual(req.body, req.user.id);
     res.status(200).json(response);
 });
+
+export const getReceiptByOrder = asyncHandler(async (req, res) => {
+    const order_payment_id = req.params.order_payment_id;
+    const data = await paymentService.getReceiptByOrder(order_payment_id);
+
+    res.setHeader("Content-Type", "application/pdf; charset=utf-8");
+    res.setHeader('Content-Disposition', `inline; filename="check-${order_payment_id}.pdf"`);
+    console.log(data)
+    res.status(200).send(data);
+});
