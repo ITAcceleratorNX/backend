@@ -1070,6 +1070,42 @@ paths:
                 items:
                   $ref: '#/components/schemas/OrderWithPayments'
 
+  /payments/{order_payment_id}/receipt:
+    get:
+      tags: [Payment]
+      summary: Получить PDF-чек по идентификатору платежа
+      description: |
+        Возвращает PDF-документ с чеком для указанного платежа.
+        Чек будет отображен непосредственно в браузере (inline).
+      parameters:
+        - name: order_payment_id
+          in: path
+          required: true
+          description: Идентификатор платежа
+          schema:
+            type: string
+            format: uuid
+            example: "05ca113a-6662-49e3-b8eb-f0c68ea7ceb8"
+      responses:
+        '200':
+          description: Успешный запрос. Возвращает PDF-документ.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: |
+                Имя файла для сохранения. Формат: `inline; filename="check-{order_payment_id}.pdf"`
+                example: 'inline; filename="check-05ca113a-6662-49e3-b8eb-f0c68ea7ceb8.pdf"'
+        '400':
+          description: Неверный запрос или транзакция не найдена
+        '401':
+          description: Не авторизован
+
   /users/{id}:
     get:
       summary: Получить все оплаты по пользователю (admin/manager)

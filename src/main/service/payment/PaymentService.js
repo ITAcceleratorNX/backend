@@ -2,7 +2,7 @@ import axios from "axios";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from 'buffer';
 import crypto from "crypto";
-import {Order, OrderPayment, Storage, User, Transaction} from "../../models/init/index.js";
+import {Order, OrderPayment, Storage, Transaction, User} from "../../models/init/index.js";
 import {DateTime} from "luxon";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
@@ -24,8 +24,27 @@ const PAYMENT_CONSTANTS = {
     apiKey: process.env.PAYMENT_API_KEY,
     payment_type: process.env.PAYMENT_TYPE,
     payment_method: process.env.PAYMENT_METHOD,
-    payment_create_url: process.env.PAYMENT_CREATE_URL
+    payment_create_url: process.env.PAYMENT_CREATE_URL,
+    get_receipt_url: process.env.PAYMENT_GET_RECEIPT_URL,
 };
+
+function generatePaymentHeadersAndSign(dataObject) {
+    const dataJson = JSON.stringify(dataObject);
+    const dataBase64 = Buffer.from(dataJson).toString('base64');
+
+    const sign = crypto
+        .createHmac('sha512', PAYMENT_CONSTANTS.secretKey)
+        .update(dataBase64)
+        .digest('hex');
+
+    const token = Buffer.from(PAYMENT_CONSTANTS.apiKey).toString('base64');
+
+    const headers = {
+        Authorization: 'Bearer ' + token
+    };
+
+    return { sign, headers, dataBase64 };
+}
 
 async function createTransaction(orderPaymentId, amount, transaction) {
     console.log("payment created_date: ", new Date());
@@ -127,17 +146,7 @@ function buildPaymentRequest(order, amount, transactionId, totalDays) {
         ]
     };
 
-    const dataJson = JSON.stringify(dataObject);
-    const dataBase64 = Buffer.from(dataJson).toString('base64');
-    const sign = crypto
-        .createHmac('sha512', PAYMENT_CONSTANTS.secretKey)
-        .update(dataBase64)
-        .digest('hex');
-    const token = Buffer.from(PAYMENT_CONSTANTS.apiKey).toString('base64');
-    const headers = {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-    };
+    const { sign, headers, dataBase64 } = generatePaymentHeadersAndSign(dataObject);
 
     return { requestBody: { data: dataBase64, sign }, headers };
 }
@@ -271,6 +280,50 @@ export const createManual = async (data, userId) => {
             requestId: data?.requestId,
             userId: ownerId
         })
+        throw error;
+    }
+}
+
+export const getReceiptByOrder = async (orderPaymentId) => {
+    const transaction = await Transaction.findOne({
+        where: { order_payment_id: orderPaymentId, operation_status: 'success' }
+    });
+    if (!transaction) {
+        const error = new Error('transaction not found with order_payment_id');
+        error.status = 400;
+        throw error;
+    }
+    const response = await getReceipt(transaction.id);
+    return response.data;
+}
+
+export const getReceipt = async (orderPaymentId) => {
+    let dataObject = {
+        order_id: String(orderPaymentId),
+    };
+
+    const { sign, headers, dataBase64: data } = generatePaymentHeadersAndSign(dataObject);
+
+    try {
+        const response = await axios.get(PAYMENT_CONSTANTS.get_receipt_url, {
+            headers,
+            data: {data, sign},
+            responseType: 'arraybuffer'
+        });
+
+        logger.info('Payment API response', {
+            message: 'Payment API response',
+            endpoint: 'payment/receipt',
+            service: 'PaymentService',
+        });
+
+        return response;
+    } catch (error) {
+        logger.error('Payment API error', {
+            message: error.message,
+            endpoint: 'payment/receipt',
+            service: 'PaymentService',
+        });
         throw error;
     }
 }
