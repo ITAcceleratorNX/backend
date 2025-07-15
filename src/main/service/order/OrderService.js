@@ -6,6 +6,7 @@ import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
 import {fn, literal} from "sequelize";
+import * as userService from "../user/UserService.js";
 
 export const getAll = async () => {
     return Order.findAll({
@@ -150,6 +151,9 @@ export const createOrder = async (req) => {
     try {
         const { storage_id, order_items, months } = req.body;
         const { id: user_id } = req.user;
+
+        const user = await userService.getById(user_id);
+        await userService.validateUserPhoneAndIIN(user);
 
         const storage = await Storage.findByPk(storage_id, { transaction });
         const total_volume = getTotalVolumeFromItems(order_items);
