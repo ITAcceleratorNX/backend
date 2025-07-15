@@ -13,11 +13,12 @@ import Message from "../Message.js";
 import OrderPayment from "../OrderPayment.js";
 import Transaction from "../Transactions.js";
 import OrderService from "../OrderService.js";
+import UserNotification from "../UserNotifications.js";
 
 
 // Order - User
 Order.belongsTo(User, { foreignKey: 'user_id' , as: 'user'});
-User.hasMany(Order, { foreignKey: 'user_id' , as: 'order'});
+User.hasMany(Order, { foreignKey: 'user_id' , as: 'orders'});
 
 // Order - Storage
 Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );
@@ -30,10 +31,6 @@ Order.hasMany(MovingOrder, { foreignKey: 'order_id' });
 // Order - OrderItem
 Order.hasMany(OrderItem, { foreignKey: 'order_id', as: 'items' });
 OrderItem.belongsTo(Order, { foreignKey: 'order_id', as: 'order' });
-
-// Notification - User
-Notification.belongsTo(User, { foreignKey: 'user_id' });
-User.hasMany(Notification, { foreignKey: 'user_id' });
 
 // Storage - Warehouse
 Warehouse.hasMany(Storage, { foreignKey: 'warehouse_id', as: 'storage' });
@@ -66,6 +63,18 @@ Service.belongsToMany(Order, {
     as: 'orders' // опционально
 });
 
+OrderService.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
+Service.hasMany(OrderService, { foreignKey: 'service_id', as: 'order_services' });
+
+Notification.hasMany(UserNotification, {
+    foreignKey: 'notification_id',
+});
+UserNotification.belongsTo(Notification, {
+    foreignKey: 'notification_id',
+});
+// Notification - User
+User.hasMany(UserNotification, { foreignKey: 'user_id' });
+UserNotification.belongsTo(User, { foreignKey: 'user_id' });
 
 export {
     Callback,
@@ -82,6 +91,7 @@ export {
     OrderPayment,
     Transaction,
     OrderItem,
-    OrderService
+    OrderService,
+    UserNotification
 };
 

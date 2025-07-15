@@ -29,7 +29,7 @@ export const update = async (id, data) => {
 };
 
 export const deleteById = async (id) => {
-    const deleted = await User.destroy({ where: { user_id: id } });
+    const deleted = await User.destroy({ where: { id: id } });
     if (!deleted) {
         const error = new Error('User not found');
         error.status = 404;
@@ -40,4 +40,17 @@ export const deleteById = async (id) => {
 
 export const getManagers = async () => {
     return await User.findAll({where: { role: 'MANAGER' }});
+}
+
+export const validateUserPhoneAndIIN = async(user) => {
+    if (!user.iin) {
+        const error = new Error('User iin found');
+        error.status = 404;
+        throw error;
+    }
+    if (!user.phone) {
+        const error = new Error('User phone number found');
+        error.status = 404;
+        throw error;
+    }
 }

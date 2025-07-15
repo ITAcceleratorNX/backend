@@ -10,5 +10,6 @@ router.get("/me", authenticateJWT, paymentController.getMyPayments);
 router.get("/users/:id", authenticateJWT, authorizeAdminOrManager, paymentController.getUserPayments);
 router.post("/", authenticateJWT, validateBody(PaymentDto), paymentController.createPayment);
 router.post('/manual', authenticateJWT, validateBody(OrderPaymentDto), paymentController.manualPayment);
+router.get('/:order_payment_id/receipt', paymentController.getReceiptByOrder)
 
 export default router;

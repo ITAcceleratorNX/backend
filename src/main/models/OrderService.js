@@ -22,6 +22,11 @@ export const OrderService = sequelize.define('OrderService', {
             model: 'services',
             key: 'id',
         }
+    },
+    count: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
     }
 
 }, {

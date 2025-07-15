@@ -6,12 +6,64 @@ export const createOrder = async (data) => {
     return await MovingOrder.create(data);
 };
 
+export const bulkCreate = async (data, options = {}) => {
+    return MovingOrder.bulkCreate(data, options);
+};
 export const getAllOrders = async () => {
     return await MovingOrder.findAll();
 };
 
 export const getOrderById = async (id) => {
-    return await MovingOrder.findByPk(id);
+    const movingOrder = await MovingOrder.findByPk(id);
+
+    if (!movingOrder) return null;
+
+    const order = await Order.findByPk(movingOrder.order_id, {
+        include: [
+            {
+                model: Storage,
+                as: 'storage',
+                include: [
+                    {
+                        model: Warehouse,
+                        as: 'warehouse',
+                        attributes: ['address']
+                    }
+                ],
+                attributes: ['name']
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['address']
+            },
+            {
+                model: Service,
+                as: 'services',
+                attributes: ['description', 'type'],
+                through: { attributes: [] },
+                required: true
+            },
+            {
+                model: OrderItem,
+                as: 'items',
+                attributes: ['id', 'name', 'volume', 'cargo_mark'],
+            }
+        ]
+    });
+
+    const serviceDescriptions = order?.services?.map(s => s.description) || [];
+
+    return {
+        movingOrderId: movingOrder.id,
+        status: movingOrder.status,
+        warehouseAddress: order?.storage?.warehouse?.address || null,
+        storageName: order?.storage?.name || null,
+        userAddress: order?.user?.address || null,
+        serviceDescriptions,
+        availability: movingOrder.availability || null,
+        items: order?.items || []
+    };
 };
 
 export const updateOrder = async (id, data) => {
@@ -39,6 +91,20 @@ export const updateOrder = async (id, data) => {
             is_email: true,
             is_sms: false
         });
+    } else if (data.availability === 'AWAITABLE') {
+        notificationService.sendNotification({
+            user_id: userId,
+            title: 'Доставка вещей',
+            message: "Здравствуйте!\n" +
+                `Мы готовим доставку ваших вещей по вашему заказу #${foundOrder.id}. Пожалуйста, подтвердите дату и адрес доставки до вашего дома, указанные при оформлении.\n` +
+                "Если вы хотите изменить дату или адрес, пожалуйста, измените его на платформе как можно скорее, чтобы мы могли учесть изменения.\n" +
+                "Спасибо за использование нашего сервиса!\n\n" +
+                "С уважением,\n" +
+                "Extraspace",
+            notification_type: 'general',
+            is_email: true,
+            is_sms: false
+        })
     }
 
     return await order.update(data);
@@ -50,6 +116,73 @@ export const deleteOrder = async (id) => {
     if (!order) return false;
     await order.destroy();
     return true;
+};
+export const getDeliveredOrdersPaginated = async (page = 1, limit = 10) => {
+    const offset = (page - 1) * limit;
+
+    const { rows: movings, count: total } = await MovingOrder.findAndCountAll({
+        where: { status: 'DELIVERED' },
+        offset,
+        limit
+    });
+
+    const results = [];
+
+    for (const item of movings) {
+        const order = await Order.findByPk(item.order_id, {
+            include: [
+                {
+                    model: Storage,
+                    as: 'storage',
+                    include: [
+                        {
+                            model: Warehouse,
+                            as: 'warehouse',
+                            attributes: ['address']
+                        }
+                    ],
+                    attributes: ['name']
+                },
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['address']
+                },
+                {
+                    model: Service,
+                    as: 'services',
+                    attributes: ['description', 'type'],
+                    through: { attributes: [] },
+                    required: true
+                },
+                {
+                    model: OrderItem,
+                    as: 'items',
+                    attributes: ['id', 'name', 'volume', 'cargo_mark'],
+                }
+            ]
+        });
+
+        const serviceDescriptions = order?.services?.map(s => s.description) || [];
+
+        results.push({
+            movingOrderId: item.id,
+            status: item.status,
+            warehouseAddress: order?.storage?.warehouse?.address || null,
+            storageName: order?.storage?.name || null,
+            userAddress: order?.user?.address || null,
+            serviceDescriptions,
+            availability: item.availability || null,
+            items: order?.items || []
+        });
+    }
+
+    return {
+        total,          // Общее количество записей
+        page,           // Текущая страница
+        limit,          // Размер страницы
+        results         // Сами заказы
+    };
 };
 
 export const getOrdersByStatus = async (status) => {
@@ -80,9 +213,6 @@ export const getOrdersByStatus = async (status) => {
                 {
                     model: Service,
                     as: 'services',
-                    where: {
-                        type: ['LIGHT', 'STANDARD', 'HARD']
-                    },
                     attributes: ['description', 'type'],
                     through: { attributes: [] },
                     required: true
@@ -106,6 +236,7 @@ export const getOrdersByStatus = async (status) => {
             storageName: order?.storage?.name || null,
             userAddress: order?.user?.address || null,
             serviceDescriptions,
+            availability: item.availability || null,
             items: order?.items || []
         });
     }
@@ -113,3 +244,12 @@ export const getOrdersByStatus = async (status) => {
     return results;
 };
 
+export const confirmOrChangeMovingOrder = async (order_id) => {
+    const movingOrders = await MovingOrder.findAll({
+        where: { order_id, availability: 'NOT_AVAILABLE', status: 'PENDING_TO' },
+    });
+    if (movingOrders.length === 0) return null;
+    for (const movingOrder of movingOrders) {
+        updateOrder(movingOrder.id, {availability: 'AWAITABLE'});
+    }
+}

@@ -26,13 +26,19 @@ export class WarehouseService {
         return warehouse;
     }
 
+    static formatTime = (timeStr) => timeStr.substring(0, 5);
+
     static async getAll() {
-        return await Warehouse.findAll({
-            include: [
-                {
-                    association: 'storage'
-                }
-            ]
+        const warehouses = await Warehouse.findAll({
+            include: [{ association: 'storage' }]
+        });
+
+        return warehouses.map(w => {
+            return {
+                ...w.toJSON(),
+                work_start: this.formatTime(w.work_start),
+                work_end: this.formatTime(w.work_end),
+            };
         });
     }
 

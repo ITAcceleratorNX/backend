@@ -56,12 +56,27 @@ describe('WarehouseService', () => {
 
     test('getAllWarehouses should return all warehouses', async () => {
         const mockWarehouses = [
-            { id: 1, name: 'Warehouse 1', location: 'Location 1' },
-            { id: 2, name: 'Warehouse 2', location: 'Location 2' }
+            {
+                toJSON: () => ({ id: 1, name: 'Warehouse 1', location: 'Location 1', work_start: '', work_end: '' }),
+                work_start: '',
+                work_end: ''
+            },
+            {
+                toJSON: () => ({ id: 2, name: 'Warehouse 2', location: 'Location 2', work_start: '', work_end: '' }),
+                work_start: '',
+                work_end: ''
+            }
         ];
-        Warehouse.findAll.mockResolvedValue(mockWarehouses);
+
+        Warehouse.findAll = jest.fn().mockResolvedValue(mockWarehouses);
+
         const result = await WarehouseService.getAll();
+
         expect(Warehouse.findAll).toHaveBeenCalled();
-        expect(result).toEqual(mockWarehouses);
+
+        expect(result).toEqual([
+            { id: 1, name: 'Warehouse 1', location: 'Location 1', work_start: '', work_end: '' },
+            { id: 2, name: 'Warehouse 2', location: 'Location 2', work_start: '', work_end: '' }
+        ]);
     });
 });
