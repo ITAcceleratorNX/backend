@@ -344,4 +344,5 @@ export const cancelOrder = async (orderId, userId) => {
         is_sms: true
     });
     confirmOrChangeMovingOrder(orderId);
+    return true;
 }

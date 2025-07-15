@@ -60,7 +60,7 @@ export const approveOrder = asyncHandler(async (req, res) => {
 export const cancelOrder = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     await orderService.cancelOrder(id, req.user.id);
-    return res.status(200);
+    return res.sendStatus(204).end();
 })
 //
 // export const extendOrder = asyncHandler(async (req, res) => {

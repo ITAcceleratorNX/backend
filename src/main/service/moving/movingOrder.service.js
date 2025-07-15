@@ -252,4 +252,5 @@ export const confirmOrChangeMovingOrder = async (order_id) => {
     for (const movingOrder of movingOrders) {
         updateOrder(movingOrder.id, {availability: 'AWAITABLE'});
     }
+    return true;
 }

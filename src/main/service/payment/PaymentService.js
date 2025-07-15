@@ -2,7 +2,7 @@ import axios from "axios";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from 'buffer';
 import crypto from "crypto";
-import {Order, OrderPayment, Storage, Transaction, User} from "../../models/init/index.js";
+import {Order, OrderPayment, Service, Storage, Transaction, User} from "../../models/init/index.js";
 import {DateTime} from "luxon";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
@@ -81,7 +81,10 @@ async function sendPaymentRequestToOneVision(order, amount, transactionId, total
     }
 }
 
-function generateOrderPayments(order, extraServicesAmount) {
+async function generateOrderPayments(order, extraServicesAmount) {
+    const deposit = await Service.findOne({
+        where: {type: 'DEPOSIT'}
+    })
     const start = DateTime.fromJSDate(order.start_date);
     const end = DateTime.fromJSDate(order.end_date);
     const totalDays = end.diff(start, 'days').days;
@@ -104,7 +107,7 @@ function generateOrderPayments(order, extraServicesAmount) {
             order_id: order.id,
             month: current.month,
             year: current.year,
-            amount: amount + (isFirst ? Number(extraServicesAmount) : 0),
+            amount: amount + (isFirst ? Number(extraServicesAmount) + Number(deposit.price) : 0),
             status: 'UNPAID',
         });
 
@@ -180,7 +183,7 @@ export const create = async (data, userId) => {
             throw error;
         }
         const extraServicesAmount = await getTotalServicePriceByOrderId(order.id);
-        const { orderPayments, totalDays } = generateOrderPayments(order, extraServicesAmount);
+        const { orderPayments, totalDays } = await generateOrderPayments(order, extraServicesAmount);
         const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
         const firstOrderPayment = createdOrderPayments[0];
