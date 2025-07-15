@@ -32,8 +32,11 @@ export const MovingOrder = sequelize.define('MovingOrder', {
         type: DataTypes.ENUM('NOT_AVAILABLE', 'AVAILABLE'),
         allowNull: false,
         defaultValue: 'NOT_AVAILABLE'
+    },
+    address: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
-
 }, {
     tableName: 'moving_orders',
     timestamps: false
