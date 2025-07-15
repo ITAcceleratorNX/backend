@@ -8,6 +8,7 @@ import * as movingOrderService from "../moving/movingOrder.service.js";
 import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
+import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 
 const notificationService = new NotificationService();
 
@@ -342,4 +343,5 @@ export const cancelOrder = async (orderId, userId) => {
         is_email: true,
         is_sms: true
     });
+    confirmOrChangeMovingOrder(orderId);
 }
