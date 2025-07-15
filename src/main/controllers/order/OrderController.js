@@ -59,15 +59,6 @@ export const approveOrder = asyncHandler(async (req, res) => {
 
 export const cancelOrder = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    if (isNaN(id)) {
-        logger.warn('Invalid ID received', {
-            userId: req.user?.id || null,
-            endpoint: req.originalUrl,
-            requestId: req.id,
-            idParam: req.params.id
-        });
-        return res.status(400).json({error: 'Invalid order ID'});
-    }
     await orderService.cancelOrder(id, req.user.id);
     return res.status(200);
 })
