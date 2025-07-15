@@ -1,12 +1,16 @@
-import {Order, OrderItem, Storage, User, OrderService, Service} from "../../models/init/index.js";
+import {Order, OrderItem, Storage, User, OrderService, Service, OrderPayment} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
-import {fn, literal} from "sequelize";
+import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
+import {NotificationService} from "../notification/notification.service.js";
+import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
+
+const notificationService = new NotificationService();
 
 export const getAll = async () => {
     return Order.findAll({
@@ -280,3 +284,65 @@ export const getTotalServicePriceByOrderId = async (orderId) => {
 
     return Number(result?.total_services_price) || 0;
 };
+
+export const validateForCanceling = async (order, user_id) => {
+    if (!order) {
+        throw Object.assign(new Error('Order not found'), { status: 404 });
+    } else if (order.user_id !== user_id) {
+        console.log(user_id);
+        throw Object.assign(new Error('Request forbidden'), { status: 403 });
+    } else if (order.status !== 'ACTIVE') {
+        throw Object.assign(new Error('Order not ACTIVE'), { status: 404 });
+    }
+}
+
+export const cancelOrder = async (orderId, userId) => {
+    const tx = await sequelize.transaction();
+    try {
+        const order = await Order.findOne({
+            where: { id: orderId }
+        });
+        await validateForCanceling(order, userId);
+
+        order.status = 'CANCELED';
+        await order.save({ transaction: tx });
+
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+
+        await OrderPayment.update(
+            { status: "CANCELED" },
+            {
+                where: {
+                    order_id: order.id,
+                    [Op.or]: [
+                        { year: { [Op.gt]: currentYear } },
+                        {
+                            year: currentYear,
+                            month: { [Op.gt]: currentMonth }
+                        }
+                    ]
+                },
+                transaction: tx
+            }
+        );
+
+        await tx.commit();
+    } catch (error) {
+        await tx.rollback();
+        error.status = 500;
+        throw error;
+    }
+    notificationService.sendNotification({
+        user_id: userId,
+        title: "Ваш заказ был отменён",
+        message: "Ваш заказ №" + orderId + " успешно отменён. Платежи за будущие месяцы были приостановлены.",
+        notification_type: "contract",
+        related_order_id: orderId,
+        is_email: true,
+        is_sms: true
+    });
+    confirmOrChangeMovingOrder(orderId);
+    return true;
+}
