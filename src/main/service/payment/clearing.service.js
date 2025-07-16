@@ -1,8 +1,8 @@
 import axios from "axios";
-import {CryptoJS} from "crypto-js";
 import { Transaction } from "../../models/init/index.js";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from "buffer";
+import crypto from "crypto";
 
 export const retry = async (fn, retries = 3, delay = 2000) => {
     try {
@@ -20,14 +20,18 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
     const clearingUrl = process.env.ONE_VISION_CLEARING_URL;
 
     const requestBody = { payment_id, amount };
-    const api_key_base64 = Buffer.from(apiKey).toString("base64");
-    const dataBase64 = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(JSON.stringify(requestBody)));
-    const sign = CryptoJS.HmacSHA512(dataBase64, secretKey).toString();
+    const dataJson = JSON.stringify(requestBody);
+    const dataBase64 = Buffer.from(dataJson).toString('base64');
+
+    const sign = crypto
+        .createHmac('sha512', secretKey)
+        .update(dataBase64)
+        .digest('hex');
+
+    const token = Buffer.from(apiKey).toString('base64');
 
     const headers = {
-        Authorization: `Bearer ${api_key_base64}`,
-        "X-SIGN": sign,
-        "Content-Type": "application/json"
+        Authorization: 'Bearer ' + token
     };
 
     const response = await axios.post(clearingUrl, {
