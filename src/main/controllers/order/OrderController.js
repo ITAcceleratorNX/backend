@@ -2,7 +2,7 @@ import * as orderService from "../../service/order/OrderService.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
-import {createContract, getContractStatus, revokeContract} from "../../service/contract/contract.service.js";
+import { getContractStatus, revokeContract} from "../../service/contract/contract.service.js";
 
 const base = createBaseController(orderService);
 
@@ -54,7 +54,7 @@ export const approveOrder = asyncHandler(async (req, res) => {
         endpoint: req.originalUrl,
         response: response
     });
-    createContract(id)
+    // createContract(id)
     return res.status(200).json({response});
 });
 
