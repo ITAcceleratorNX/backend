@@ -6,6 +6,7 @@ import {Buffer} from 'buffer';
 import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
 import JSONbig from "json-bigint";
+import logger from "../../utils/winston/logger.js";
 
 const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
 const API_KEY = process.env.PAYMENT_API_KEY;
@@ -40,7 +41,7 @@ export async function runMonthlyPayments() {
     for (const payment of unpaidPayments) {
         const user = payment.order?.user;
         if (!user || !user.recurrent_token) {
-            console.log(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
+            logger.warn(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
             continue;
         }
 
@@ -125,7 +126,7 @@ export async function runMonthlyPayments() {
                 }
 
             } else {
-                console.log(`❌ Ошибка оплаты: ${resData}`);
+                logger.error(`❌ Ошибка оплаты: ${resData}`);
 
                 transaction.operation_status = 'FAILED';
                 transaction.error_code = resData.error_code || null;
