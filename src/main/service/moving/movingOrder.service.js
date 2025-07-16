@@ -91,6 +91,20 @@ export const updateOrder = async (id, data) => {
             is_email: true,
             is_sms: false
         });
+    } else if (data.availability === 'AWAITABLE') {
+        notificationService.sendNotification({
+            user_id: userId,
+            title: 'Доставка вещей',
+            message: "Здравствуйте!\n" +
+                `Мы готовим доставку ваших вещей по вашему заказу #${foundOrder.id}. Пожалуйста, подтвердите дату и адрес доставки до вашего дома, указанные при оформлении.\n` +
+                "Если вы хотите изменить дату или адрес, пожалуйста, измените его на платформе как можно скорее, чтобы мы могли учесть изменения.\n" +
+                "Спасибо за использование нашего сервиса!\n\n" +
+                "С уважением,\n" +
+                "Extraspace",
+            notification_type: 'general',
+            is_email: true,
+            is_sms: false
+        })
     }
 
     return await order.update(data);
@@ -230,3 +244,13 @@ export const getOrdersByStatus = async (status) => {
     return results;
 };
 
+export const confirmOrChangeMovingOrder = async (order_id) => {
+    const movingOrders = await MovingOrder.findAll({
+        where: { order_id, availability: 'NOT_AVAILABLE', status: 'PENDING_TO' },
+    });
+    if (movingOrders.length === 0) return null;
+    for (const movingOrder of movingOrders) {
+        updateOrder(movingOrder.id, {availability: 'AWAITABLE'});
+    }
+    return true;
+}
