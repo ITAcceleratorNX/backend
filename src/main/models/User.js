@@ -47,6 +47,10 @@ export const User = sequelize.define('User', {
     recurrent_token: {
         type: DataTypes.STRING(255),
         allowNull: true
+    },
+    bday: {
+        type: DataTypes.DATE,
+        allowNull: true
     }
 }, {
     tableName: 'users',

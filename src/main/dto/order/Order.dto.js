@@ -16,6 +16,7 @@ export const OrderDto = z.object({
     })).nonempty(),
     is_selected_moving: z.boolean().optional(),
     is_selected_package: z.boolean().optional(),
+    punct33: z.string().optional(),
 });
 
 export const ApproveOrderDto = z.object({

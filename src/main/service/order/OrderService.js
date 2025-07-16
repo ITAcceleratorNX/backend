@@ -55,7 +55,21 @@ export const getById = async (id) => {
         ]
     });
 };
-
+export const getByIdForContract = async (id) => {
+    return Order.findByPk(id, {
+        include: [
+            {
+                model: User,
+                as: 'user',
+                attributes: ['name', 'phone', 'email','iin','address','bday'],
+            },
+            {
+                model: Storage,
+                as: 'storage',
+            }
+        ]
+    });
+};
 export const getByUserId = async (userId) => {
     const orders = await Order.findAll({
         where: { user_id: userId },
