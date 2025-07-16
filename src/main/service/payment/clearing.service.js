@@ -57,7 +57,7 @@ export const tryClearingAsync = async (payment_id, amount, order_id) => {
             logger.info(`Clearing successful for payment_id: ${payment_id}`, { response });
             await Transaction.update({ clearing_status: 'SUCCESS' }, { where: { id: order_id } });
         } catch (err) {
-            logger.error(`Clearing failed for payment_id: ${payment_id}`, { response: err });
+            logger.error(`Clearing failed for payment_id: ${payment_id}`, { response: err.message });
             await Transaction.update({ clearing_status: 'FAILED' }, { where: { id: order_id } });
         }
     })();
