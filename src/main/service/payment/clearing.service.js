@@ -8,6 +8,7 @@ export const retry = async (fn, retries = 3, delay = 2000) => {
     try {
         return await fn();
     } catch (err) {
+        logger.error("retry error", {response: err});
         if (retries <= 0) throw err;
         await new Promise(res => setTimeout(res, delay));
         return retry(fn, retries - 1, delay);

@@ -70,7 +70,7 @@ const handleWithdraw = async (data) => {
             }
         });
         await Order.update({ payment_status: 'PAID' }, {
-            where: { id: transactionData.order_payment.order.id },
+            where: { id: transactionData.order_payment.order_id },
             transaction
         });
         await OrderPayment.update({ status: 'PAID', payment_id: data.payment_id, paid_at: new Date(data.payment_date) }, {
@@ -99,12 +99,11 @@ const handleWithdraw = async (data) => {
             transaction
         })
         await transaction.commit();
-
+        tryClearingAsync(data.payment_id, data.amount, data.order_id);
     } catch (err) {
         await transaction.rollback();
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
     }
-    tryClearingAsync(data.payment_id, data.amount, data.order_id);
 };
 
 const handlePaymentExpired = async (data) => {
