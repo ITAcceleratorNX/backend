@@ -234,10 +234,11 @@ export const getOrdersByStatus = async (status) => {
             status: item.status,
             warehouseAddress: order?.storage?.warehouse?.address || null,
             storageName: order?.storage?.name || null,
-            userAddress: order?.user?.address || null,
+            userAddress: item?.address || null,
             serviceDescriptions,
             availability: item.availability || null,
-            items: order?.items || []
+            items: order?.items || [],
+            phone: order?.user.phone || null,
         });
     }
 
