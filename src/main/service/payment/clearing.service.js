@@ -19,9 +19,7 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
     const secretKey = process.env.PAYMENT_SECRET_KEY;
     const clearingUrl = process.env.ONE_VISION_CLEARING_URL;
 
-    if (typeof payment_id !== 'string') {
-        payment_id = BigInt(payment_id);
-    }
+    payment_id = BigInt(payment_id);
 
     const requestBody = { payment_id, amount };
     const dataJson = JSON.stringify(requestBody);
