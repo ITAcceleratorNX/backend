@@ -6,6 +6,7 @@ export const UserDto = z.object({
     phone: z.string().min(1),
     iin: z.string().min(12).max(12),
     address: z.string().min(1),
+    bday: z.string().optional()
 });
 
 export const UserEmailDto = z.object({
