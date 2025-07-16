@@ -8,7 +8,6 @@ export const retry = async (fn, retries = 3, delay = 2000) => {
     try {
         return await fn();
     } catch (err) {
-        logger.error("retry error", {response: err});
         if (retries <= 0) throw err;
         await new Promise(res => setTimeout(res, delay));
         return retry(fn, retries - 1, delay);
@@ -39,10 +38,16 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
         Authorization: 'Bearer ' + token
     };
 
-    const response = await axios.post(clearingUrl, {
-        data: dataBase64,
-        sign
-    }, { headers });
+    let response;
+    try {
+        response = await axios.post(clearingUrl, {
+            data: dataBase64,
+            sign
+        }, { headers });
+    } catch (err) {
+        logger.error("retry error", {response: err});
+        throw err;
+    }
 
     return response.data;
 };
