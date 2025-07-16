@@ -100,11 +100,11 @@ const handleWithdraw = async (data) => {
         })
         await transaction.commit();
 
-        tryClearingAsync(data.payment_id, data.amount, data.order_id);
     } catch (err) {
         await transaction.rollback();
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
     }
+    tryClearingAsync(data.payment_id, data.amount, data.order_id);
 };
 
 const handlePaymentExpired = async (data) => {

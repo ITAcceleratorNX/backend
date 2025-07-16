@@ -19,6 +19,10 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
     const secretKey = process.env.PAYMENT_SECRET_KEY;
     const clearingUrl = process.env.ONE_VISION_CLEARING_URL;
 
+    if (typeof payment_id !== 'string') {
+        payment_id = BigInt(payment_id);
+    }
+
     const requestBody = { payment_id, amount };
     const dataJson = JSON.stringify(requestBody);
     const dataBase64 = Buffer.from(dataJson).toString('base64');
@@ -45,7 +49,7 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
 export const tryClearingAsync = async (payment_id, amount, order_id) => {
     (async () => {
         try {
-            const response = await retry(() => sendClearingRequest({ payment_id, amount }));
+            const response = await retry(() => sendClearingRequest({ payment_id: String(payment_id), amount }));
             logger.info(`Clearing successful for payment_id: ${payment_id}`, { response });
             await Transaction.update({ clearing_status: 'SUCCESS' }, { where: { id: order_id } });
         } catch (err) {
