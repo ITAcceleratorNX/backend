@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get("/", authenticateJWT, authorizeAdminOrManager, orderController.getAllOrders);
 router.get("/me", authenticateJWT, orderController.getMyOrders);
+router.get("/statuses", authenticateJWT, orderController.getAllContractsStatusByUser);
 router.get("/:id", authenticateJWT, orderController.getOrderById);
 router.post("/", authenticateJWT, validateBody(OrderDto), orderController.createOrder);
 router.put("/:id", authenticateJWT, validateBody(OrderUpdateDto), orderController.updateOrder);

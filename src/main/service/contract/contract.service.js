@@ -4,7 +4,7 @@ import {getByType} from "../price/PriceService.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
-const createContract = async (id) => {
+export const createContract = async (id) => {
 
     const order = await orderService.getByIdForContract(id)
     const formatDate = (timestamp) => {
@@ -64,7 +64,7 @@ const createContract = async (id) => {
         throw error;
     }
 }
-const getContractStatus = async (documentId) => {
+export const getContractStatus = async (documentId) => {
     try {
         const response = await axios.get(TRUST_ME_API_URL+`/trust_contract_public_apis/ContractStatus/${documentId}`, {
             headers: {
@@ -86,7 +86,7 @@ const getContractStatus = async (documentId) => {
         throw error;
     }
 };
-const revokeContract = async (documentId) => {
+export const revokeContract = async (documentId) => {
     try {
         const response = await axios.get(TRUST_ME_API_URL+`/trust_contract_public_apis/RevokeContract/${documentId}`, {
             headers: {
