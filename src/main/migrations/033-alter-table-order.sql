@@ -1,0 +1,6 @@
+ALTER TABLE orders
+ADD COLUMN document_id VARCHAR;
+ALTER TABLE users
+ADD COLUMN bday DATE;
+ALTER TABLE orders
+ADD COLUMN punct33 TEXT;
