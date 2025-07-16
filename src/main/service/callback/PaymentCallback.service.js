@@ -3,6 +3,7 @@ import logger from "../../utils/winston/logger.js";
 import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js";
 import {NotificationService} from "../notification/notification.service.js";
 import {Op} from "sequelize";
+import { tryClearingAsync } from "../payment/clearing.service.js";
 
 const notificationService = new NotificationService();
 
@@ -98,6 +99,8 @@ const handleWithdraw = async (data) => {
             transaction
         })
         await transaction.commit();
+
+        tryClearingAsync(data.payment_id, data.amount, data.order_id);
     } catch (err) {
         await transaction.rollback();
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
