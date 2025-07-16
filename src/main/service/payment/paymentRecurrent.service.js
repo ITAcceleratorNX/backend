@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import {Buffer} from 'buffer';
 import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
+import JSONbig from "json-bigint";
 
 const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
 const API_KEY = process.env.PAYMENT_API_KEY;
@@ -82,7 +83,7 @@ export async function runMonthlyPayments() {
                 const generatedSign = crypto.createHmac('sha512', SECRET_KEY).update(resData.data).digest('hex');
 
                 if (generatedSign === resData.sign) {
-                    const decodedData = JSON.parse(Buffer.from(resData.data, 'base64').toString());
+                    const decodedData = JSONbig.parse(Buffer.from(resData.data, 'base64').toString());
 
                     transaction.operation_status = 'success';
                     transaction.payment_id = decodedData.payment_id || null;
