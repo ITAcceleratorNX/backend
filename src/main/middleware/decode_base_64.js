@@ -1,10 +1,11 @@
 import {Buffer} from "buffer";
 import logger from "../utils/winston/logger.js";
+import JSONbig from 'json-bigint';
 
 export const base64Decoder = (req, res, next) => {
     try {
         logger.info("payment callback", {response: req.body.data});
-        const decoded = JSON.parse(Buffer.from(req.body.data, 'base64').toString('utf-8'));
+        const decoded = JSONbig.parse(Buffer.from(req.body.data, 'base64').toString('utf-8'));
         logger.info(`Decoded payment callback`, {response: decoded});
         req.body.data = decoded;
         next();
