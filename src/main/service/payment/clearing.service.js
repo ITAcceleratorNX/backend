@@ -57,7 +57,7 @@ export const tryClearingAsync = async (payment_id, amount, order_id) => {
             logger.info(`Clearing successful for payment_id: ${payment_id}`, { response });
             await Transaction.update({ clearing_status: 'SUCCESS' }, { where: { id: order_id } });
         } catch (err) {
-            logger.error(`Clearing failed for payment_id: ${payment_id}`, { error: err });
+            logger.error(`Clearing failed for payment_id: ${payment_id}`, { response: err });
             await Transaction.update({ clearing_status: 'FAILED' }, { where: { id: order_id } });
         }
     })();
@@ -76,9 +76,9 @@ export const clearingRetryJob = async () => {
             const result = await sendClearingRequest({ payment_id, amount });
             await Transaction.update({ clearing_status: 'SUCCESS' }, { where: { id: order_id } });
 
-            logger.info(`Клиринг успешен при повторной попытке: ${payment_id}`, { result });
+            logger.info(`Клиринг успешен при повторной попытке: ${payment_id}`, { response: result });
         } catch (err) {
-            logger.error(`Клиринг снова не удался: ${tx.payment_id}`, { error: err });
+            logger.error(`Клиринг снова не удался: ${tx.payment_id}`, { response: err });
         }
     }
 
