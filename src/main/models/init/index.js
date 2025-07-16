@@ -26,7 +26,7 @@ Order.belongsTo(Storage, { foreignKey: 'storage_id', as : 'storage' });
 
 // MovingOrder - Contract
 MovingOrder.belongsTo(Order, { foreignKey: 'order_id' });
-Order.hasMany(MovingOrder, { foreignKey: 'order_id' });
+Order.hasMany(MovingOrder, { foreignKey: 'order_id', as: 'moving_orders' });
 
 // Order - OrderItem
 Order.hasMany(OrderItem, { foreignKey: 'order_id', as: 'items' });

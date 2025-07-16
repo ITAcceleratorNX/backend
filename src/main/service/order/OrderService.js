@@ -1,4 +1,13 @@
-import {Order, OrderItem, Storage, User, OrderService, Service, OrderPayment} from "../../models/init/index.js";
+import {
+    Order,
+    OrderItem,
+    Storage,
+    User,
+    OrderService,
+    Service,
+    OrderPayment,
+    MovingOrder
+} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
@@ -29,6 +38,10 @@ export const getAll = async () => {
             {
                 model: Service,
                 as: 'services',
+            },
+            {
+                model: MovingOrder,
+                as: 'moving_orders',
             }
         ]
     });
@@ -69,6 +82,10 @@ export const getByUserId = async (userId) => {
             {
                 model: Service,
                 as: 'services',
+            },
+            {
+                model: MovingOrder,
+                as: 'moving_orders',
             }
         ]
     });
