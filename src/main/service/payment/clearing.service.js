@@ -1,8 +1,9 @@
 import axios from "axios";
-import { Transaction } from "../../models/init/index.js";
+import {Transaction} from "../../models/init/index.js";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from "buffer";
 import crypto from "crypto";
+import JSONbig from "json-bigint";
 
 export const retry = async (fn, retries = 3, delay = 2000) => {
     try {
@@ -22,7 +23,7 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
     payment_id = BigInt(payment_id);
 
     const requestBody = { payment_id, amount };
-    const dataJson = JSON.stringify(requestBody);
+    const dataJson = JSONbig.stringify(requestBody);
     const dataBase64 = Buffer.from(dataJson).toString('base64');
 
     const sign = crypto
