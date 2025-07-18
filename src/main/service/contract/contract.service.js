@@ -64,7 +64,7 @@ export const createContract = async (id, tx) => {
                 'Content-Type': 'application/json'
             }
         });
-        await updateContract(response.data,latestContract.id);
+        await updateContract(response.data,latestContract.id, {transaction: tx});
         return response.data;
 
     } catch (error) {
@@ -116,8 +116,8 @@ export const revokeContract = async (documentId) => {
         throw error;
     }
 };
-export const updateContract = async (data,id) => {
-    return Contract.update(data, { where: { id: id } });
+export const updateContract = async (data, id, options = {}) => {
+    return Contract.update(data, { where: { id: id }, ...options });
 }
 export const deleteContractByOrder = async (id) => {
     return Contract.destroy({where: { order_id: id }})
