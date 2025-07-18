@@ -35,11 +35,11 @@ export const createContract = async (id, tx) => {
         templateName: 'KZ230240017395_valar_dogovor',
         contractName: `Драфт по складам для физ лиц`,
         contractNumber: String(latestContract.id),
-        Requisites: {
+        Requisites: [{
             fio: order.user.name,
             IIN_BIN: order.user.iin,
             phoneNumber: order.user.phone,
-        },
+        }],
         templateData: [
             { key: 'contract.date', value: formatDate(order.start_date) },
             { key: 'contract.date2', value: formatDate(order.end_date) },
