@@ -58,7 +58,7 @@ export const createContract = async (id, tx) => {
     };
 
     try {
-        const response = await axios.post(TRUST_ME_API_URL+'/contract/create', data, {
+        const response = await axios.post(TRUST_ME_API_URL+'/trust_contract_public_apis/UploadContractByTemplateName', data, {
             headers: {
                 Authorization: TRUST_ME_API_TOKEN,
                 'Content-Type': 'application/json'
