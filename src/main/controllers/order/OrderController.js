@@ -62,8 +62,7 @@ export const approveOrder = asyncHandler(async (req, res) => {
 
 export const cancelOrder = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    await orderService.cancelOrder(id, req.user.id);
-    await revokeContract(id)
+    await orderService.cancelOrder(id, req.user.id,req.body.document_id);
     return res.sendStatus(204).end();
 })
 

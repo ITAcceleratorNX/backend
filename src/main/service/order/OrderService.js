@@ -20,7 +20,7 @@ import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
-import {createContract, getContractStatus} from "../contract/contract.service.js";
+import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
 
@@ -424,7 +424,7 @@ export const validateForCanceling = async (order, user_id) => {
     }
 }
 
-export const cancelOrder = async (orderId, userId) => {
+export const cancelOrder = async (orderId, userId,documentId) => {
     const tx = await sequelize.transaction();
     try {
         const order = await Order.findOne({
@@ -455,8 +455,13 @@ export const cancelOrder = async (orderId, userId) => {
                 transaction: tx
             }
         );
-
+        try {
+            await revokeContract(documentId);
+        } catch (e) {
+            logger.error("Ошибка отзыва контракта", e);
+        }
         await tx.commit();
+
     } catch (error) {
         await tx.rollback();
         error.status = 500;
