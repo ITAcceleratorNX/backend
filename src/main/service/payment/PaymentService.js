@@ -81,10 +81,7 @@ async function sendPaymentRequestToOneVision(order, amount, transactionId, total
     }
 }
 
-async function generateOrderPayments(order, extraServicesAmount) {
-    const deposit = await Service.findOne({
-        where: {type: 'DEPOSIT'}
-    })
+export async function generateOrderPayments(order, extraServicesAmount) {
     const start = DateTime.fromJSDate(order.start_date);
     const end = DateTime.fromJSDate(order.end_date);
     const totalDays = end.diff(start, 'days').days;
@@ -107,7 +104,7 @@ async function generateOrderPayments(order, extraServicesAmount) {
             order_id: order.id,
             month: current.month,
             year: current.year,
-            amount: amount + (isFirst ? Number(extraServicesAmount) + Number(deposit.price) : 0),
+            amount: amount + (isFirst ? Number(extraServicesAmount) : 0),
             status: 'UNPAID',
         });
 
@@ -183,7 +180,11 @@ export const create = async (data, userId) => {
             throw error;
         }
         const extraServicesAmount = await getTotalServicePriceByOrderId(order.id);
-        const { orderPayments, totalDays } = await generateOrderPayments(order, extraServicesAmount);
+        const deposit = await Service.findOne({
+            where: {type: 'DEPOSIT'}
+        })
+        const { orderPayments, totalDays } = await generateOrderPayments(order,
+            Number(extraServicesAmount) + Number(deposit.price));
         const createdOrderPayments = await orderPaymentService.bulkCreate(orderPayments, { transaction: paymentOrderTransaction });
 
         const firstOrderPayment = createdOrderPayments[0];
