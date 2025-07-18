@@ -2,9 +2,6 @@ import * as orderService from "../../service/order/OrderService.js";
 import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
-import {
-    revokeContract
-} from "../../service/contract/contract.service.js";
 
 const base = createBaseController(orderService);
 
