@@ -12,7 +12,7 @@ export const createContract = async (id) => {
     const latestContract = order.contracts?.sort((a, b) =>
         new Date(b.created_at) - new Date(a.created_at)
     )[0];
-    logger.info(`LATEST CONTRACT INFO, `, {response: latestContract});
+    logger.info(`LATEST CONTRACT INFO`, {message: latestContract});
     const formatDate = (timestamp) => {
         if (String(timestamp).length === 10) {
             timestamp *= 1000;
