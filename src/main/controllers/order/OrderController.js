@@ -4,8 +4,7 @@ import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 import {
     createContract,
-    revokeContract,
-    updateContract
+    revokeContract
 } from "../../service/contract/contract.service.js";
 
 const base = createBaseController(orderService);
