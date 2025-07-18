@@ -32,7 +32,7 @@ export const createContract = async (id) => {
     const data = {
         templateName: 'KZ230240017395_valar_dogovor',
         contractName: `Драфт по складам для физ лиц`,
-        numberDeal: latestContract.id,
+        contractNumber: latestContract.id,
         Requisites: {
             fio: order.user.name,
             IIN_BIN: order.user.iin,

@@ -7,7 +7,8 @@ import {
     Service,
     OrderPayment,
     Warehouse,
-    MovingOrder
+    MovingOrder,
+    Contract
 } from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
@@ -19,7 +20,6 @@ import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
-import Contract from "../../models/Contract.js";
 import { getContractStatus} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
