@@ -2,15 +2,17 @@ import axios from "axios";
 import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
 import {Contract} from "../../models/init/index.js";
+import logger from "../../utils/winston/logger.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
-export const createContract = async (id) => {
+export const createContract = async (id, tx) => {
 
-    const order = await orderService.getByIdForContract(id)
+    const order = await orderService.getByIdForContract(id, { transaction: tx });
     const latestContract = order.contracts?.sort((a, b) =>
         new Date(b.created_at) - new Date(a.created_at)
     )[0];
+    logger.info(`LATEST CONTRACT INFO`, {response: order});
     const formatDate = (timestamp) => {
         if (String(timestamp).length === 10) {
             timestamp *= 1000;
@@ -19,7 +21,7 @@ export const createContract = async (id) => {
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        return `${day}.${month}.${year}`;
     };
     let summa;
     if (order.storage.storage_type === 'INDIVIDUAL') {
@@ -32,12 +34,12 @@ export const createContract = async (id) => {
     const data = {
         templateName: 'KZ230240017395_valar_dogovor',
         contractName: `Драфт по складам для физ лиц`,
-        numberDeal: latestContract.id,
-        Requisites: {
+        contractNumber: String(latestContract.id),
+        Requisites: [{
             fio: order.user.name,
             IIN_BIN: order.user.iin,
             phoneNumber: order.user.phone,
-        },
+        }],
         templateData: [
             { key: 'contract.date', value: formatDate(order.start_date) },
             { key: 'contract.date2', value: formatDate(order.end_date) },
@@ -56,13 +58,17 @@ export const createContract = async (id) => {
     };
 
     try {
-        const response = await axios.post(TRUST_ME_API_URL+'/contract/create', data, {
+        const response = await axios.post(TRUST_ME_API_URL+'/trust_contract_public_apis/UploadContractByTemplateName', data, {
             headers: {
                 Authorization: TRUST_ME_API_TOKEN,
                 'Content-Type': 'application/json'
             }
         });
-        await updateContract(response.data,latestContract.id);
+        await updateContract({
+            file_name: response.data.data.fileName,
+            url: response.data.data.url,
+            document_id: response.data.data.id
+        }, latestContract.id, { transaction: tx });
         return response.data;
 
     } catch (error) {
@@ -114,8 +120,8 @@ export const revokeContract = async (documentId) => {
         throw error;
     }
 };
-export const updateContract = async (data,id) => {
-    return Contract.update(data, { where: { order_id: id } });
+export const updateContract = async (data, id, options = {}) => {
+    return Contract.update(data, { where: { id: id }, ...options });
 }
 export const deleteContractByOrder = async (id) => {
     return Contract.destroy({where: { order_id: id }})

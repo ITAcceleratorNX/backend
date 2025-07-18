@@ -3,9 +3,7 @@ import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 import {
-    createContract,
-    revokeContract,
-    updateContract
+    revokeContract
 } from "../../service/contract/contract.service.js";
 
 const base = createBaseController(orderService);
@@ -38,6 +36,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 });
 
 export const updateOrder = base.update;
+
 export const deleteOrder = base.delete;
 
 export const approveOrder = asyncHandler(async (req, res) => {
@@ -57,14 +56,13 @@ export const approveOrder = asyncHandler(async (req, res) => {
         endpoint: req.originalUrl,
         response: response
     });
-    await createContract(id)
+
     return res.status(200).json({response});
 });
 
 export const cancelOrder = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    await orderService.cancelOrder(id, req.user.id);
-    await revokeContract(id)
+    await orderService.cancelOrder(id, req.user.id,req.body.document_id);
     return res.sendStatus(204).end();
 })
 
@@ -72,11 +70,7 @@ export const getMyContracts = asyncHandler(async (req, res) => {
     const contracts = await orderService.getMyContracts(req.user.id);
     res.json(contracts);
 });
-export const updateMyContracts = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    const response = await updateContract(req.body, id);
-    return res.status(200).json({ response });
-});
+
 
 //
 // export const extendOrder = asyncHandler(async (req, res) => {
