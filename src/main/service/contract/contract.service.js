@@ -34,7 +34,7 @@ export const createContract = async (id, tx) => {
     const data = {
         templateName: 'KZ230240017395_valar_dogovor',
         contractName: `Драфт по складам для физ лиц`,
-        contractNumber: latestContract.id,
+        contractNumber: String(latestContract.id),
         Requisites: {
             fio: order.user.name,
             IIN_BIN: order.user.iin,
