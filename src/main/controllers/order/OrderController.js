@@ -4,11 +4,9 @@ import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 import {
     createContract,
-    deleteContractByOrder,
     revokeContract,
     updateContract
 } from "../../service/contract/contract.service.js";
-import {response} from "express";
 
 const base = createBaseController(orderService);
 
@@ -59,7 +57,7 @@ export const approveOrder = asyncHandler(async (req, res) => {
         endpoint: req.originalUrl,
         response: response
     });
-    createContract(id)
+    await createContract(id)
     return res.status(200).json({response});
 });
 
