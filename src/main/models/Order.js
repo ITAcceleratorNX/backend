@@ -68,14 +68,6 @@ const Order = sequelize.define('Order', {
         allowNull: false,
         defaultValue: false,
     },
-    document_id: {
-            type: DataTypes.STRING,
-            allowNull: true,
-    },
-    punct33:{
-        type: DataTypes.TEXT,
-        allowNull: true,
-    }
 
 }, {
     tableName: 'orders',
