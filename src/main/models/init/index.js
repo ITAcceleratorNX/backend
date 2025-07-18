@@ -14,11 +14,15 @@ import OrderPayment from "../OrderPayment.js";
 import Transaction from "../Transactions.js";
 import OrderService from "../OrderService.js";
 import UserNotification from "../UserNotifications.js";
+import Contract from "../Contract.js";
 
 
 // Order - User
 Order.belongsTo(User, { foreignKey: 'user_id' , as: 'user'});
 User.hasMany(Order, { foreignKey: 'user_id' , as: 'orders'});
+
+Contract.belongsTo(Order, { foreignKey: 'order_id' , as: 'orders'});
+Order.hasMany(Contract, { foreignKey: 'order_id' , as: 'contracts'});
 
 // Order - Storage
 Storage.hasMany(Order, { foreignKey: 'storage_id', as: 'orders' } );
@@ -60,7 +64,7 @@ Service.belongsToMany(Order, {
     through: OrderService,
     foreignKey: 'service_id',
     otherKey: 'order_id',
-    as: 'orders' // опционально
+    as: 'orders'
 });
 
 OrderService.belongsTo(Service, { foreignKey: 'service_id', as: 'service' });
@@ -92,6 +96,7 @@ export {
     Transaction,
     OrderItem,
     OrderService,
-    UserNotification
+    UserNotification,
+    Contract
 };
 

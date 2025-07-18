@@ -1,4 +1,13 @@
-import {Order, OrderItem, OrderPayment, OrderService, Service, Storage, User} from "../../models/init/index.js";
+import {
+    Order,
+    OrderItem,
+    Storage,
+    User,
+    OrderService,
+    Service,
+    OrderPayment,
+    Warehouse
+} from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
 import {DateTime} from 'luxon';
@@ -9,6 +18,8 @@ import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
+import Contract from "../../models/Contract.js";
+import { getContractStatus} from "../contract/contract.service.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as paymentService from "../payment/PaymentService.js";
 
@@ -69,7 +80,12 @@ export const getByIdForContract = async (id) => {
             {
                 model: Storage,
                 as: 'storage',
+            },
+            {
+                model: Contract,
+                as: 'contracts',
             }
+
         ]
     });
 };
@@ -145,7 +161,91 @@ export const approveOrder = async (id, data) => {
         throw error;
     }
 }
+const contractStatusMap = {
+    0: 'Не подписан',
+    1: 'Подписан компанией',
+    2: 'Подписан клиентом',
+    3: 'Полностью подписан',
+    4: 'Отозван компанией',
+    5: 'Компания инициировала расторжение',
+    6: 'Клиент инициировал расторжение',
+    7: 'Клиент отказался от расторжения',
+    8: 'Расторгнут',
+    9: 'Клиент отказался подписывать договор',
+};
 
+export const getMyContracts = async (userId) => {
+    try {
+        const orders = await Order.findAll({
+            where: { user_id: userId ,status: {
+                    [Op.not]: 'INACTIVE'
+                } },
+            include: [
+                {
+                    model: Storage,
+                    as: 'storage',
+                    attributes: ['name'],
+                    include: [
+                        {
+                            model: Warehouse,
+                            as: 'warehouse',
+                            attributes: ['address'],
+                        }
+
+                    ]
+                },
+                {
+                    model: Contract,
+                    as: 'contracts',
+                    required: false
+                }
+            ],
+            order: [
+                ['created_at', 'DESC']
+            ]
+        });
+
+        if (!orders || orders.length === 0) {
+            throw Object.assign(new Error('Not Found'), { status: 400 });
+        }
+
+        const formattedOrders = await Promise.all(orders.map(async order => {
+            const latestContract = order.contracts?.sort(
+                (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            )[0] || null;
+
+            const contract_status = latestContract
+                ? await getContractStatus(latestContract.document_id)
+                : null;
+            logger.error(contract_status)
+            return {
+                order_id: order.id,
+                storage_name: order.storage.name,
+                warehouse_address: order.storage.warehouse?.address || null,
+                total_volume: order.total_volume,
+                rental_period: {
+                    start_date: order.start_date,
+                    end_date: order.end_date
+                },
+                contract_status: contractStatusMap[contract_status],
+                contract_data: latestContract ? {
+                    contract_id: latestContract.id,
+                    document_id: latestContract.document_id,
+                    url: latestContract.url
+                } : null,
+                payment_status: order.payment_status,
+                order_status: order.status,
+                created_at: order.created_at
+            };
+        }));
+
+
+        return formattedOrders;
+    } catch (error) {
+        console.error('Error fetching orders with contracts:', error);
+       throw error;
+    }
+};
 export const deleteById = async (id) => {
     const transaction = await sequelize.transaction();
     try {
@@ -199,7 +299,9 @@ export const createOrder = async (req) => {
         };
 
         const order = await Order.create(orderData, { transaction });
-
+        await Contract.create({
+            order_id: order.id,
+        })
         const itemsToCreate = order_items.map(item => ({
             ...item,
             order_id: order.id
@@ -325,7 +427,6 @@ export const cancelOrder = async (orderId, userId) => {
             where: { id: orderId }
         });
         await validateForCanceling(order, userId);
-
         order.status = 'CANCELED';
         await order.save({ transaction: tx });
 

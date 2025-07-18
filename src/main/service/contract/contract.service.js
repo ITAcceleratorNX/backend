@@ -1,12 +1,16 @@
 import axios from "axios";
 import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
+import {Contract} from "../../models/init/index.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
 export const createContract = async (id) => {
 
     const order = await orderService.getByIdForContract(id)
+    const latestContract = order.contracts?.sort((a, b) =>
+        new Date(b.created_at) - new Date(a.created_at)
+    )[0];
     const formatDate = (timestamp) => {
         if (String(timestamp).length === 10) {
             timestamp *= 1000;
@@ -24,10 +28,11 @@ export const createContract = async (id) => {
         summa = (await getByType('CLOUD')).price;
     }
 
-    const isPunct33Enabled = !!order.punct33 && order.punct33.trim() !== '';
+    const isPunct33Enabled = !!latestContract.punct33 && latestContract.punct33.trim() !== '';
     const data = {
-        templateName: 'Драфт по складам для физ лиц',
+        templateName: 'KZ230240017395_valar_dogovor',
         contractName: `Драфт по складам для физ лиц`,
+        numberDeal: latestContract.id,
         Requisites: {
             fio: order.user.name,
             IIN_BIN: order.user.iin,
@@ -37,7 +42,7 @@ export const createContract = async (id) => {
             { key: 'contract.date', value: formatDate(order.start_date) },
             { key: 'contract.date2', value: formatDate(order.end_date) },
             { key: 'contract.punct33', value: isPunct33Enabled ? 'включен' : 'не включен' },
-            ...(isPunct33Enabled ? [{ key: 'contract.text', value: order.punct33 }] : []),
+            ...(isPunct33Enabled ? [{ key: 'contract.text', value: latestContract.punct33 }] : []),
             { key: 'contract.square', value: String(order.total_volume) },
             { key: 'contract.summa2', value: String(order.total_price) },
             { key: 'contract.summa', value: String(summa) },
@@ -57,8 +62,9 @@ export const createContract = async (id) => {
                 'Content-Type': 'application/json'
             }
         });
-
+        await updateContract(response.data,latestContract.id);
         return response.data;
+
     } catch (error) {
         console.error('Ошибка создания договора:', error.response?.data || error.message);
         throw error;
@@ -108,4 +114,14 @@ export const revokeContract = async (documentId) => {
         throw error;
     }
 };
-
+export const updateContract = async (data,id) => {
+    return Contract.update(data, { where: { order_id: id } });
+}
+export const deleteContractByOrder = async (id) => {
+    return Contract.destroy({where: { order_id: id }})
+}
+// export const getContract = async (id) => {
+//     return Contract.findOne({where: {
+//         id: id
+//         }})
+// }
