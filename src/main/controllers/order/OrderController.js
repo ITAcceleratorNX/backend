@@ -57,7 +57,7 @@ export const approveOrder = asyncHandler(async (req, res) => {
         endpoint: req.originalUrl,
         response: response
     });
-    await createContract(id)
+
     return res.status(200).json({response});
 });
 

@@ -20,7 +20,7 @@ import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
-import { getContractStatus} from "../contract/contract.service.js";
+import {createContract, getContractStatus} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
 
@@ -160,6 +160,7 @@ export const approveOrder = async (id, data) => {
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
         }
+        await createContract(id)
 
         await tx.commit();
         return updatedOrder;
