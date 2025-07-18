@@ -3,7 +3,6 @@ import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 import {
-    createContract,
     revokeContract
 } from "../../service/contract/contract.service.js";
 

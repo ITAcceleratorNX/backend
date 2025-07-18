@@ -315,6 +315,7 @@ export const createOrder = async (req) => {
         await OrderItem.bulkCreate(itemsToCreate, { transaction });
 
         await updateStorageVolume(storage, total_volume, transaction);
+        await Contract.create({order_id: order.id}, {transaction})
 
         await transaction.commit();
         return order;
