@@ -131,7 +131,7 @@ export const update = async (id, data, options = {}) => {
 };
 
 export const approveOrder = async (id, data) => {
-    logger.info("APPROVE ORDER DATA FROM FRONTEND", {message: data})
+    logger.info("APPROVE ORDER DATA FROM FRONTEND", {response: data})
     const tx = await sequelize.transaction();
     try {
         const updatingOrder = await getById(id)
@@ -163,7 +163,7 @@ export const approveOrder = async (id, data) => {
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
         }
         const contractData = await createContract(id, tx);
-        logger.info("TRUST ME DATA", {message: contractData});
+        logger.info("TRUST ME DATA", {response: contractData});
 
         await tx.commit();
         return updatedOrder;
