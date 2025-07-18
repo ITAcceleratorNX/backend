@@ -64,7 +64,11 @@ export const createContract = async (id, tx) => {
                 'Content-Type': 'application/json'
             }
         });
-        await updateContract(response.data,latestContract.id, {transaction: tx});
+        await updateContract({
+            file_name: response.data.data.fileName,
+            url: response.data.data.url,
+            document_id: response.data.data.id
+        }, latestContract.id, { transaction: tx });
         return response.data;
 
     } catch (error) {
