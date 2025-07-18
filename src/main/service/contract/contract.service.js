@@ -2,6 +2,7 @@ import axios from "axios";
 import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
 import {Contract} from "../../models/init/index.js";
+import logger from "../../utils/winston/logger.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
@@ -11,6 +12,7 @@ export const createContract = async (id) => {
     const latestContract = order.contracts?.sort((a, b) =>
         new Date(b.created_at) - new Date(a.created_at)
     )[0];
+    logger.info(`LATEST CONTRACT INFO, `, {response: latestContract});
     const formatDate = (timestamp) => {
         if (String(timestamp).length === 10) {
             timestamp *= 1000;
