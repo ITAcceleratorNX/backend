@@ -73,11 +73,7 @@ export const getMyContracts = asyncHandler(async (req, res) => {
     const contracts = await orderService.getMyContracts(req.user.id);
     res.json(contracts);
 });
-export const updateMyContracts = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    const response = await updateContract(req.body, id);
-    return res.status(200).json({ response });
-});
+
 
 //
 // export const extendOrder = asyncHandler(async (req, res) => {

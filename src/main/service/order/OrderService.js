@@ -139,7 +139,10 @@ export const approveOrder = async (id, data) => {
             throw Object.assign(new Error('Approve only for inactive orders'), { status: 400 });
         }
         const updatedOrder = await update(id, data, { transaction: tx });
-
+        await Contract.create({
+            order_id: id,
+            punct33: data.punct33 ?? null
+        },{ transaction: tx })
         if (data.is_selected_moving) {
             const enrichedMovingOrders = data.moving_orders.map(movingOrder => ({
                 ...movingOrder,
@@ -303,9 +306,6 @@ export const createOrder = async (req) => {
         };
 
         const order = await Order.create(orderData, { transaction });
-        await Contract.create({
-            order_id: order.id,
-        })
         const itemsToCreate = order_items.map(item => ({
             ...item,
             order_id: order.id

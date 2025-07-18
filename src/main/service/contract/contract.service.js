@@ -114,9 +114,7 @@ export const revokeContract = async (documentId) => {
         throw error;
     }
 };
-export const updateContract = async (data,id) => {
-    return Contract.update(data, { where: { order_id: id } });
-}
+
 export const deleteContractByOrder = async (id) => {
     return Contract.destroy({where: { order_id: id }})
 }
