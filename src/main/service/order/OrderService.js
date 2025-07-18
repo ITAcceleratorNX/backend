@@ -71,7 +71,7 @@ export const getById = async (id) => {
         ]
     });
 };
-export const getByIdForContract = async (id) => {
+export const getByIdForContract = async (id, options = {}) => {
     return Order.findByPk(id, {
         include: [
             {
@@ -87,7 +87,8 @@ export const getByIdForContract = async (id) => {
                 model: Contract,
                 as: 'contracts',
             }
-        ]
+        ],
+        ...options
     });
 };
 export const getByUserId = async (userId) => {
@@ -160,7 +161,7 @@ export const approveOrder = async (id, data) => {
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
         }
-        await createContract(id)
+        await createContract(id, tx)
 
         await tx.commit();
         return updatedOrder;
@@ -315,7 +316,6 @@ export const createOrder = async (req) => {
         await OrderItem.bulkCreate(itemsToCreate, { transaction });
 
         await updateStorageVolume(storage, total_volume, transaction);
-        await Contract.create({order_id: order.id}, {transaction})
 
         await transaction.commit();
         return order;

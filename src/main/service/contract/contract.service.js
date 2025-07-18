@@ -6,9 +6,9 @@ import logger from "../../utils/winston/logger.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
-export const createContract = async (id) => {
+export const createContract = async (id, tx) => {
 
-    const order = await orderService.getByIdForContract(id)
+    const order = await orderService.getByIdForContract(id, { transaction: tx });
     const latestContract = order.contracts?.sort((a, b) =>
         new Date(b.created_at) - new Date(a.created_at)
     )[0];
