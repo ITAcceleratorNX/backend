@@ -7,6 +7,7 @@ import {DateTime} from "luxon";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
 import {getTotalServicePriceByOrderId} from "../order/OrderService.js";
+import JSONbig from "json-bigint";
 
 const PAYMENT_CONSTANTS = {
     currency: process.env.PAYMENT_CURRENCY,
@@ -68,7 +69,7 @@ async function sendPaymentRequestToOneVision(order, amount, transactionId, total
             userId,
             response: response.data
         });
-        return JSON.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
+        return JSONbig.parse(Buffer.from(response.data.data, 'base64').toString('utf-8'));
     } catch (error) {
         logger.error('Payment API error', {
             message: error.message,

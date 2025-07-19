@@ -27,6 +27,7 @@ export default defineConfig([
         document: "readonly",
         window: "readonly",
         setInterval: "readonly",
+        setTimeout: "readonly",
       },
     },
   },

@@ -49,7 +49,7 @@ export const User = sequelize.define('User', {
         allowNull: true
     },
     bday: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: true
     }
 }, {

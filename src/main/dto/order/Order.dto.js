@@ -16,7 +16,6 @@ export const OrderDto = z.object({
     })).nonempty(),
     is_selected_moving: z.boolean().optional(),
     is_selected_package: z.boolean().optional(),
-    punct33: z.string().optional(),
 });
 
 export const ApproveOrderDto = z.object({
@@ -25,6 +24,7 @@ export const ApproveOrderDto = z.object({
     is_selected_package: z.boolean().optional(),
     moving_orders: z.array(MovingOrderDto).optional(),
     services: z.array(OrderServiceDto).optional(),
+    punct33: z.string().optional(),
 })
 
 export const OrderUpdateDto = OrderDto.partial();
