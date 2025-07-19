@@ -59,6 +59,11 @@ const Transaction = sequelize.define('Transaction', {
     payer_info: {
         type: DataTypes.JSONB,
         allowNull: true,
+    },
+    clearing_status: {
+        type: DataTypes.ENUM('SUCCESS','FAILED','PENDING'),
+        allowNull: false,
+        defaultValue: 'PENDING',
     }
 }, {
     tableName: 'transactions',

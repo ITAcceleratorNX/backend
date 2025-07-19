@@ -6,7 +6,9 @@ import {
     OrderService,
     Service,
     OrderPayment,
-    Warehouse
+    Warehouse,
+    MovingOrder,
+    Contract
 } from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
@@ -18,8 +20,7 @@ import {fn, Op, literal} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
-import Contract from "../../models/Contract.js";
-import { getContractStatus} from "../contract/contract.service.js";
+import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
 
@@ -40,6 +41,10 @@ export const getAll = async () => {
             {
                 model: Service,
                 as: 'services',
+            },
+            {
+                model: MovingOrder,
+                as: 'moving_orders',
             }
         ]
     });
@@ -66,7 +71,7 @@ export const getById = async (id) => {
         ]
     });
 };
-export const getByIdForContract = async (id) => {
+export const getByIdForContract = async (id, options = {}) => {
     return Order.findByPk(id, {
         include: [
             {
@@ -82,8 +87,8 @@ export const getByIdForContract = async (id) => {
                 model: Contract,
                 as: 'contracts',
             }
-
-        ]
+        ],
+        ...options
     });
 };
 export const getByUserId = async (userId) => {
@@ -99,6 +104,10 @@ export const getByUserId = async (userId) => {
             {
                 model: Service,
                 as: 'services',
+            },
+            {
+                model: MovingOrder,
+                as: 'moving_orders',
             }
         ]
     });
@@ -110,6 +119,10 @@ export const getByUserId = async (userId) => {
     return orders;
 };
 
+export const create = async (data, options = {}) => {
+    return Order.create(data, options);
+};
+
 export const update = async (id, data, options = {}) => {
     return Order.update(data, {
         where: { id },
@@ -118,6 +131,7 @@ export const update = async (id, data, options = {}) => {
 };
 
 export const approveOrder = async (id, data) => {
+    logger.info("APPROVE ORDER DATA FROM FRONTEND", {response: data})
     const tx = await sequelize.transaction();
     try {
         const updatingOrder = await getById(id)
@@ -127,7 +141,10 @@ export const approveOrder = async (id, data) => {
             throw Object.assign(new Error('Approve only for inactive orders'), { status: 400 });
         }
         const updatedOrder = await update(id, data, { transaction: tx });
-
+        await Contract.create({
+            order_id: id,
+            punct33: data.punct33 ?? null
+        },{ transaction: tx })
         if (data.is_selected_moving) {
             const enrichedMovingOrders = data.moving_orders.map(movingOrder => ({
                 ...movingOrder,
@@ -145,6 +162,8 @@ export const approveOrder = async (id, data) => {
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
         }
+        const contractData = await createContract(id, tx);
+        logger.info("TRUST ME DATA", {response: contractData});
 
         await tx.commit();
         return updatedOrder;
@@ -291,9 +310,6 @@ export const createOrder = async (req) => {
         };
 
         const order = await Order.create(orderData, { transaction });
-        await Contract.create({
-            order_id: order.id,
-        })
         const itemsToCreate = order_items.map(item => ({
             ...item,
             order_id: order.id
@@ -408,13 +424,14 @@ export const validateForCanceling = async (order, user_id) => {
     }
 }
 
-export const cancelOrder = async (orderId, userId) => {
+export const cancelOrder = async (orderId, userId,documentId) => {
     const tx = await sequelize.transaction();
     try {
         const order = await Order.findOne({
             where: { id: orderId }
         });
         await validateForCanceling(order, userId);
+
         order.status = 'CANCELED';
         await order.save({ transaction: tx });
 
@@ -438,8 +455,13 @@ export const cancelOrder = async (orderId, userId) => {
                 transaction: tx
             }
         );
-
+        try {
+            await revokeContract(documentId);
+        } catch (e) {
+            logger.error("Ошибка отзыва контракта", e);
+        }
         await tx.commit();
+
     } catch (error) {
         await tx.rollback();
         error.status = 500;

@@ -30,6 +30,7 @@ import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./servi
 import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 import orderServiceRoutes from "./routes/order_service/orderService.routes.js";
 import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
+import {clearingRetryJob} from "./service/payment/clearing.service.js";
 
 export default async function appFactory() {
     await initDb();
@@ -83,9 +84,12 @@ export default async function appFactory() {
         console.log('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
-    cron.schedule('*/10 * * * *', () => {
+    cron.schedule('*/5 * * * *', () => {
         console.log('🕒 Cron, проверка истекших оплат');
         processCronJobForExpiredTransactions();
+    });
+    cron.schedule("*/10 * * * *", async () => {
+        await clearingRetryJob(); // каждые 10 минут
     });
 
 
