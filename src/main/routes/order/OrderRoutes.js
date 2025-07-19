@@ -9,6 +9,7 @@ const router = express.Router();
 router.get("/", authenticateJWT, authorizeAdminOrManager, orderController.getAllOrders);
 router.get("/me", authenticateJWT, orderController.getMyOrders);
 router.get("/contracts", authenticateJWT, orderController.getMyContracts);
+router.get("/items/:id", authenticateJWT, orderController.getItemsByOrderId);
 router.get("/:id", authenticateJWT, orderController.getOrderById);
 router.post("/", authenticateJWT, validateBody(OrderDto), orderController.createOrder);
 router.put("/:id", authenticateJWT, validateBody(OrderUpdateDto), orderController.updateOrder);

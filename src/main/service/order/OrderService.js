@@ -326,7 +326,19 @@ export const createOrder = async (req) => {
         throw error;
     }
 };
+export const getItemsByOrderId = async (id) => {
+    const [items, movingOrders] = await Promise.all([
+        OrderItem.findAll({ where: { order_id: id } }),
+        MovingOrder.findAll({
+            where: {
+                order_id: id,
+                availability: 'AVAILABLE'
+            }
+        })
+    ]);
 
+    return { items, movingOrders };
+};
 function validateStorage(storage, total_volume) {
     if (!storage) {
         throw Object.assign(new Error('storage not found'), { status: 200 });
