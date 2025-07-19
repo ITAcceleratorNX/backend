@@ -31,6 +31,11 @@ import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 import orderServiceRoutes from "./routes/order_service/orderService.routes.js";
 import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
 import {clearingRetryJob} from "./service/payment/clearing.service.js";
+import {
+    autoExtendPendingOrders,
+    markExpiredOrdersAsFinished,
+    markOrdersWith10DaysLeftAsPending
+} from "./service/order/job/OrderJob.js";
 
 export default async function appFactory() {
     await initDb();
@@ -73,23 +78,29 @@ export default async function appFactory() {
 
 
     cron.schedule('0 0 1 * *', () => {
-        console.log('⏰ Запуск автооплаты...');
+        logger.info('⏰ Запуск автооплаты...');
         runMonthlyPayments();
     });
     cron.schedule('0 10 * * *', () => {
-        console.log('🔔 Проверка MANUAL оплат старше 10 дней...');
+        logger.info('🔔 Проверка MANUAL оплат старше 10 дней...');
         notifyManualPaymentsAfter10Days();
     });
     cron.schedule('0 9 * * *', () => {
-        console.log('🚨 Проверка просроченных оплат и штрафов...');
+        logger.info('🚨 Проверка просроченных оплат и штрафов...');
         handleLateManualPayments();
     });
     cron.schedule('*/5 * * * *', () => {
-        console.log('🕒 Cron, проверка истекших оплат');
+        logger.info('🕒 Cron, проверка истекших оплат');
         processCronJobForExpiredTransactions();
     });
     cron.schedule("*/10 * * * *", async () => {
         await clearingRetryJob(); // каждые 10 минут
+    });
+    cron.schedule('0 */6 * * *', () => {
+        logger.info('Cron, проверка заканчивающихся броней');
+        markOrdersWith10DaysLeftAsPending()
+        autoExtendPendingOrders()
+        markExpiredOrdersAsFinished()
     });
 
 

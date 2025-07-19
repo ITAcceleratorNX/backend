@@ -16,9 +16,11 @@ import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
-import {fn, Op, literal} from "sequelize";
+import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
+import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
+import * as paymentService from "../payment/PaymentService.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
 
@@ -71,6 +73,7 @@ export const getById = async (id) => {
         ]
     });
 };
+
 export const getByIdForContract = async (id, options = {}) => {
     return Order.findByPk(id, {
         include: [
@@ -91,6 +94,7 @@ export const getByIdForContract = async (id, options = {}) => {
         ...options
     });
 };
+
 export const getByUserId = async (userId) => {
     const orders = await Order.findAll({
         where: { user_id: userId },
@@ -339,9 +343,13 @@ function validateStorage(storage, total_volume) {
     }
 }
 
-function calculateDates(months) {
-    const start = DateTime.now();
+function calculateDates(months, start_date = null) {
+    const start = start_date !== null
+        ? DateTime.fromJSDate(new Date(start_date))
+        : DateTime.now();
+
     const end = start.plus({ months });
+
     return {
         start_date: start.toJSDate(),
         end_date: end.toJSDate(),
@@ -479,3 +487,66 @@ export const cancelOrder = async (orderId, userId,documentId) => {
     confirmOrChangeMovingOrder(orderId);
     return true;
 }
+
+export const extendOrder = async (data, userId) => {
+    const { order_id, months } = data;
+    const tx = await sequelize.transaction();
+    try {
+        const user = await userService.getById(userId);
+        const order = await Order.findByPk(order_id, {
+            include: [ { association: 'storage' } ]
+        }, { transaction: tx });
+
+        if (!order) {
+            throw Object.assign(new Error('Order not found'), { status: 404 });
+        } else if (order.user_id !== user.id) {
+            throw Object.assign(new Error('Forbidden'), { status: 403 });
+        } else if (order.status !== 'ACTIVE') {
+            throw Object.assign(new Error('Order not ACTIVE'), { status: 400 });
+        } else if (order.extension_status !== 'PENDING') {
+            throw Object.assign(new Error('Order extension status is invalid'), { status: 400 });
+        } else if (order.payment_status !== 'PAID') {
+            throw Object.assign(new Error('Payment status is invalid'), { status: 400 });
+        }
+
+        if (!data.is_extended) {
+            order.extended = 'CANCELED';
+            await order.save({ transaction: tx });
+            confirmOrChangeMovingOrder(order.id);
+            return
+        }
+
+        const { start_date, end_date } = calculateDates(months, order.end_date);
+        const total_price = await calculateTotalPrice(
+            order.storage.storage_type,
+            order.storage.storage_type === 'INDIVIDUAL' ? Number(order.storage.total_volume) : Number(order.total_volume),
+            months
+        );
+        order.total_price = Number(order.total_price) + Number(total_price);
+        order.end_date = end_date;
+        await order.save({ transaction: tx });
+
+        const { orderPayments } = await paymentService.generateOrderPayments({
+            start_date,
+            end_date,
+            total_price,
+            id: order_id
+        }, 0);
+
+        await orderPaymentService.bulkCreate(orderPayments, { transaction: tx });
+        await tx.commit();
+    } catch (error) {
+        await tx.rollback();
+        throw error;
+    }
+
+    notificationService.sendNotification({
+        user_id: userId,
+        title: "Ваш заказ продлено",
+        message: "Ваш заказ №" + order_id + " успешно продлено.",
+        notification_type: "contract",
+        related_order_id: order_id,
+        is_email: true,
+        is_sms: true
+    });
+};

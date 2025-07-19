@@ -50,7 +50,7 @@ const Order = sequelize.define('Order', {
         defaultValue: 'UNPAID',
     },
     status: {
-        type: DataTypes.ENUM('ACTIVE','INACTIVE', 'APPROVED', 'PROCESSING', 'CANCELED'),
+        type: DataTypes.ENUM('ACTIVE','INACTIVE', 'APPROVED', 'PROCESSING', 'CANCELED', 'FINISHED'),
         allowNull: false,
         defaultValue: 'INACTIVE',
     },
@@ -68,7 +68,11 @@ const Order = sequelize.define('Order', {
         allowNull: false,
         defaultValue: false,
     },
-
+    extension_status: {
+        type: DataTypes.ENUM('NO','PENDING','CANCELED'),
+        allowNull: false,
+        defaultValue: 'NO',
+    }
 }, {
     tableName: 'orders',
     timestamps: false,
