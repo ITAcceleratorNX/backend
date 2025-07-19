@@ -503,6 +503,8 @@ export const extendOrder = async (data, userId) => {
             throw Object.assign(new Error('Forbidden'), { status: 403 });
         } else if (order.status !== 'ACTIVE') {
             throw Object.assign(new Error('Order not ACTIVE'), { status: 400 });
+        } else if (order.extension_status !== 'PENDING') {
+            throw Object.assign(new Error('Order extension status is invalid'), { status: 400 });
         } else if (order.payment_status !== 'PAID') {
             throw Object.assign(new Error('Payment status is invalid'), { status: 400 });
         }
