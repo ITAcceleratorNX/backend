@@ -19,7 +19,6 @@ import * as movingOrderService from "../moving/movingOrder.service.js";
 import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
-import Contract from "../../models/init/index.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as paymentService from "../payment/PaymentService.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";

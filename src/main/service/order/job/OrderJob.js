@@ -2,6 +2,8 @@ import {Order} from '../../../models/init/index.js';
 import { Op } from 'sequelize';
 import { startOfDay, endOfDay } from 'date-fns';
 import {NotificationService} from "../../notification/notification.service.js";
+import logger from "../../../utils/winston/logger.js";
+import * as orderService from "../../../service/order/OrderService.js";
 
 const notificationService = new NotificationService();
 
@@ -39,8 +41,73 @@ export async function markOrdersWith10DaysLeftAsPending() {
             });
         }
 
-        console.log(`Updated ${orders.length} orders to extension_status: PENDING and sent notifications.`);
+        logger.info(`Updated ${orders.length} orders to extension_status: PENDING and sent notifications.`);
     } catch (error) {
-        console.error('Error processing orders:', error);
+        logger.error('Error processing orders:', error);
+    }
+}
+
+export async function autoExtendPendingOrders() {
+    try {
+        const orders = await Order.findAll({
+            where: {
+                extension_status: 'PENDING',
+                end_date: {
+                    [Op.lt]: new Date()
+                }
+            }
+        });
+
+        for (const order of orders) {
+            try {
+                await orderService.extendOrder({
+                    order_id: order.id,
+                    months: 1
+                }, order.user_id);
+                order.extension_status = 'NO';
+                await order.save();
+            } catch (error) {
+                logger.error(error)
+                continue;
+            }
+
+            await notificationService.sendNotification({
+                user_id: order.user_id,
+                title: 'Автоматическое продление заказа',
+                message: `Ваш заказ #${order.id} был автоматически продлён на 1 месяц.`,
+                notification_type: 'general',
+                related_order_id: order.id,
+                is_email: true,
+                is_sms: true
+            });
+        }
+
+        logger.info(`Auto-extended ${orders.length} pending orders.`);
+    } catch (error) {
+        logger.error('Error auto-extending orders:', error);
+    }
+}
+
+export async function markExpiredOrdersAsFinished() {
+    try {
+        const orders = await Order.findAll({
+            where: {
+                end_date: {
+                    [Op.lt]: new Date()
+                },
+                extension_status: {
+                    [Op.not]: 'CANCELED'
+                }
+            }
+        });
+
+        for (const order of orders) {
+            order.status = 'FINISHED';
+            await order.save();
+        }
+
+        logger.info(`Marked ${orders.length} expired orders as FINISHED.`);
+    } catch (error) {
+        logger.error('Error marking expired orders as FINISHED:', error);
     }
 }
