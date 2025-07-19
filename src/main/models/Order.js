@@ -68,7 +68,11 @@ const Order = sequelize.define('Order', {
         allowNull: false,
         defaultValue: false,
     },
-
+    extension_status: {
+        type: DataTypes.ENUM('NO','PENDING','CANCELED'),
+        allowNull: false,
+        defaultValue: 'NO',
+    }
 }, {
     tableName: 'orders',
     timestamps: false,
