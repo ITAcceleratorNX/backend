@@ -509,6 +509,13 @@ export const extendOrder = async (data, userId) => {
             throw Object.assign(new Error('Payment status is invalid'), { status: 400 });
         }
 
+        if (!data.is_extended) {
+            order.extended = 'CANCELED';
+            await order.save({ transaction: tx });
+            confirmOrChangeMovingOrder(order.id);
+            return
+        }
+
         const { start_date, end_date } = calculateDates(months, order.end_date);
         const total_price = await calculateTotalPrice(
             order.storage.storage_type,

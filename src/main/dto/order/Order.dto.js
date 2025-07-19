@@ -30,9 +30,10 @@ export const ApproveOrderDto = z.object({
 export const OrderUpdateDto = OrderDto.partial();
 
 export const ExtendedOrderDto = z.object({
+    is_extended: z.boolean(),
     order_id: z.number({
         required_error: 'order_id is required',
         invalid_type_error: 'order_id must be a number',
-    }),
-    months: z.number().int().min(1),
+    }).optional(),
+    months: z.number().int().min(1).optional(),
 });
