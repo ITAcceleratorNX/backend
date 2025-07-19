@@ -1,9 +1,10 @@
-import {Order} from '../../../models/init/index.js';
+import {Order, OrderPayment} from '../../../models/init/index.js';
 import { Op } from 'sequelize';
 import { startOfDay, endOfDay } from 'date-fns';
 import {NotificationService} from "../../notification/notification.service.js";
 import logger from "../../../utils/winston/logger.js";
 import * as orderService from "../../../service/order/OrderService.js";
+import * as refundService from "../../../service/payment/refund.service.js";
 
 const notificationService = new NotificationService();
 
@@ -102,8 +103,29 @@ export async function markExpiredOrdersAsFinished() {
         });
 
         for (const order of orders) {
-            order.status = 'FINISHED';
-            await order.save();
+            try {
+                const payment = await OrderPayment.findOne({
+                    where: {
+                        order_id: order.id,
+                        payment_id: {
+                            [Op.not]: null,
+                        }
+                    },
+                    order: [
+                        ['paid_at', 'ASC'],
+                    ]
+                });
+                if (!payment) {
+                    logger.warn(`No valid payment found for order #${order.id}`);
+                    continue;
+                }
+
+                await refundService.refundPayment(payment.payment_id);
+                order.status = 'FINISHED';
+                await order.save();
+            } catch (error) {
+                logger.error(error)
+            }
         }
 
         logger.info(`Marked ${orders.length} expired orders as FINISHED.`);
