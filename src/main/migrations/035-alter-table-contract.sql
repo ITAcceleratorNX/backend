@@ -1,0 +1,4 @@
+ALTER TABLE contracts
+    ALTER COLUMN document_id DROP NOT NULL,
+    ALTER COLUMN url DROP NOT NULL,
+    ALTER COLUMN file_name DROP NOT NULL;
