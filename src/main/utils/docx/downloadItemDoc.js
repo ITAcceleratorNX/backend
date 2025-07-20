@@ -1,8 +1,7 @@
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { getItemDocumentData } from "../../service/moving/movingOrder.service.js"; // твоя функция
-import { Response } from "express";
 
-export const downloadItemDoc = async (req, res = Response) => {
+export const downloadItemDoc = async (req, res) => {
     const itemId = req.params.itemId;
     const data = await getItemDocumentData(itemId);
 
