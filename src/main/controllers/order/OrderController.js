@@ -74,9 +74,8 @@ export const getItemsByOrderId = asyncHandler(async (req, res) => {
     res.json(items);
 })
 
-//
-// export const extendOrder = asyncHandler(async (req, res) => {
-//     const response = await orderService.extendOrder(req.body, req.user.id);
-//     logger.info(`Extending order`)
-//     return res.status(200).json({response});
-// });
+export const extendOrder = asyncHandler(async (req, res) => {
+    const response = await orderService.extendOrder(req.body, req.user.id);
+    logger.info(`Extending order`)
+    return res.status(200).json({response});
+});

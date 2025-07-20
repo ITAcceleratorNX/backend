@@ -1,6 +1,13 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
+winston.addColors({
+    info: 'green',
+    error: 'red',
+    warn: 'yellow',
+    debug: 'blue',
+});
+
 const logDirectory = process.env.LOG_DIR || 'logs';
 
 const transport = new DailyRotateFile({
@@ -10,6 +17,14 @@ const transport = new DailyRotateFile({
     maxFiles: '7d',
     level: 'info'
 });
+
+const consoleFormat = winston.format.combine(
+    winston.format.colorize({ all: true }),
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+        return `[${timestamp}] ${level}: ${message}`;
+    })
+);
 
 const logger = winston.createLogger({
     level: 'info',
@@ -31,7 +46,7 @@ const logger = winston.createLogger({
     ),
     transports: [
         transport,
-        new winston.transports.Console()
+        new winston.transports.Console({ format: consoleFormat })
     ]
 });
 
