@@ -1054,6 +1054,47 @@ paths:
                   response:
                     type: object
 
+  /orders/extend:
+    post:
+      summary: Продление заказа
+      description: Позволяет продлить заказ на заданное количество месяцев. Если `is_extended` = false, продление отменяется.
+      tags: [ Order ]
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_extended:
+                  type: boolean
+                  description: Флаг продления заказа
+                  example: true
+                order_id:
+                  type: integer
+                  description: ID заказа (если is_extended = true)
+                  example: 123
+                months:
+                  type: integer
+                  description: Количество месяцев продления (если is_extended = true)
+                  minimum: 1
+                  example: 2
+              required:
+                - is_extended
+      responses:
+        '200':
+          description: Успешное продление заказа
+        '400':
+          description: Ошибка валидации или бизнес-логики
+        '403':
+          description: Доступ запрещён
+        '404':
+          description: Заказ не найден
+        '500':
+          description: Внутренняя ошибка сервера
+
   /payments/me:
     get:
       summary: Получить все оплаты текущего пользователя
