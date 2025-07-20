@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
-import {Contract} from "../../models/init/index.js";
+import {Contract, Order} from "../../models/init/index.js";
 import logger from "../../utils/winston/logger.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
@@ -69,6 +69,10 @@ export const createContract = async (id, tx) => {
             url: response.data.data.url,
             document_id: response.data.data.id
         }, latestContract.id, { transaction: tx });
+        await Order.update(
+            { contract_status: 'SIGNED' },
+            { where: { id: id } , transaction: tx }
+        );
         return response.data;
 
     } catch (error) {

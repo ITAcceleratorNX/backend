@@ -3,6 +3,7 @@ import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 import {createBaseController} from "../base/BaseController.js";
 import logger from "../../utils/winston/logger.js";
 
+
 const base = createBaseController(orderService);
 
 export const getAllOrders = base.getAll;
@@ -67,7 +68,11 @@ export const getMyContracts = asyncHandler(async (req, res) => {
     const contracts = await orderService.getMyContracts(req.user.id);
     res.json(contracts);
 });
-
+export const getItemsByOrderId = asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const items = await orderService.getItemsByOrderId(id);
+    res.json(items);
+})
 
 export const extendOrder = asyncHandler(async (req, res) => {
     const response = await orderService.extendOrder(req.body, req.user.id);
