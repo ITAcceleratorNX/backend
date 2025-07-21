@@ -2,14 +2,12 @@ import axios from "axios";
 import logger from "../../utils/winston/logger.js";
 import {Buffer} from 'buffer';
 import crypto from "crypto";
-import {Contract, Order, OrderPayment, Service, Storage, Transaction, User} from "../../models/init/index.js";
+import {Order, OrderPayment, Service, Storage, Transaction, User} from "../../models/init/index.js";
 import {DateTime} from "luxon";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import {sequelize} from "../../config/database.js";
 import {getTotalServicePriceByOrderId} from "../order/OrderService.js";
 import JSONbig from "json-bigint";
-import {getContractStatus} from "../contract/contract.service.js";
-import order from "../../models/Order.js";
 
 const PAYMENT_CONSTANTS = {
     currency: process.env.PAYMENT_CURRENCY,
