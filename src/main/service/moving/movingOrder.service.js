@@ -35,7 +35,7 @@ export const getOrderById = async (id) => {
             {
                 model: User,
                 as: 'user',
-                attributes: ['address']
+                attributes: ['address','phone','name']
             },
             {
                 model: Service,
@@ -60,9 +60,62 @@ export const getOrderById = async (id) => {
         warehouseAddress: order?.storage?.warehouse?.address || null,
         storageName: order?.storage?.name || null,
         userAddress: order?.user?.address || null,
+        userName: order?.user?.name || null,
+        userPhone: order?.user?.phone || null,
         serviceDescriptions,
         availability: movingOrder.availability || null,
         items: order?.items || []
+    };
+};
+export const getItemDocumentData = async (itemId) => {
+    const item = await OrderItem.findByPk(itemId);
+
+    if (!item) return null;
+
+    const order = await Order.findByPk(item.order_id, {
+        include: [
+            {
+                model: Storage,
+                as: 'storage',
+                include: [
+                    {
+                        model: Warehouse,
+                        as: 'warehouse',
+                        attributes: ['address']
+                    }
+                ],
+                attributes: ['name']
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['address', 'phone', 'name']
+            },
+            {
+                model: MovingOrder,
+                as: 'moving_orders',
+                where: { availability: 'AVAILABLE' },
+                required: false
+            }
+        ]
+    });
+
+    const movingOrder = order?.moving_orders?.[0];
+
+    return {
+        item: {
+            id: item.id,
+            name: item.name,
+            volume: item.volume,
+            cargo_mark: item.cargo_mark
+        },
+        movingOrderId: movingOrder?.id || null,
+        status: movingOrder?.status || null,
+        warehouseAddress: order?.storage?.warehouse?.address || null,
+        storageName: order?.storage?.name || null,
+        userAddress: order?.user?.address || null,
+        userName: order?.user?.name || null,
+        userPhone: order?.user?.phone || null,
     };
 };
 
@@ -235,6 +288,7 @@ export const getOrdersByStatus = async (status) => {
             warehouseAddress: order?.storage?.warehouse?.address || null,
             storageName: order?.storage?.name || null,
             userAddress: item?.address || null,
+            userName: order.user.name || null,
             serviceDescriptions,
             availability: item.availability || null,
             items: order?.items || [],

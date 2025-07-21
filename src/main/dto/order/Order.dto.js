@@ -2,7 +2,6 @@ import { z } from 'zod';
 import {MovingOrderDto} from "../moving/MovingOrder.dto.js";
 import {OrderServiceDto} from "../serivce/Service.dto.js";
 
-export const ORDER_STATUSES = z.enum(["APPROVED"]);
 export const OrderDto = z.object({
     storage_id: z.number({
         required_error: 'storage_id is required',
@@ -14,18 +13,28 @@ export const OrderDto = z.object({
         volume: z.number().gt(0),
         cargo_mark: z.enum(["NO", "HEAVY", "FRAGILE"])
     })).nonempty(),
-    is_selected_moving: z.boolean().optional(),
-    is_selected_package: z.boolean().optional(),
-});
-
-export const ApproveOrderDto = z.object({
-    status: ORDER_STATUSES,
-    is_selected_moving: z.boolean().optional(),
-    is_selected_package: z.boolean().optional(),
+    is_selected_moving: z.boolean(),
+    is_selected_package: z.boolean(),
     moving_orders: z.array(MovingOrderDto).optional(),
     services: z.array(OrderServiceDto).optional(),
     punct33: z.string().optional(),
-})
+}).superRefine((data, ctx) => {
+    if (data.is_selected_moving && (!data.moving_orders || data.moving_orders.length === 0)) {
+        ctx.addIssue({
+            path: ['moving_orders'],
+            code: z.ZodIssueCode.custom,
+            message: 'moving_orders is required',
+        });
+    }
+
+    if (data.is_selected_package && (!data.services || data.services.length === 0)) {
+        ctx.addIssue({
+            path: ['services'],
+            code: z.ZodIssueCode.custom,
+            message: 'services is required',
+        });
+    }
+});
 
 export const OrderUpdateDto = OrderDto.partial();
 
