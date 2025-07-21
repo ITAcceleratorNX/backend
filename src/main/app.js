@@ -36,6 +36,8 @@ import {
     markExpiredOrdersAsFinished,
     markOrdersWith10DaysLeftAsPending
 } from "./service/order/job/OrderJob.js";
+import {Contract} from "./models/init/index.js";
+import {checkToActiveOrder} from "./service/order/OrderService.js";
 
 export default async function appFactory() {
     await initDb();
@@ -124,6 +126,34 @@ export default async function appFactory() {
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
+    app.post('/ntfmessage', async (req, res) => {
+        const incomingToken = req.headers['token'];
+        const expectedToken = process.env.TRUSTME_HOOK_SECRET;
+
+        if (incomingToken !== expectedToken) {
+            return res.status(403).json({ error: 'Forbidden: Invalid token' });
+        }
+
+        const {contract_id} = req.body;
+
+        try {
+            const contract = await Contract.findOne({
+                where: {
+                    document_id: contract_id
+                }
+            });
+            if (!contract) {
+                return res.status(404).json({ error: 'Contract not found' });
+            }
+            await checkToActiveOrder(contract.order_id);
+            logger.info(contract_id)
+            res.status(200).json({ success: true });
+        } catch (error) {
+            console.error('❌ Ошибка при обработке webhook:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    });
+
     app.use(errorHandler);
 
     return { app, server };
