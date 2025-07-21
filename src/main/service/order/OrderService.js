@@ -1,14 +1,14 @@
 import {
+    Contract,
+    MovingOrder,
     Order,
     OrderItem,
-    Storage,
-    User,
+    OrderPayment,
     OrderService,
     Service,
-    OrderPayment,
-    Warehouse,
-    MovingOrder,
-    Contract
+    Storage,
+    User,
+    Warehouse
 } from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
@@ -517,8 +517,9 @@ export const extendOrder = async (data, userId) => {
         }
 
         if (!data.is_extended) {
-            order.extended = 'CANCELED';
+            order.extension_status = 'CANCELED';
             await order.save({ transaction: tx });
+            await tx.commit();
             confirmOrChangeMovingOrder(order.id);
             return
         }
@@ -531,6 +532,7 @@ export const extendOrder = async (data, userId) => {
         );
         order.total_price = Number(order.total_price) + Number(total_price);
         order.end_date = end_date;
+        order.extension_status = 'NO';
         await order.save({ transaction: tx });
 
         const { orderPayments } = await paymentService.generateOrderPayments({
@@ -557,3 +559,17 @@ export const extendOrder = async (data, userId) => {
         is_sms: true
     });
 };
+
+export const checkToActiveOrder = async (orderId) => {
+    const contract = await Contract.findOne({
+        where: { order_id: orderId }
+    });
+    const data = await getContractStatus(contract.document_id);
+    const order = await Order.findByPk(orderId);
+    logger.info("CONTRACT STATUS",{response: data});
+    if (data === 3 && order.payment_status === 'PAID') {
+        await Order.update({status: 'ACTIVE'}, {
+            where: {id: orderId}
+        })
+    }
+}
