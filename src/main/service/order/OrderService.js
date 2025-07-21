@@ -522,7 +522,7 @@ export const extendOrder = async (data, userId) => {
         }
 
         if (!data.is_extended) {
-            order.extended = 'CANCELED';
+            order.extension_status = 'CANCELED';
             await order.save({ transaction: tx });
             confirmOrChangeMovingOrder(order.id);
             return
@@ -536,6 +536,7 @@ export const extendOrder = async (data, userId) => {
         );
         order.total_price = Number(order.total_price) + Number(total_price);
         order.end_date = end_date;
+        order.extension_status = 'NO';
         await order.save({ transaction: tx });
 
         const { orderPayments } = await paymentService.generateOrderPayments({
