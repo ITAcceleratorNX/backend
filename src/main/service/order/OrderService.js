@@ -524,6 +524,7 @@ export const extendOrder = async (data, userId) => {
         if (!data.is_extended) {
             order.extension_status = 'CANCELED';
             await order.save({ transaction: tx });
+            await tx.commit();
             confirmOrChangeMovingOrder(order.id);
             return
         }
