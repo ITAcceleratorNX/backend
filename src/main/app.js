@@ -121,7 +121,7 @@ export default async function appFactory() {
     app.use('/notifications',authenticateJWT, notificationRoutes);
     app.use('/callbacks', successPaymentCallback);
     app.use('/payments', paymentRoutes);
-    app.use('/moving', movingOrderRoutes)
+    app.use('/moving', authenticateJWT, movingOrderRoutes)
     app.use('/order-services',authenticateJWT, orderServiceRoutes);
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
