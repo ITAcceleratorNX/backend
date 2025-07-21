@@ -134,48 +134,6 @@ export const update = async (id, data, options = {}) => {
     });
 };
 
-export const approveOrder = async (id, data) => {
-    logger.info("APPROVE ORDER DATA FROM FRONTEND", {response: data})
-    const tx = await sequelize.transaction();
-    try {
-        const updatingOrder = await getById(id)
-        if (!updatingOrder) {
-            throw Object.assign(new Error('Not found'), { status: 400 });
-        } else if (updatingOrder.status !== 'INACTIVE') {
-            throw Object.assign(new Error('Approve only for inactive orders'), { status: 400 });
-        }
-        const updatedOrder = await update(id, data, { transaction: tx });
-        await Contract.create({
-            order_id: id,
-            punct33: data.punct33 ?? null
-        },{ transaction: tx })
-        if (data.is_selected_moving) {
-            const enrichedMovingOrders = data.moving_orders.map(movingOrder => ({
-                ...movingOrder,
-                order_id: id,
-                vehicle_type: 'LARGE',
-                availability: movingOrder.status === 'PENDING_FROM' ? 'AVAILABLE': 'NOT_AVAILABLE',
-            }));
-
-            await movingOrderService.bulkCreate(enrichedMovingOrders, { transaction: tx });
-            await validateServiceIds(data?.services, tx);
-            const enrichedOrderServices = data.services.map(service => ({
-                ...service,
-                order_id: id,
-                count: service.count
-            }))
-            await OrderService.bulkCreate(enrichedOrderServices, { transaction: tx });
-        }
-        const contractData = await createContract(id, tx);
-        logger.info("TRUST ME DATA", {response: contractData});
-
-        await tx.commit();
-        return updatedOrder;
-    } catch (error) {
-        await tx.rollback();
-        throw error;
-    }
-}
 const contractStatusMap = {
     0: 'Не подписан',
     1: 'Подписан компанией',
@@ -286,7 +244,16 @@ export const deleteById = async (id) => {
 export const createOrder = async (req) => {
     const transaction = await sequelize.transaction();
     try {
-        const { storage_id, order_items, months } = req.body;
+        const {
+            storage_id,
+            order_items,
+            months,
+            is_selected_moving,
+            moving_orders,
+            is_selected_package,
+            services,
+            punct33
+        } = req.body;
         const { id: user_id } = req.user;
 
         const user = await userService.getById(user_id);
@@ -311,6 +278,7 @@ export const createOrder = async (req) => {
             total_volume: storage.storage_type === 'INDIVIDUAL' ? Number(storage.total_volume) : Number(total_volume),
             total_price: total_price,
             created_at: new Date(),
+            status: 'APPROVED',
         };
 
         const order = await Order.create(orderData, { transaction });
@@ -322,6 +290,33 @@ export const createOrder = async (req) => {
         await OrderItem.bulkCreate(itemsToCreate, { transaction });
 
         await updateStorageVolume(storage, total_volume, transaction);
+
+        await Contract.create({
+            order_id: order.id,
+            punct33: punct33 ?? null
+        },{ transaction: transaction });
+
+        if (is_selected_moving) {
+            const enrichedMovingOrders = moving_orders.map(movingOrder => ({
+                ...movingOrder,
+                order_id: order.id,
+                vehicle_type: 'LARGE',
+                availability: movingOrder.status === 'PENDING_FROM' ? 'AVAILABLE': 'NOT_AVAILABLE',
+            }));
+
+            await movingOrderService.bulkCreate(enrichedMovingOrders, { transaction: transaction });
+        }
+        if (is_selected_package) {
+            await validateServiceIds(services, transaction);
+            const enrichedOrderServices = services.map(service => ({
+                ...service,
+                order_id: order.id,
+                count: service.count
+            }))
+            await OrderService.bulkCreate(enrichedOrderServices, { transaction: transaction });
+        }
+        const contractData = await createContract(order.id, transaction);
+        logger.info("TRUST ME DATA", {response: contractData});
 
         await transaction.commit();
         return order;
