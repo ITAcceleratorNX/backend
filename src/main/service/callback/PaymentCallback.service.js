@@ -4,6 +4,7 @@ import {Order, OrderPayment, Transaction, User} from "../../models/init/index.js
 import {NotificationService} from "../notification/notification.service.js";
 import {Op} from "sequelize";
 import { tryClearingAsync } from "../payment/clearing.service.js";
+import {checkToActiveOrder} from "../order/OrderService.js";
 
 const notificationService = new NotificationService();
 
@@ -100,6 +101,7 @@ const handleWithdraw = async (data) => {
         })
         await transaction.commit();
         tryClearingAsync(String(data.payment_id), data.amount, data.order_id);
+        checkToActiveOrder(transactionData.order_payment.order.id)
     } catch (err) {
         await transaction.rollback();
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
