@@ -571,8 +571,9 @@ export const checkToActiveOrder = async (orderId) => {
         where: { order_id: order.id }
     });
     const data = await getContractStatus(contract.document_id);
+    const order = await Order.findByPk(orderId);
     logger.info("CONTRACT STATUS",{response: data});
-    if (data === 3) {
+    if (data === 3 && order.payment_status === 'PAID') {
         await Order.update({status: 'ACTIVE'}, {
             where: {id: orderId}
         })
