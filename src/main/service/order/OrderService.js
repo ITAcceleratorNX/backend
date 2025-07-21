@@ -23,6 +23,7 @@ import * as orderPaymentService from "../order_payments/OrderPaymentsService.js"
 import * as paymentService from "../payment/PaymentService.js";
 import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
+import order from "../../models/Order.js";
 
 const notificationService = new NotificationService();
 
@@ -564,3 +565,16 @@ export const extendOrder = async (data, userId) => {
         is_sms: true
     });
 };
+
+export const checkToActiveOrder = async (orderId) => {
+    const contract = await Contract.findOne({
+        where: { order_id: order.id }
+    });
+    const data = await getContractStatus(contract.document_id);
+    logger.info("CONTRACT STATUS",{response: data});
+    if (data === 3) {
+        await Order.update({status: 'ACTIVE'}, {
+            where: {id: orderId}
+        })
+    }
+}
