@@ -1,14 +1,14 @@
 import {
+    Contract,
+    MovingOrder,
     Order,
     OrderItem,
-    Storage,
-    User,
+    OrderPayment,
     OrderService,
     Service,
-    OrderPayment,
-    Warehouse,
-    MovingOrder,
-    Contract
+    Storage,
+    User,
+    Warehouse
 } from "../../models/init/index.js";
 import * as priceService from "../price/PriceService.js";
 import {sequelize} from "../../config/database.js";
@@ -16,14 +16,13 @@ import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
+import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as paymentService from "../payment/PaymentService.js";
-import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
-import order from "../../models/Order.js";
 
 const notificationService = new NotificationService();
 
@@ -568,7 +567,7 @@ export const extendOrder = async (data, userId) => {
 
 export const checkToActiveOrder = async (orderId) => {
     const contract = await Contract.findOne({
-        where: { order_id: order.id }
+        where: { order_id: orderId }
     });
     const data = await getContractStatus(contract.document_id);
     const order = await Order.findByPk(orderId);
