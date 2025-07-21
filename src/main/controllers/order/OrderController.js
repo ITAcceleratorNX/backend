@@ -37,27 +37,6 @@ export const updateOrder = base.update;
 
 export const deleteOrder = base.delete;
 
-export const approveOrder = asyncHandler(async (req, res) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) {
-        logger.warn('Invalid ID received', {
-            userId: req.user?.id || null,
-            endpoint: req.originalUrl,
-            requestId: req.id,
-            idParam: req.params.id
-        });
-        return res.status(400).json({error: 'Invalid order ID'});
-    }
-    const response = await orderService.approveOrder(id, req.body);
-    logger.info('Updated order status', {
-        userId: req.user?.id || null,
-        endpoint: req.originalUrl,
-        response: response
-    });
-
-    return res.status(200).json({response});
-});
-
 export const cancelOrder = asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
     await orderService.cancelOrder(id, req.user.id,req.body.document_id);
