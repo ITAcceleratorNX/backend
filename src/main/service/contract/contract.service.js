@@ -3,9 +3,12 @@ import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
 import {Contract, Order} from "../../models/init/index.js";
 import logger from "../../utils/winston/logger.js";
+import {TRUSTME_ERROR_MESSAGES} from "./trustmeErrorMessages.js";
 
 const TRUST_ME_API_TOKEN = process.env.TRUST_ME_API_TOKEN;
 const TRUST_ME_API_URL = process.env.TRUST_ME_API_URL;
+
+
 export const createContract = async (id, tx) => {
 
     const order = await orderService.getByIdForContract(id, { transaction: tx });
@@ -76,8 +79,16 @@ export const createContract = async (id, tx) => {
         return response.data;
 
     } catch (error) {
-        console.error('Ошибка создания договора:', error.response?.data || error.message);
-        throw error;
+        const errorCode = error.response?.data?.ErrorText;
+        const readableMessage = TRUSTME_ERROR_MESSAGES[errorCode] || 'Неизвестная ошибка от TrustMe API';
+
+        console.error('Ошибка создания договора:', readableMessage);
+
+        throw {
+            status: 500,
+            message: readableMessage,
+            raw: error.response?.data
+        };
     }
 }
 export const getContractStatus = async (documentId) => {
