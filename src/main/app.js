@@ -136,7 +136,7 @@ export default async function appFactory() {
             return res.status(403).json({ error: 'Forbidden: Invalid token' });
         }
 
-        const {contract_id} = req.body;
+        const {contract_id,status} = req.body;
         const body=req.body
         logger.info("callback",{response: body})
         try {
@@ -146,9 +146,13 @@ export default async function appFactory() {
                 }
             });
             if (!contract) {
+                logger.warn("Check To Active Order: Contract not found");
+                return;
+            }
+            if (!contract) {
                 return res.status(404).json({ error: 'Contract not found' });
             }
-            await checkToActiveOrder({document_id: contract.order_id});
+            await checkToActiveOrder({order_id: contract.order_id,status});
 
             res.status(200).json({ success: true });
         } catch (error) {

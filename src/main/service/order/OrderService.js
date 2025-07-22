@@ -566,28 +566,10 @@ export const extendOrder = async (data, userId) => {
     });
 };
 
-export const checkToActiveOrder = async ({ order_id, document_id }) => {
-    if (!order_id && !document_id) {
-        logger.warn("Check To Active Order: Missing parameters");
-        return;
-    }
+export const checkToActiveOrder = async ({ order_id,status}) => {
 
-    const contract = await Contract.findOne({
-        where: order_id ? { order_id } : { document_id }
-    });
-
-    if (!contract) {
-        logger.warn("Check To Active Order: Contract not found");
-        return;
-    }
-
-    const docId = contract.document_id;
-    const contractStatus = await getContractStatus(docId);
-    const order = await Order.findByPk(contract.order_id);
-
-    logger.info("CONTRACT STATUS", { response: contractStatus });
-
-    if (contractStatus === 3 && order?.payment_status === 'PAID') {
+    const order = await Order.findByPk(order_id);
+    if (status === 3 && order?.payment_status === 'PAID') {
         await order.update({ status: 'ACTIVE' });
     }
 };
