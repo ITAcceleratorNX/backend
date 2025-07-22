@@ -497,6 +497,7 @@ export const cancelOrder = async (orderId, userId,documentId) => {
 
 export const extendOrder = async (data, userId) => {
     const { order_id, months } = data;
+
     const tx = await sequelize.transaction();
     try {
         const user = await userService.getById(userId);
@@ -543,6 +544,11 @@ export const extendOrder = async (data, userId) => {
         }, 0);
 
         await orderPaymentService.bulkCreate(orderPayments, { transaction: tx });
+        await Contract.create({
+            order_id: order_id,
+        },{ transaction: tx });
+        const contractData = await createContract(order.id, tx);
+        logger.info("TRUST ME DATA", {response: contractData});
         await tx.commit();
     } catch (error) {
         await tx.rollback();
