@@ -68,6 +68,7 @@ export default async function appFactory() {
             userId: req.user?.id || null,
             endpoint: req.originalUrl,
             method: req.method,
+            body: req.body
         });
         next();
     });
@@ -131,6 +132,7 @@ export default async function appFactory() {
         const expectedToken = process.env.TRUSTME_HOOK_SECRET;
 
         if (incomingToken !== expectedToken) {
+            logger.warn("Incorrect TRUST ME TOKEN", {response: incomingToken});
             return res.status(403).json({ error: 'Forbidden: Invalid token' });
         }
 
