@@ -136,7 +136,7 @@ export default async function appFactory() {
 
         const {contract_id} = req.body;
         const body=req.body
-        logger.error("callback",{body})
+        logger.error("callback",{response: body})
         try {
             const contract = await Contract.findOne({
                 where: {
