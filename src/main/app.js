@@ -135,7 +135,8 @@ export default async function appFactory() {
         }
 
         const {contract_id} = req.body;
-        logger.error(req.body)
+        const body=req.body
+        logger.error("callback",{body})
         try {
             const contract = await Contract.findOne({
                 where: {
@@ -146,7 +147,7 @@ export default async function appFactory() {
                 return res.status(404).json({ error: 'Contract not found' });
             }
             await checkToActiveOrder(contract.order_id);
-            logger.info(contract_id)
+
             res.status(200).json({ success: true });
         } catch (error) {
             console.error('❌ Ошибка при обработке webhook:', error);
