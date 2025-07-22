@@ -135,7 +135,7 @@ export default async function appFactory() {
         }
 
         const {contract_id} = req.body;
-
+        logger.error(req.body)
         try {
             const contract = await Contract.findOne({
                 where: {
