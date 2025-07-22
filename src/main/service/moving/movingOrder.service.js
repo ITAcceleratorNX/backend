@@ -259,11 +259,6 @@ export const getOrdersByStatus = async (status) => {
                     attributes: ['name']
                 },
                 {
-                    model: User,
-                    as: 'user',
-                    attributes: ['address', 'phone']
-                },
-                {
                     model: Service,
                     as: 'services',
                     attributes: ['description', 'type'],
@@ -288,11 +283,9 @@ export const getOrdersByStatus = async (status) => {
             warehouseAddress: order?.storage?.warehouse?.address || null,
             storageName: order?.storage?.name || null,
             userAddress: item?.address || null,
-            userName: order.user.name || null,
             serviceDescriptions,
             availability: item.availability || null,
             items: order?.items || [],
-            phone: order?.user.phone || null,
         });
     }
 
