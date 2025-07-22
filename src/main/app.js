@@ -148,7 +148,7 @@ export default async function appFactory() {
             if (!contract) {
                 return res.status(404).json({ error: 'Contract not found' });
             }
-            await checkToActiveOrder(contract.order_id);
+            await checkToActiveOrder({document_id: contract.order_id});
 
             res.status(200).json({ success: true });
         } catch (error) {

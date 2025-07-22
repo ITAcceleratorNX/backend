@@ -101,7 +101,7 @@ const handleWithdraw = async (data) => {
         })
         await transaction.commit();
         tryClearingAsync(String(data.payment_id), data.amount, data.order_id);
-        checkToActiveOrder(transactionData.order_payment.order.id)
+        checkToActiveOrder({order_id: transactionData.order_payment.order.id})
     } catch (err) {
         await transaction.rollback();
         logger.error(`Error creating payment transaction, message: ${err.message}`, { error: err });
