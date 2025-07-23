@@ -30,7 +30,6 @@ import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./servi
 import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 import orderServiceRoutes from "./routes/order_service/orderService.routes.js";
 import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
-import {clearingRetryJob} from "./service/payment/clearing.service.js";
 import {
     autoExtendPendingOrders,
     markExpiredOrdersAsFinished,
@@ -96,9 +95,9 @@ export default async function appFactory() {
         logger.info('🕒 Cron, проверка истекших оплат');
         processCronJobForExpiredTransactions();
     });
-    cron.schedule("*/10 * * * *", async () => {
-        await clearingRetryJob(); // каждые 10 минут
-    });
+    // cron.schedule("*/10 * * * *", async () => {
+    //     await clearingRetryJob(); // каждые 10 минут
+    // });
     cron.schedule('0 */6 * * *', () => {
         logger.info('Cron, проверка заканчивающихся броней');
         markOrdersWith10DaysLeftAsPending()
