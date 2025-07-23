@@ -567,6 +567,7 @@ export const extendOrder = async (data, userId) => {
 };
 
 export const checkToActiveOrder = async (order_id) => {
+    logger.info("method checkToActiveOrder");
     if (!order_id) {
         logger.warn("Check To Active Order: Missing parameters");
         return;
@@ -585,9 +586,10 @@ export const checkToActiveOrder = async (order_id) => {
     const contractStatus = await getContractStatus(docId);
     const order = await Order.findByPk(contract.order_id);
 
-    logger.info("CONTRACT STATUS", { response: contractStatus });
+    logger.info("CONTRACT STATUS", { body: contractStatus });
 
     if (contractStatus === 3 && order?.payment_status === 'PAID') {
         await order.update({ status: 'ACTIVE' });
+        logger.info("SUCCESS UPDATE ORDER STATUS", { body: order.status });
     }
 };
