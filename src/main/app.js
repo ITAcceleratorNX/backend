@@ -128,14 +128,6 @@ export default async function appFactory() {
         res.status(404).json({ error: 'Не найдено' });
     });
     app.post('/ntfmessage', async (req, res) => {
-        const incomingToken = req.headers['token'];
-        const expectedToken = process.env.TRUSTME_HOOK_SECRET;
-
-        if (incomingToken !== expectedToken) {
-            logger.warn("Incorrect TRUST ME TOKEN", {response: incomingToken});
-            return res.status(403).json({ error: 'Forbidden: Invalid token' });
-        }
-
         const {contract_id} = req.body;
         const body=req.body
         logger.info("callback",{response: body})
@@ -152,7 +144,7 @@ export default async function appFactory() {
             if (!contract) {
                 return res.status(404).json({ error: 'Contract not found' });
             }
-            await checkToActiveOrder({order_id: contract.order_id});
+            await checkToActiveOrder(contract.order_id);
 
             res.status(200).json({ success: true });
         } catch (error) {

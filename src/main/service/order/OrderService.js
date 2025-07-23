@@ -566,14 +566,14 @@ export const extendOrder = async (data, userId) => {
     });
 };
 
-export const checkToActiveOrder = async ({ order_id, document_id }) => {
-    if (!order_id && !document_id) {
+export const checkToActiveOrder = async (order_id) => {
+    if (!order_id) {
         logger.warn("Check To Active Order: Missing parameters");
         return;
     }
 
     const contract = await Contract.findOne({
-        where: order_id ? { order_id } : { document_id }
+        where: {order_id: order_id}
     });
 
     if (!contract) {
