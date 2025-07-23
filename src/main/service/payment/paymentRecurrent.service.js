@@ -103,7 +103,6 @@ export async function runMonthlyPayments() {
 
                     await t.commit();
 
-                    tryClearingAsync(String(payment.payment_id), Number(transaction.amount), transaction.id);
                     await notificationService.sendNotification({
                         user_id: user.id,
                         title: 'Оплата прошла успешно',
