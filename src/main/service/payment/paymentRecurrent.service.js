@@ -7,7 +7,6 @@ import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
 import JSONbig from "json-bigint";
 import logger from "../../utils/winston/logger.js";
-import {tryClearingAsync} from "./clearing.service.js";
 
 const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
 const API_KEY = process.env.PAYMENT_API_KEY;
