@@ -45,6 +45,15 @@ export async function runMonthlyPayments() {
             payment.status = 'MANUAL';
             await payment.save();
             logger.warn(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
+            await notificationService.sendNotification({
+                user_id: payment.order.user.id,
+                title: 'Небольшая заминка с оплатой!',
+                message: 'К сожалению, не удалось провести ежемесячную оплату. Пожалуйста, перейдите на сайт Extraspace и оплатите вручную. Если возникли вопросы — мы всегда рядом и готовы помочь!',
+                notification_type: 'general',
+                related_order_id: payment.id,
+                is_email: true,
+                is_sms: false
+            });
             continue;
         }
 
