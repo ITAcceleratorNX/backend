@@ -126,10 +126,10 @@ export default async function appFactory() {
     app.use('/payments', paymentRoutes);
     app.use('/moving', movingOrderRoutes)
     app.use('/order-services',authenticateJWT, orderServiceRoutes);
+    app.use("/ntfmessage", trustmeRouter)
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
-    app.use("/ntfmessage", trustmeRouter)
 
     app.use(errorHandler);
 
