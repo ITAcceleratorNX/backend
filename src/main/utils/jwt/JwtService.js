@@ -15,6 +15,7 @@ export const setTokenCookie=(res, token) =>{
         httpOnly: true,
         secure: true,
         sameSite: 'none',
+        domain: process.env.FRONTEND_URL,
         maxAge: 7 * 24 * 60 * 60 * 1000
     });
 }

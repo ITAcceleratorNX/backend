@@ -4,7 +4,7 @@ import cors from 'cors';
 import passport from './config/passport.js';
 import googleAuthRoutes from './routes/auth/google.js';
 import basicAuthRoutes from './routes/auth/BasicAuthRouter.js';
-import { authenticateJWT } from "./middleware/jwt.js";
+import {authenticateJWT} from "./middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
@@ -13,7 +13,7 @@ import warehouseRoutes from "./routes/warehouse/WarehouseRoutes.js";
 import userRoutes from './routes/user/UserRoutes.js';
 import cookieParser from 'cookie-parser';
 import http from "http";
-import { setWSS } from "./config/ws.js";
+import {setWSS} from "./config/ws.js";
 import logger from "./utils/winston/logger.js";
 import {errorHandler} from "./middleware/errorHandler.js";
 import chatRoutes from "./routes/chat/ChatRoutes.js";
@@ -24,7 +24,7 @@ import orderRoutes from "./routes/order/OrderRoutes.js";
 import successPaymentCallback from "./routes/callbacks/PaymentCallback.router.js";
 import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
-import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
+import {runMonthlyPayments} from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
 import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
@@ -36,8 +36,6 @@ import {
     markExpiredOrdersAsFinished,
     markOrdersWith10DaysLeftAsPending
 } from "./service/order/job/OrderJob.js";
-import {Contract} from "./models/init/index.js";
-import {checkToActiveOrder} from "./service/order/OrderService.js";
 import trustmeRouter from "./routes/callbacks/trustme.router.js";
 
 export default async function appFactory() {

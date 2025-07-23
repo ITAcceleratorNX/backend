@@ -13,7 +13,7 @@ router.get('/google/callback', passport.authenticate('google', {
 }), (req, res) => {
     const token = req.user.token;
     setTokenCookie(res, token);
-    res.redirect(process.env.FRONTEND_URL);
+    res.redirect(process.env.FRONTEND_URL + '/personal-account');
 });
 
 router.get('/logout', (req, res) => {
