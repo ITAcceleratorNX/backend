@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as orderService from "../order/OrderService.js";
 import {getByType} from "../price/PriceService.js";
-import {Contract, Order} from "../../models/init/index.js";
+import {Contract} from "../../models/init/index.js";
 import logger from "../../utils/winston/logger.js";
 import {TRUSTME_ERROR_MESSAGES} from "./trustmeErrorMessages.js";
 
