@@ -47,7 +47,10 @@ const logger = winston.createLogger({
     ),
     transports: [
         transport,
-        new winston.transports.Console({ format: consoleFormat })
+        new winston.transports.Console({
+            level: 'debug',
+            format: consoleFormat
+        })
     ]
 });
 
