@@ -186,11 +186,6 @@ export const getMyContracts = async (userId) => {
             const latestContract = order.contracts?.sort(
                 (a, b) => new Date(b.created_at) - new Date(a.created_at)
             )[0] || null;
-
-            const contract_status = latestContract
-                ? await getContractStatus(latestContract.document_id)
-                : null;
-            logger.error(contract_status)
             return {
                 order_id: order.id,
                 storage_name: order.storage.name,
@@ -200,7 +195,7 @@ export const getMyContracts = async (userId) => {
                     start_date: order.start_date,
                     end_date: order.end_date
                 },
-                contract_status: contractStatusMap[contract_status],
+                contract_status: contractStatusMap[latestContract.status],
                 contract_data: latestContract ? {
                     contract_id: latestContract.id,
                     document_id: latestContract.document_id,

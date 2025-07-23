@@ -1,14 +1,12 @@
 import express from 'express';
 import logger from "../../utils/winston/logger.js";
-import {Contract} from "../../models/init/index.js";
+import {Contract, Order} from "../../models/init/index.js";
 import {checkToActiveOrder} from "../../service/order/OrderService.js";
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-    const {contract_id} = req.body;
-    const body=req.body
-    logger.info("callback",{response: body})
+    const {contract_id,status} = req.body;
     try {
         const contract = await Contract.findOne({
             where: {
@@ -19,8 +17,14 @@ router.post('/', async (req, res) => {
             logger.warn("Check To Active Order: Contract not found");
             return;
         }
-        if (!contract) {
-            return res.status(404).json({ error: 'Contract not found' });
+        await Contract.update({
+            status: status
+        },{where: {contract_id: contract_id}});
+        if(status===2){
+            await Order.update(
+                { contract_status: 'SIGNED' },
+                { where: { id: contract.order_id }}
+            );
         }
         await checkToActiveOrder(contract.order_id);
 

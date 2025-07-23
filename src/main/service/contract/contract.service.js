@@ -72,10 +72,6 @@ export const createContract = async (id, tx) => {
             url: response.data.data.url,
             document_id: response.data.data.id
         }, latestContract.id, { transaction: tx });
-        await Order.update(
-            { contract_status: 'SIGNED' },
-            { where: { id: id } , transaction: tx }
-        );
         return response.data;
 
     } catch (error) {
