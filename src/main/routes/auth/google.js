@@ -22,8 +22,9 @@ router.get('/logout', (req, res) => {
         res.clearCookie('token', {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             path: '/',
+            domain: '.shakyrty.kz'
         }).redirect(process.env.FRONTEND_URL + "/login");
     });
 });
