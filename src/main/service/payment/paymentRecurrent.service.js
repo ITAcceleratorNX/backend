@@ -28,6 +28,7 @@ export async function runMonthlyPayments() {
             {
                 model: Order,
                 as: 'order',
+                where: { status: 'ACTIVE' },
                 include: [
                     {
                         model: User,
