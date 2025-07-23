@@ -4,7 +4,7 @@ import {asyncHandler} from "../../utils/handler/asyncHandler.js";
 
 export const createPayment = asyncHandler(async (req, res) => {
     const response = await paymentService.create(req.body, req.user.id);
-    return res.redirect(response.payment_page_url);
+    res.status(201).json(response);
 });
 
 export const getMyPayments = asyncHandler(async (req, res) => {
