@@ -55,7 +55,7 @@ export const tryClearingAsync = async (payment_id, amount, order_id) => {
     (async () => {
         try {
             const response = await retry(() => sendClearingRequest({ payment_id: String(payment_id), amount }));
-            if (response.status !== 'success') {
+            if (!response.success) {
                 logger.error(`Clearing failed for payment_id: ${payment_id}`, { response });
                 await Transaction.update({ clearing_status: 'FAILED' }, { where: { id: order_id } });
                 return;
