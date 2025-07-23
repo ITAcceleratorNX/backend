@@ -76,6 +76,7 @@ export default async function appFactory() {
     app.use(passport.initialize());
     app.use(passport.session());
     app.get('/', (req, res) => {
+        logger.info("LOGGER WORKING")
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
 
