@@ -38,6 +38,7 @@ import {
 } from "./service/order/job/OrderJob.js";
 import {Contract} from "./models/init/index.js";
 import {checkToActiveOrder} from "./service/order/OrderService.js";
+import trustmeRouter from "./routes/callbacks/trustme.router.js";
 
 export default async function appFactory() {
     await initDb();
@@ -128,31 +129,7 @@ export default async function appFactory() {
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
     });
-    app.post('/ntfmessage', async (req, res) => {
-        const {contract_id} = req.body;
-        const body=req.body
-        logger.info("callback",{response: body})
-        try {
-            const contract = await Contract.findOne({
-                where: {
-                    document_id: contract_id
-                }
-            });
-            if (!contract) {
-                logger.warn("Check To Active Order: Contract not found");
-                return;
-            }
-            if (!contract) {
-                return res.status(404).json({ error: 'Contract not found' });
-            }
-            await checkToActiveOrder(contract.order_id);
-
-            res.status(200).json({ success: true });
-        } catch (error) {
-            console.error('❌ Ошибка при обработке webhook:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    });
+    app.use("/ntfmessage", trustmeRouter)
 
     app.use(errorHandler);
 
