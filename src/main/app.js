@@ -80,7 +80,7 @@ export default async function appFactory() {
     });
 
 
-    cron.schedule('0 0 1 * *', () => {
+    cron.schedule('*/1 * * * *', () => {
         logger.info('⏰ Запуск автооплаты...');
         runMonthlyPayments();
     });
