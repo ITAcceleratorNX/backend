@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
         }
         await Contract.update({
             status: status
-        },{where: {contract_id: contract_id}});
+        },{where: {document_id: contract_id}});
         if(status===2){
             await Order.update(
                 { contract_status: 'SIGNED' },
