@@ -22,7 +22,7 @@ export const sendClearingRequest = async ({ payment_id, amount }) => {
 
     payment_id = BigInt(payment_id);
 
-    const requestBody = { payment_id, amount };
+    const requestBody = { payment_id, amount, test_mode: 1 };
     const dataJson = JSONbig.stringify(requestBody);
     const dataBase64 = Buffer.from(dataJson).toString('base64');
 
