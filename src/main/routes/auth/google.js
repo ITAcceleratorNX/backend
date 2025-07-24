@@ -24,7 +24,7 @@ router.get('/logout', (req, res) => {
             secure: true,
             sameSite: 'none',
             path: '/',
-            domain: '.extraspace.kz'
+            // domain: '.extraspace.kz'
         }).redirect(process.env.FRONTEND_URL + "/login");
     });
 });
