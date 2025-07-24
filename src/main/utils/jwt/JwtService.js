@@ -10,14 +10,11 @@ export const generateToken = (user) => {
         {expiresIn: JWT_EXPIRES_IN,}
     );
 };
-export const setTokenCookie = (res, token) => {
-    const isProd = process.env.NODE_ENV === 'production';
-
+export const setTokenCookie=(res, token) =>{
     res.cookie('token', token, {
         httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        ...(isProd && { domain: '.extraspace.kz' }),
     });
-};
+}
