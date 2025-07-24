@@ -19,7 +19,7 @@ export function createSequelize({ dbName, user, password, host, port }) {
             timestamps: false,
             freezeTableName: true
         },
-        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        logging: true,
         dialectOptions: {
             ssl: process.env.DB_SSL === 'true' ? {
                 require: true,
