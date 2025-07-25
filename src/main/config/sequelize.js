@@ -8,7 +8,7 @@ export function createSequelize({ dbName, user, password, host, port }) {
         host,
         port,
         dialect: 'postgres',
-        timezone: '+06:00',
+        timezone: '+00:00',
         pool: {
             max: 10,
             min: 0,
@@ -19,7 +19,7 @@ export function createSequelize({ dbName, user, password, host, port }) {
             timestamps: false,
             freezeTableName: true
         },
-        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        logging: true,
         dialectOptions: {
             ssl: process.env.DB_SSL === 'true' ? {
                 require: true,

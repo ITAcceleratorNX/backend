@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {MovingOrderDto} from "../moving/MovingOrder.dto.js";
 import {OrderServiceDto} from "../serivce/Service.dto.js";
 
-export const OrderDto = z.object({
+export const Order = z.object({
     storage_id: z.number({
         required_error: 'storage_id is required',
         invalid_type_error: 'storage_id must be a number',
@@ -18,7 +18,9 @@ export const OrderDto = z.object({
     moving_orders: z.array(MovingOrderDto).optional(),
     services: z.array(OrderServiceDto).optional(),
     punct33: z.string().optional(),
-}).superRefine((data, ctx) => {
+});
+
+export const OrderDto = Order.superRefine((data, ctx) => {
     if (data.is_selected_moving && (!data.moving_orders || data.moving_orders.length === 0)) {
         ctx.addIssue({
             path: ['moving_orders'],
@@ -34,9 +36,9 @@ export const OrderDto = z.object({
             message: 'services is required',
         });
     }
-});
+})
 
-export const OrderUpdateDto = OrderDto.partial();
+export const OrderUpdateDto = Order.partial();
 
 export const ExtendedOrderDto = z.object({
     is_extended: z.boolean(),

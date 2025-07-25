@@ -16,12 +16,12 @@ import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
+import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as paymentService from "../payment/PaymentService.js";
-import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
@@ -186,11 +186,6 @@ export const getMyContracts = async (userId) => {
             const latestContract = order.contracts?.sort(
                 (a, b) => new Date(b.created_at) - new Date(a.created_at)
             )[0] || null;
-
-            const contract_status = latestContract
-                ? await getContractStatus(latestContract.document_id)
-                : null;
-            logger.error(contract_status)
             return {
                 order_id: order.id,
                 storage_name: order.storage.name,
@@ -200,7 +195,7 @@ export const getMyContracts = async (userId) => {
                     start_date: order.start_date,
                     end_date: order.end_date
                 },
-                contract_status: contractStatusMap[contract_status],
+                contract_status: contractStatusMap[latestContract.status],
                 contract_data: latestContract ? {
                     contract_id: latestContract.id,
                     document_id: latestContract.document_id,
@@ -566,16 +561,30 @@ export const extendOrder = async (data, userId) => {
     });
 };
 
-export const checkToActiveOrder = async (orderId) => {
-    const contract = await Contract.findOne({
-        where: { order_id: orderId }
-    });
-    const data = await getContractStatus(contract.document_id);
-    const order = await Order.findByPk(orderId);
-    logger.info("CONTRACT STATUS",{response: data});
-    if (data === 3 && order.payment_status === 'PAID') {
-        await Order.update({status: 'ACTIVE'}, {
-            where: {id: orderId}
-        })
+export const checkToActiveOrder = async (order_id) => {
+    logger.info("method checkToActiveOrder");
+    if (!order_id) {
+        logger.warn("Check To Active Order: Missing parameters");
+        return;
     }
-}
+
+    const contract = await Contract.findOne({
+        where: {order_id: order_id}
+    });
+
+    if (!contract) {
+        logger.warn("Check To Active Order: Contract not found");
+        return;
+    }
+
+    const docId = contract.document_id;
+    const contractStatus = await getContractStatus(docId);
+    const order = await Order.findByPk(contract.order_id);
+
+    logger.info("CONTRACT STATUS", { body: contractStatus });
+
+    if (contractStatus === 3 && order?.payment_status === 'PAID') {
+        await order.update({ status: 'ACTIVE' });
+        logger.info("SUCCESS UPDATE ORDER STATUS", { body: order.status });
+    }
+};
