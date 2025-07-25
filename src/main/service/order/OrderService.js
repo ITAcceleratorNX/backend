@@ -64,7 +64,7 @@ export const getById = async (id) => {
             {
                 model: User,
                 as: 'user',
-                attributes: ['name', 'phone', 'email'],
+                attributes: ['name', 'phone', 'email', 'role'],
             },
             {
                 model: Service,
@@ -273,7 +273,6 @@ export const createOrder = async (req) => {
             total_volume: storage.storage_type === 'INDIVIDUAL' ? Number(storage.total_volume) : Number(total_volume),
             total_price: total_price,
             created_at: new Date(),
-            status: 'APPROVED',
         };
 
         const order = await Order.create(orderData, { transaction });
@@ -310,8 +309,6 @@ export const createOrder = async (req) => {
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: transaction });
         }
-        const contractData = await createContract(order.id, transaction);
-        logger.info("TRUST ME DATA", {response: contractData});
 
         await transaction.commit();
         return order;
@@ -592,3 +589,29 @@ export const checkToActiveOrder = async (order_id) => {
         logger.info("SUCCESS UPDATE ORDER STATUS", { body: order.status });
     }
 };
+
+export const approveOrder = async (order_id, user_id) => {
+    const tx = await sequelize.transaction();
+    try {
+        const order = await Order.findByPk(order_id, {
+            transaction: tx
+        });
+        if (!order) {
+            throw Object.assign(new Error('Order not found'), { status: 200 });
+        } else if (order.user_id !== user_id) {
+            throw Object.assign(new Error('Forbidden'), { status: 403 });
+        }
+
+        order.status = 'APPROVED';
+        order.save({ transaction: tx });
+
+        const contractData = await createContract(order.id, tx);
+        logger.info("TRUST ME DATA", {response: contractData});
+
+        await tx.commit();
+    } catch (error) {
+        await tx.rollback();
+        logger.error(error);
+        throw error;
+    }
+}
