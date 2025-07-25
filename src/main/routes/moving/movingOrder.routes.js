@@ -19,6 +19,6 @@ router.delete('/:id', authenticateJWT, deleteOrder);
 router.get('/status/:status', authenticateJWT, getOrderByStatus);
 router.get('/orders/delivered', authenticateJWT, getDeliveredOrders);
 router.get("/download/item/:itemId", downloadItemDoc);
-router.get('/me', authenticateJWT, getMyMovings);
+router.get('/me/all', authenticateJWT, getMyMovings);
 
 export default router;
