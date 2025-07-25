@@ -531,6 +531,10 @@ export const extendOrder = async (data, userId) => {
         order.extension_status = 'NO';
         await order.save({ transaction: tx });
 
+        await MovingOrder.update({moving_date: end_date}, {
+            where: {order_id: order.id, availability: 'NOT_AVAILABLE'}
+        })
+
         const { orderPayments } = await paymentService.generateOrderPayments({
             start_date,
             end_date,
