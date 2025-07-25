@@ -33,6 +33,12 @@ export const Contract = sequelize.define('Contract', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    status: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+    },
+
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

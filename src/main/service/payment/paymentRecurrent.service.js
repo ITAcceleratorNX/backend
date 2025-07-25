@@ -7,7 +7,6 @@ import {NotificationService} from '../notification/notification.service.js';
 import {sequelize} from "../../config/database.js";
 import JSONbig from "json-bigint";
 import logger from "../../utils/winston/logger.js";
-import {tryClearingAsync} from "./clearing.service.js";
 
 const API_URL = process.env.ONE_VISION_API_URL_RECURRENT;
 const API_KEY = process.env.PAYMENT_API_KEY;
@@ -29,6 +28,7 @@ export async function runMonthlyPayments() {
             {
                 model: Order,
                 as: 'order',
+                where: { status: 'ACTIVE' },
                 include: [
                     {
                         model: User,
@@ -42,7 +42,18 @@ export async function runMonthlyPayments() {
     for (const payment of unpaidPayments) {
         const user = payment.order?.user;
         if (!user || !user.recurrent_token) {
+            payment.status = 'MANUAL';
+            await payment.save();
             logger.warn(`⚠️ Пропущено: нет токена для user_id ${payment.order.user_id}`);
+            await notificationService.sendNotification({
+                user_id: payment.order.user.id,
+                title: 'Небольшая заминка с оплатой!',
+                message: 'К сожалению, не удалось провести ежемесячную оплату. Пожалуйста, перейдите на сайт Extraspace и оплатите вручную. Если возникли вопросы — мы всегда рядом и готовы помочь!',
+                notification_type: 'general',
+                related_order_id: payment.id,
+                is_email: true,
+                is_sms: false
+            });
             continue;
         }
 
@@ -101,7 +112,6 @@ export async function runMonthlyPayments() {
 
                     await t.commit();
 
-                    tryClearingAsync(String(payment.payment_id), Number(transaction.amount), transaction.id);
                     await notificationService.sendNotification({
                         user_id: user.id,
                         title: 'Оплата прошла успешно',

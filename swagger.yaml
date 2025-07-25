@@ -6,7 +6,7 @@ info:
     Документация по авторизации и WebSocket чату.
 
 servers:
-  - url: https://extraspace-backend.onrender.com
+  - url: https://api.extraspace.kz
 
 paths:
   /logout:

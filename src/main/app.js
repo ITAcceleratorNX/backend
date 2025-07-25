@@ -4,7 +4,7 @@ import cors from 'cors';
 import passport from './config/passport.js';
 import googleAuthRoutes from './routes/auth/google.js';
 import basicAuthRoutes from './routes/auth/BasicAuthRouter.js';
-import { authenticateJWT } from "./middleware/jwt.js";
+import {authenticateJWT} from "./middleware/jwt.js";
 import * as fs from "node:fs";
 import * as yaml from "yaml";
 import swaggerUi from "swagger-ui-express";
@@ -13,7 +13,7 @@ import warehouseRoutes from "./routes/warehouse/WarehouseRoutes.js";
 import userRoutes from './routes/user/UserRoutes.js';
 import cookieParser from 'cookie-parser';
 import http from "http";
-import { setWSS } from "./config/ws.js";
+import {setWSS} from "./config/ws.js";
 import logger from "./utils/winston/logger.js";
 import {errorHandler} from "./middleware/errorHandler.js";
 import chatRoutes from "./routes/chat/ChatRoutes.js";
@@ -24,20 +24,18 @@ import orderRoutes from "./routes/order/OrderRoutes.js";
 import successPaymentCallback from "./routes/callbacks/PaymentCallback.router.js";
 import notificationRoutes from "./routes/notification/notification.routes.js";
 import cron from 'node-cron';
-import { runMonthlyPayments } from './service/payment/paymentRecurrent.service.js';
+import {runMonthlyPayments} from './service/payment/paymentRecurrent.service.js';
 import paymentRoutes from "./routes/payment/PaymentRoutes.js";
 import {handleLateManualPayments, notifyManualPaymentsAfter10Days} from "./service/payment/paymentCheck.service.js";
 import movingOrderRoutes from "./routes/moving/movingOrder.routes.js";
 import orderServiceRoutes from "./routes/order_service/orderService.routes.js";
 import {processCronJobForExpiredTransactions} from "./service/callback/PaymentCallback.service.js";
-import {clearingRetryJob} from "./service/payment/clearing.service.js";
 import {
     autoExtendPendingOrders,
     markExpiredOrdersAsFinished,
     markOrdersWith10DaysLeftAsPending
 } from "./service/order/job/OrderJob.js";
-import {Contract} from "./models/init/index.js";
-import {checkToActiveOrder} from "./service/order/OrderService.js";
+import trustmeRouter from "./routes/callbacks/trustme.router.js";
 
 export default async function appFactory() {
     await initDb();
@@ -68,6 +66,7 @@ export default async function appFactory() {
             userId: req.user?.id || null,
             endpoint: req.originalUrl,
             method: req.method,
+            body: req.body
         });
         next();
     });
@@ -75,6 +74,7 @@ export default async function appFactory() {
     app.use(passport.initialize());
     app.use(passport.session());
     app.get('/', (req, res) => {
+        logger.info("LOGGER WORKING")
         res.status(200).json({ message: 'ExtraSpace API работает!' });
     });
 
@@ -95,9 +95,9 @@ export default async function appFactory() {
         logger.info('🕒 Cron, проверка истекших оплат');
         processCronJobForExpiredTransactions();
     });
-    cron.schedule("*/10 * * * *", async () => {
-        await clearingRetryJob(); // каждые 10 минут
-    });
+    // cron.schedule("*/10 * * * *", async () => {
+    //     await clearingRetryJob(); // каждые 10 минут
+    // });
     cron.schedule('0 */6 * * *', () => {
         logger.info('Cron, проверка заканчивающихся броней');
         markOrdersWith10DaysLeftAsPending()
@@ -123,35 +123,9 @@ export default async function appFactory() {
     app.use('/payments', paymentRoutes);
     app.use('/moving', movingOrderRoutes)
     app.use('/order-services',authenticateJWT, orderServiceRoutes);
+    app.use("/ntfmessage", trustmeRouter)
     app.use((req, res) => {
         res.status(404).json({ error: 'Не найдено' });
-    });
-    app.post('/ntfmessage', async (req, res) => {
-        const incomingToken = req.headers['token'];
-        const expectedToken = process.env.TRUSTME_HOOK_SECRET;
-
-        if (incomingToken !== expectedToken) {
-            return res.status(403).json({ error: 'Forbidden: Invalid token' });
-        }
-
-        const {contract_id} = req.body;
-
-        try {
-            const contract = await Contract.findOne({
-                where: {
-                    document_id: contract_id
-                }
-            });
-            if (!contract) {
-                return res.status(404).json({ error: 'Contract not found' });
-            }
-            await checkToActiveOrder(contract.order_id);
-            logger.info(contract_id)
-            res.status(200).json({ success: true });
-        } catch (error) {
-            console.error('❌ Ошибка при обработке webhook:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
     });
 
     app.use(errorHandler);

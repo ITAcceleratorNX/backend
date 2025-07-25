@@ -259,11 +259,6 @@ export const getOrdersByStatus = async (status) => {
                     attributes: ['name']
                 },
                 {
-                    model: User,
-                    as: 'user',
-                    attributes: ['address', 'phone']
-                },
-                {
                     model: Service,
                     as: 'services',
                     attributes: ['description', 'type'],
@@ -308,4 +303,8 @@ export const confirmOrChangeMovingOrder = async (order_id) => {
         updateOrder(movingOrder.id, {availability: 'AWAITABLE'});
     }
     return true;
+}
+
+export const getMyMovings = async (user_id) => {
+    return await MovingOrder.findAll({ where: { user_id } });
 }

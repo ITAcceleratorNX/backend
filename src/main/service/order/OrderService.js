@@ -16,12 +16,12 @@ import {DateTime} from 'luxon';
 import * as storageService from "../storage/StorageService.js";
 import logger from "../../utils/winston/logger.js";
 import * as movingOrderService from "../moving/movingOrder.service.js";
+import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {fn, literal, Op} from "sequelize";
 import * as userService from "../user/UserService.js";
 import {NotificationService} from "../notification/notification.service.js";
 import * as orderPaymentService from "../order_payments/OrderPaymentsService.js";
 import * as paymentService from "../payment/PaymentService.js";
-import {confirmOrChangeMovingOrder} from "../moving/movingOrder.service.js";
 import {createContract, getContractStatus, revokeContract} from "../contract/contract.service.js";
 
 const notificationService = new NotificationService();
@@ -64,7 +64,7 @@ export const getById = async (id) => {
             {
                 model: User,
                 as: 'user',
-                attributes: ['name', 'phone', 'email'],
+                attributes: ['name', 'phone', 'email', 'role'],
             },
             {
                 model: Service,
@@ -186,11 +186,6 @@ export const getMyContracts = async (userId) => {
             const latestContract = order.contracts?.sort(
                 (a, b) => new Date(b.created_at) - new Date(a.created_at)
             )[0] || null;
-
-            const contract_status = latestContract
-                ? await getContractStatus(latestContract.document_id)
-                : null;
-            logger.error(contract_status)
             return {
                 order_id: order.id,
                 storage_name: order.storage.name,
@@ -200,7 +195,7 @@ export const getMyContracts = async (userId) => {
                     start_date: order.start_date,
                     end_date: order.end_date
                 },
-                contract_status: contractStatusMap[contract_status],
+                contract_status: contractStatusMap[latestContract.status],
                 contract_data: latestContract ? {
                     contract_id: latestContract.id,
                     document_id: latestContract.document_id,
@@ -278,7 +273,6 @@ export const createOrder = async (req) => {
             total_volume: storage.storage_type === 'INDIVIDUAL' ? Number(storage.total_volume) : Number(total_volume),
             total_price: total_price,
             created_at: new Date(),
-            status: 'APPROVED',
         };
 
         const order = await Order.create(orderData, { transaction });
@@ -315,8 +309,6 @@ export const createOrder = async (req) => {
             }))
             await OrderService.bulkCreate(enrichedOrderServices, { transaction: transaction });
         }
-        const contractData = await createContract(order.id, transaction);
-        logger.info("TRUST ME DATA", {response: contractData});
 
         await transaction.commit();
         return order;
@@ -536,6 +528,10 @@ export const extendOrder = async (data, userId) => {
         order.extension_status = 'NO';
         await order.save({ transaction: tx });
 
+        await MovingOrder.update({moving_date: end_date}, {
+            where: {order_id: order.id, availability: 'NOT_AVAILABLE'}
+        })
+
         const { orderPayments } = await paymentService.generateOrderPayments({
             start_date,
             end_date,
@@ -566,16 +562,56 @@ export const extendOrder = async (data, userId) => {
     });
 };
 
-export const checkToActiveOrder = async (orderId) => {
+export const checkToActiveOrder = async (order_id) => {
+    logger.info("method checkToActiveOrder");
+    if (!order_id) {
+        logger.warn("Check To Active Order: Missing parameters");
+        return;
+    }
+
     const contract = await Contract.findOne({
-        where: { order_id: orderId }
+        where: {order_id: order_id}
     });
-    const data = await getContractStatus(contract.document_id);
-    const order = await Order.findByPk(orderId);
-    logger.info("CONTRACT STATUS",{response: data});
-    if (data === 3 && order.payment_status === 'PAID') {
-        await Order.update({status: 'ACTIVE'}, {
-            where: {id: orderId}
-        })
+
+    if (!contract) {
+        logger.warn("Check To Active Order: Contract not found");
+        return;
+    }
+
+    const docId = contract.document_id;
+    const contractStatus = await getContractStatus(docId);
+    const order = await Order.findByPk(contract.order_id);
+
+    logger.info("CONTRACT STATUS", { body: contractStatus });
+
+    if (contractStatus === 3 && order?.payment_status === 'PAID') {
+        await order.update({ status: 'ACTIVE' });
+        logger.info("SUCCESS UPDATE ORDER STATUS", { body: order.status });
+    }
+};
+
+export const approveOrder = async (order_id, user_id) => {
+    const tx = await sequelize.transaction();
+    try {
+        const order = await Order.findByPk(order_id, {
+            transaction: tx
+        });
+        if (!order) {
+            throw Object.assign(new Error('Order not found'), { status: 200 });
+        } else if (order.user_id !== user_id) {
+            throw Object.assign(new Error('Forbidden'), { status: 403 });
+        }
+
+        order.status = 'APPROVED';
+        order.save({ transaction: tx });
+
+        const contractData = await createContract(order.id, tx);
+        logger.info("TRUST ME DATA", {response: contractData});
+
+        await tx.commit();
+    } catch (error) {
+        await tx.rollback();
+        logger.error(error);
+        throw error;
     }
 }

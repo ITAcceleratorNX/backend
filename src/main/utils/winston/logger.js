@@ -30,7 +30,7 @@ const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
         winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message, response, ...meta }) => {
+        winston.format.printf(({ timestamp, level, message, response, body, ...meta }) => {
             const log = {
                 timestamp,
                 level,
@@ -39,14 +39,18 @@ const logger = winston.createLogger({
                 userId: meta.userId || null,
                 endpoint: meta.endpoint || null,
                 service: meta.service || 'backend',
-                requestId: meta.requestId || null
+                requestId: meta.requestId || null,
+                body
             };
             return JSON.stringify(log);
         })
     ),
     transports: [
         transport,
-        new winston.transports.Console({ format: consoleFormat })
+        new winston.transports.Console({
+            level: 'debug',
+            format: consoleFormat
+        })
     ]
 });
 

@@ -13,7 +13,7 @@ router.get('/google/callback', passport.authenticate('google', {
 }), (req, res) => {
     const token = req.user.token;
     setTokenCookie(res, token);
-    res.redirect(process.env.FRONTEND_URL);
+    res.redirect(process.env.FRONTEND_URL + '/personal-account');
 });
 
 router.get('/logout', (req, res) => {
@@ -22,8 +22,9 @@ router.get('/logout', (req, res) => {
         res.clearCookie('token', {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             path: '/',
+            // domain: '.extraspace.kz'
         }).redirect(process.env.FRONTEND_URL + "/login");
     });
 });

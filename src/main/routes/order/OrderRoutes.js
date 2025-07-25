@@ -13,8 +13,9 @@ router.get("/items/:id", authenticateJWT, orderController.getItemsByOrderId);
 router.get("/:id", authenticateJWT, orderController.getOrderById);
 router.post("/", authenticateJWT, validateBody(OrderDto), orderController.createOrder);
 router.put("/:id", authenticateJWT, validateBody(OrderUpdateDto), orderController.updateOrder);
-router.delete("/:id", authenticateJWT, authorizeAdminOrManager, orderController.deleteOrder);
+router.delete("/:id", authenticateJWT, orderController.deleteOrder);
 router.put("/:id/cancel", authenticateJWT, orderController.cancelOrder);
 router.post("/extend", authenticateJWT, validateBody(ExtendedOrderDto), orderController.extendOrder);
+router.patch('/:order_id/approve', authenticateJWT, orderController.approveOrder)
 
 export default router;
