@@ -304,5 +304,12 @@ export const confirmOrChangeMovingOrder = async (order_id) => {
 }
 
 export const getMyMovings = async (user_id) => {
-    return await MovingOrder.findAll({ where: { user_id } });
-}
+    return await MovingOrder.findAll({
+        include: [{
+            model: Order,
+            as: 'order',
+            where: { user_id },
+            attributes: []
+        }]
+    });
+};
