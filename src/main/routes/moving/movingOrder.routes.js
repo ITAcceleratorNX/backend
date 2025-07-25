@@ -4,7 +4,7 @@ import {
     getAllOrders,
     getOrderById,
     updateOrder,
-    deleteOrder, getOrderByStatus, getDeliveredOrders
+    deleteOrder, getOrderByStatus, getDeliveredOrders, getMyMovings
 } from '../../controllers/moving/movingOrder.controller.js';
 import {downloadItemDoc} from "../../utils/docx/downloadItemDoc.js";
 import {authenticateJWT} from "../../middleware/jwt.js";
@@ -19,4 +19,6 @@ router.delete('/:id', authenticateJWT, deleteOrder);
 router.get('/status/:status', authenticateJWT, getOrderByStatus);
 router.get('/orders/delivered', authenticateJWT, getDeliveredOrders);
 router.get("/download/item/:itemId", downloadItemDoc);
+router.get('/me', authenticateJWT, getMyMovings);
+
 export default router;
