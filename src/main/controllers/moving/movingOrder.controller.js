@@ -70,3 +70,8 @@ export const deleteOrder = asyncHandler(async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+export const getMyMovings = asyncHandler(async (req, res) => {
+    const response = await orderService.getMyMovings(req.user.id);
+    return res.status(200).json(response);
+})

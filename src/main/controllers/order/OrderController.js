@@ -58,3 +58,9 @@ export const extendOrder = asyncHandler(async (req, res) => {
     logger.info(`Extending order`)
     return res.status(200).json({response});
 });
+
+export const approveOrder = asyncHandler(async (req, res) => {
+    const response = await orderService.approveOrder(req.params.order_id, req.user.id);
+    logger.info(`Approve order: ${req.params.order_id}`);
+    return res.status(200).json({response});
+});

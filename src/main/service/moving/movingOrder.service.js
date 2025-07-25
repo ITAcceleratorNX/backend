@@ -302,3 +302,7 @@ export const confirmOrChangeMovingOrder = async (order_id) => {
     }
     return true;
 }
+
+export const getMyMovings = async (user_id) => {
+    return await MovingOrder.findAll({ where: { user_id } });
+}
