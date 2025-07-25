@@ -307,7 +307,7 @@ export const getMyMovings = async (user_id) => {
     return await MovingOrder.findAll({
         include: [{
             model: Order,
-            as: 'order',
+            as: 'orders',
             where: { user_id },
             attributes: []
         }]
