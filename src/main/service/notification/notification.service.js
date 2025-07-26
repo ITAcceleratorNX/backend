@@ -1,14 +1,12 @@
 import Notification from '../../models/Notification.js';
 import User from '../../models/User.js';
-import sgMail from '@sendgrid/mail';
+import {sendMail} from "../../utils/nodemailer/nodemailer.js";
 import dotenv from 'dotenv';
 import MobizonApi from "../../utils/mobizon/Mobizon.js";
 import {UserNotification} from "../../models/init/index.js";
 
 dotenv.config();
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const fromEmail = process.env.SENDGRID_EMAIL;
 const mobizon = new MobizonApi(process.env.MOBIZON_API_KEY);
 
 export class NotificationService {
@@ -119,15 +117,8 @@ export class NotificationService {
 
 
     async sendEmail(to, subject, text) {
-        const msg = {
-            to,
-            from: fromEmail,
-            subject,
-            text,
-        };
-
         try {
-            await sgMail.send(msg);
+            sendMail(to, subject, text);
         } catch (error) {
             console.error('❌ Ошибка при отправке email:', error.response?.body || error.message);
         }

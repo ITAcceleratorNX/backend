@@ -2,10 +2,10 @@ import * as AuthService from '../../../main/service/auth/AuthService.js';
 import {User} from '../../../main/models/init/index.js';
 import * as bcryptService from '../../../main/utils/bcrypt/BCryptService.js';
 import * as cryptoUtils from '../../../main/utils/crypto/UniqueCodeGenerator.js';
-import * as sendGrid from '../../../main/utils/sendgird/SendGrid.js';
+import * as nodeMailer from '../../../main/utils/nodemailer/nodemailer.js';
 
 jest.mock('../../../main/models/init/index.js');
-jest.mock('../../../main/utils/sendgird/SendGrid.js');
+jest.mock('../../../main/utils/nodemailer/nodemailer.js');
 jest.mock('../../../main/utils/bcrypt/BCryptService.js');
 jest.mock('../../../main/utils/jwt/JwtService.js');
 jest.mock('../../../main/utils/crypto/UniqueCodeGenerator.js');
@@ -34,7 +34,7 @@ describe('Auth Controller', () => {
 
             await AuthService.checkEmail(req, res);
 
-            expect(sendGrid.sendVerificationCode).toHaveBeenCalledWith('test@example.com', '123456');
+            expect(nodeMailer.sendMail).toHaveBeenCalledWith('test@example.com', 'Extraspace код подтверждения', `Ваш код подтверждения: 123456`);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 user_exists: false,
@@ -64,7 +64,7 @@ describe('Auth Controller', () => {
 
             await AuthService.checkEmailForRestorePassword(req, res);
 
-            expect(sendGrid.sendVerificationCode).toHaveBeenCalledWith('restore@example.com', 'restoreCode');
+            expect(nodeMailer.sendMail).toHaveBeenCalledWith('restore@example.com', 'Extraspace код подтверждения', `Ваш код подтверждения: restoreCode`);
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 user_exists: true,

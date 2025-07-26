@@ -283,11 +283,9 @@ export const getOrdersByStatus = async (status) => {
             warehouseAddress: order?.storage?.warehouse?.address || null,
             storageName: order?.storage?.name || null,
             userAddress: item?.address || null,
-            userName: order.user.name || null,
             serviceDescriptions,
             availability: item.availability || null,
             items: order?.items || [],
-            phone: order?.user.phone || null,
         });
     }
 
@@ -306,5 +304,19 @@ export const confirmOrChangeMovingOrder = async (order_id) => {
 }
 
 export const getMyMovings = async (user_id) => {
-    return await MovingOrder.findAll({ where: { user_id } });
-}
+    return await MovingOrder.findAll({
+        include: [{
+            model: Order,
+            as: 'order',
+            where: { user_id },
+            attributes: ['id'],
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'items',
+                    attributes: ['id', 'name']
+                }
+            ]
+        }]
+    });
+};

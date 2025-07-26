@@ -30,6 +30,7 @@
     "morgan": "~1.9.1",
     "node-cron": "^4.1.0",
     "node-pg-migrate": "^7.9.1",
+    "nodemailer": "^7.0.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.14.1",
