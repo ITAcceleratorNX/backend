@@ -309,6 +309,13 @@ export const getMyMovings = async (user_id) => {
             model: Order,
             as: 'order',
             where: { user_id },
+            include: [
+                {
+                    model: OrderItem,
+                    as: 'items',
+                    attributes: ['name']
+                }
+            ],
             attributes: []
         }]
     });
