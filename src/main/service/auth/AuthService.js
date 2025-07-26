@@ -1,8 +1,8 @@
 import {User} from "../../models/init/index.js";
 import {generateSecureCode, verifyCode} from "../../utils/crypto/UniqueCodeGenerator.js";
-import {sendVerificationCode} from "../../utils/sendgird/SendGrid.js";
 import {comparePassword, getHashedPassword} from "../../utils/bcrypt/BCryptService.js";
 import {generateToken, setTokenCookie} from "../../utils/jwt/JwtService.js";
+import {sendMail} from "../../utils/nodemailer/nodemailer.js";
 
 async function findUserByEmail(email) {
     return await User.findOne({ where: { email } });
@@ -15,7 +15,7 @@ export async function checkEmail(req, res) {
         if (!user) {
             let uniqueCode = generateSecureCode(email);
             console.log("Generated unique code: ", uniqueCode, " for email: ", email);
-            sendVerificationCode(email, uniqueCode);
+            sendMail(email, "Extraspace код подтверждения", `Ваш код подтверждения: ${uniqueCode}`)
             return res.status(200).json({ user_exists: false, email });
         }
         return res.status(200).json({ user_exists: true });
@@ -32,7 +32,7 @@ export async function checkEmailForRestorePassword(req, res) {
         if (user) {
             let uniqueCode = generateSecureCode(email);
             console.log("Generated unique code: ", uniqueCode, " for email: ", email);
-            sendVerificationCode(email, uniqueCode);
+            sendMail(email, "Extraspace код подтверждения", `Ваш код подтверждения: ${uniqueCode}`);
             return res.status(200).json({ user_exists: true, email });
         }
         return res.status(200).json({ user_exists: false, email });
